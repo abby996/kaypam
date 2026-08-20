@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Espace Admin — KayPam</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #F2F5F1; --bg-soft: #E8EDE6; --ink: #16243B; --ink-soft: #4A5872;
+    --navy: #16243B; --coral: #E25C3B; --coral-dark: #C2473A;
+    --green: #1E8F6F; --gold: #F2B134; --card-bg: #FFFFFF; --border: rgba(22,36,59,0.12);
+    --font-display: 'Space Grotesk', sans-serif; --font-body: 'Inter', sans-serif; --font-mono: 'Space Mono', monospace;
+    --radius: 14px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);line-height:1.55;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;} button{font-family:var(--font-body);cursor:pointer;}
+  h1,h2,h3{font-family:var(--font-display);margin:0 0 0.4em;font-weight:700;letter-spacing:-0.01em;}
+  p{margin:0 0 1em;}
+  .wrap{max-width:980px;margin:0 auto;padding:0 24px;}
+  :focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
+
+  /* Lock screen */
+  #lock-screen{
+    position:fixed;inset:0;background:var(--navy);color:#fff;
+    display:flex;align-items:center;justify-content:center;z-index:200;padding:20px;
+  }
+  .lock-box{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:16px;padding:34px;max-width:360px;width:100%;text-align:center;}
+  .lock-box h2{color:#fff;font-size:19px;}
+  .lock-box p{color:rgba(255,255,255,0.65);font-size:13.5px;}
+  .lock-box input{
+    width:100%;padding:11px 12px;border-radius:9px;border:1px solid rgba(255,255,255,0.25);
+    background:rgba(255,255,255,0.08);color:#fff;font-size:15px;margin-bottom:12px;text-align:center;letter-spacing:.1em;
+  }
+  .lock-box button{
+    width:100%;background:var(--coral);color:#fff;border:none;border-radius:9px;
+    padding:12px;font-weight:700;font-size:14.5px;
+  }
+  .lock-box button:hover{background:var(--coral-dark);}
+  .lock-error{color:#ffb4a3;font-size:12.5px;margin-top:10px;display:none;}
+  .lock-error.show{display:block;}
+
+  header{background:var(--navy);padding:18px 0;}
+  .header-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+  .logo-mark{width:32px;height:32px;flex-shrink:0;}
+  .logo-text{font-family:var(--font-display);font-weight:700;font-size:19px;color:#fff;}
+  .logo-text span{color:var(--gold);}
+  .admin-tag{
+    font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;
+    background:var(--coral);color:#fff;padding:4px 10px;border-radius:999px;
+  }
+  .back-link{
+    font-size:13.5px;font-weight:700;color:#fff;text-decoration:none;display:flex;align-items:center;gap:6px;
+    background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);border-radius:999px;padding:9px 18px;
+  }
+  .back-link:hover{background:var(--coral);border-color:var(--coral);}
+
+  .intro{padding:36px 0 8px;}
+  .intro h1{font-size:clamp(22px,3vw,30px);}
+  .intro p{color:var(--ink-soft);max-width:64ch;font-size:14.5px;}
+
+  .guide-box{
+    background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin:18px 0;
+  }
+  .guide-box h3{font-size:14.5px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.05em;color:var(--coral-dark);}
+  .guide-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;}
+  .guide-list li{display:flex;gap:10px;font-size:13.5px;color:var(--ink-soft);align-items:flex-start;}
+  .guide-num{
+    flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--bg-soft);color:var(--ink);
+    font-family:var(--font-mono);font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;
+  }
+  .guide-list b{color:var(--ink);}
+
+  .stats-bar{display:flex;gap:12px;flex-wrap:wrap;margin:22px 0;}
+  .stat-pill{
+    flex:1;min-width:130px;background:#fff;border:1px solid var(--border);border-radius:12px;
+    padding:14px 16px;
+  }
+  .stat-pill b{display:block;font-family:var(--font-mono);font-size:22px;color:var(--coral-dark);}
+  .stat-pill span{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+
+  .filter-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px;}
+  .filter-chip{
+    border:1px solid var(--border);background:#fff;border-radius:999px;padding:9px 16px;
+    font-size:13.5px;font-weight:600;color:var(--ink-soft);
+  }
+  .filter-chip:hover{border-color:var(--coral);color:var(--coral-dark);}
+  .filter-chip.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+
+  .listing-card{
+    background:#fff;border:1px solid var(--border);border-radius:var(--radius);
+    padding:20px 22px;margin-bottom:16px;
+  }
+  .lc-top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:10px;}
+  .lc-badges{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .badge{
+    font-family:var(--font-mono);font-size:10.5px;font-weight:700;text-transform:uppercase;
+    letter-spacing:.04em;padding:4px 10px;border-radius:999px;
+  }
+  .badge-vente{background:var(--gold);color:#4A3300;}
+  .badge-location{background:var(--green);color:#fff;}
+  .badge-attente{background:rgba(242,177,52,0.18);color:#7a5300;}
+  .badge-valide{background:rgba(30,143,111,0.15);color:#0f5c47;}
+  .badge-refuse{background:rgba(226,92,59,0.14);color:var(--coral-dark);}
+  .lc-title{font-size:17px;font-weight:700;font-family:var(--font-display);margin:2px 0 2px;}
+  .lc-price{font-family:var(--font-mono);font-weight:700;color:var(--coral-dark);font-size:15px;}
+  .lc-meta{font-size:12.5px;color:var(--ink-soft);}
+  .lc-desc{font-size:13.5px;color:var(--ink-soft);margin:10px 0;}
+  .lc-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:12px 0;font-size:13px;}
+  .lc-block-label{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-family:var(--font-mono);margin-bottom:4px;}
+  .lc-contact a{color:var(--green);font-weight:600;text-decoration:none;}
+  .lc-contact a:hover{text-decoration:underline;}
+  .media-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+  .media-tag{background:var(--bg-soft);border-radius:6px;padding:3px 8px;font-size:11.5px;color:var(--ink-soft);}
+  .media-photo{width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid var(--border);}
+  .lc-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
+  .lc-actions button{
+    border:none;border-radius:9px;padding:10px 18px;font-weight:700;font-size:13.5px;
+  }
+  .btn-validate{background:var(--green);color:#fff;}
+  .btn-validate:hover{background:#177c5f;}
+  .btn-refuse{background:var(--bg-soft);color:var(--coral-dark);}
+  .btn-refuse:hover{background:rgba(226,92,59,0.14);}
+  .btn-revert{background:var(--bg-soft);color:var(--ink-soft);}
+  .btn-revert:hover{background:var(--border);}
+  .empty-state{text-align:center;padding:50px 20px;color:var(--ink-soft);}
+  .empty-state strong{display:block;color:var(--ink);font-size:16px;margin-bottom:6px;}
+  .loading-note{text-align:center;padding:30px;color:var(--ink-soft);font-size:13.5px;}
+
+  footer{padding:26px 0 40px;text-align:center;font-size:12.5px;color:var(--ink-soft);}
+
+  @media (max-width:640px){
+    .lc-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div id="lock-screen">
+  <div class="lock-box">
+    <h2>🔒 Espace Admin KayPam</h2>
+    <p>Connectez-vous avec votre compte administrateur pour gérer les annonces.</p>
+    <input type="email" id="lock-email" placeholder="Email" autocomplete="username">
+    <input type="password" id="lock-password" placeholder="Mot de passe" autocomplete="current-password">
+    <button onclick="tryLogin()">Se connecter</button>
+    <div class="lock-error" id="lock-error"></div>
+  </div>
+</div>
+
+<header>
+  <div class="wrap header-inner">
+    <a href="kaypam.html" class="logo">
+      <svg class="logo-mark" viewBox="0 0 40 40" aria-hidden="true">
+        <rect width="40" height="40" rx="9" fill="#F2F5F1"/>
+        <path d="M20 8 L31 17 V32 H9 V17 Z" fill="#16243B"/>
+        <rect x="17" y="22" width="6" height="10" fill="#E25C3B"/>
+        <rect x="13" y="11" width="14" height="3" fill="#F2B134"/>
+      </svg>
+      <span class="logo-text">Kay<span>Pam</span></span>
+      <span class="admin-tag">Admin</span>
+    </a>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <a href="javascript:void(0)" onclick="logout()" class="back-link" style="background:none;border-color:rgba(255,255,255,0.25);">Déconnexion</a>
+      <a href="kaypam.html" class="back-link">← Retour au site</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="intro">
+    <h1>Vérification des annonces</h1>
+    <p>Chaque annonce reste invisible du public jusqu'à validation. Suivez les 3 vérifications ci-dessous avant de cliquer sur « Valider ».</p>
+  </div>
+
+  <div class="guide-box">
+    <h3>Guide de vérification</h3>
+    <ul class="guide-list">
+      <li><span class="guide-num">1</span><span><b>Appel de courtoisie :</b> contactez le propriétaire par téléphone ou WhatsApp pour confirmer que le bien est bien disponible et qu'il en est propriétaire (ou proche direct). Demandez-lui d'envoyer les photos/vidéos par WhatsApp si besoin.</span></li>
+      <li><span class="guide-num">2</span><span><b>Cohérence du prix :</b> vérifiez que le prix demandé correspond au type de bien et à la zone. Un prix anormalement bas est souvent une erreur ou une arnaque.</span></li>
+      <li><span class="guide-num">3</span><span><b>Qualité des photos/vidéos :</b> assurez-vous qu'elles montrent réellement le bien, sont récentes et nettes avant de valider.</span></li>
+    </ul>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-pill"><b id="stat-attente">—</b><span>En attente</span></div>
+    <div class="stat-pill"><b id="stat-valide">—</b><span>Validées</span></div>
+    <div class="stat-pill"><b id="stat-refuse">—</b><span>Refusées</span></div>
+    <div class="stat-pill"><b id="stat-owners">—</b><span>Propriétaires</span></div>
+  </div>
+
+  <div class="filter-row" id="filter-row"></div>
+
+  <div id="listing-list">
+    <div class="loading-note">Chargement des annonces…</div>
+  </div>
+
+  <div class="intro" style="padding-top:12px;">
+    <h1 style="font-size:22px;">⭐ Demandes de boost</h1>
+    <p>Confirmez le paiement MonCash reçu pour activer la mise en avant.</p>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-pill"><b id="stat-boost-pending">—</b><span>Paiements en attente</span></div>
+    <div class="stat-pill"><b id="stat-boost-active">—</b><span>Boosts actifs</span></div>
+  </div>
+
+  <div id="boost-list">
+    <div class="loading-note">Chargement des demandes de boost…</div>
+  </div>
+</main>
+
+<footer>
+  © 2026 KayPam. Espace réservé à l'équipe de vérification.
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ===== Configuration Supabase — à remplir après avoir suivi SETUP.md ===== */
+const SUPABASE_URL = "https://hmbvlwwmwmkvfjpkfgye.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_nnesDNdLlyiS1-ekCZqXyQ_aYF1cOXY";
+const supabaseClient = (SUPABASE_URL.startsWith('http') && SUPABASE_ANON_KEY.length > 10)
+  ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
+/* =========================================================================== */
+
+async function tryLogin(){
+  const email = document.getElementById('lock-email').value.trim();
+  const password = document.getElementById('lock-password').value;
+  const errBox = document.getElementById('lock-error');
+  errBox.classList.remove('show');
+
+  if(!supabaseClient){
+    errBox.textContent = "Configuration Supabase manquante dans le code (voir SETUP.md).";
+    errBox.classList.add('show');
+    return;
+  }
+  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  if(error){
+    errBox.textContent = "Connexion refusée : " + error.message;
+    errBox.classList.add('show');
+    return;
+  }
+  document.getElementById('lock-screen').style.display = 'none';
+  init();
+}
+document.getElementById('lock-password').addEventListener('keydown', (e) => {
+  if(e.key === 'Enter') tryLogin();
+});
+
+async function logout(){
+  if(supabaseClient) await supabaseClient.auth.signOut();
+  location.reload();
+}
+
+async function checkExistingSession(){
+  if(!supabaseClient) return;
+  const { data } = await supabaseClient.auth.getSession();
+  if(data && data.session){
+    document.getElementById('lock-screen').style.display = 'none';
+    init();
+  }
+}
+checkExistingSession();
+
+let allListings = [];
+let currentFilter = 'en_attente_verification';
+
+const STATUS_LABELS = {
+  en_attente_verification: 'En attente',
+  valide: 'Validée',
+  refuse: 'Refusée'
+};
+const STATUS_BADGE_CLASS = {
+  en_attente_verification: 'badge-attente',
+  valide: 'badge-valide',
+  refuse: 'badge-refuse'
+};
+
+function fmtPrice(l){
+  let base = l.currency === 'HTG' ? `${Number(l.price).toLocaleString('en-US')} HTG` : `$${Number(l.price).toLocaleString('en-US')}`;
+  if(l.period === 'mois') base += ' /mois';
+  else if(l.period === 'an') base += ' /an';
+  return base;
+}
+
+function escapeHtml(s){
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function loadAllListings(){
+  const listEl = document.getElementById('listing-list');
+  try{
+    const { data, error } = await supabaseClient
+      .from('listings')
+      .select('id,title,city,transaction,type,price,currency,period,description,status,available,created_at,reviewed_at,owners(name,phone,whatsapp),listing_media(media_type,url)')
+      .order('created_at', { ascending:false });
+    if(error) throw error;
+    allListings = data || [];
+  }catch(err){
+    console.error('Erreur de chargement des annonces', err);
+    allListings = [];
+    listEl.innerHTML = '<div class="empty-state"><strong>Impossible de charger les annonces</strong>Vérifiez la connexion et réessayez.</div>';
+  }
+}
+
+async function loadOwnerCount(){
+  try{
+    const { count, error } = await supabaseClient.from('owners').select('*', { count:'exact', head:true });
+    if(error) throw error;
+    return count || 0;
+  }catch(err){
+    return 0;
+  }
+}
+
+function renderStats(){
+  const attente = allListings.filter(l => l.status === 'en_attente_verification').length;
+  const valide = allListings.filter(l => l.status === 'valide').length;
+  const refuse = allListings.filter(l => l.status === 'refuse').length;
+  document.getElementById('stat-attente').textContent = attente;
+  document.getElementById('stat-valide').textContent = valide;
+  document.getElementById('stat-refuse').textContent = refuse;
+}
+
+function renderFilters(){
+  const row = document.getElementById('filter-row');
+  const options = [
+    {key:'en_attente_verification', label:'En attente'},
+    {key:'valide', label:'Validées'},
+    {key:'refuse', label:'Refusées'},
+    {key:'all', label:'Toutes'}
+  ];
+  row.innerHTML = options.map(o =>
+    `<button class="filter-chip ${currentFilter===o.key?'active':''}" onclick="setFilter('${o.key}')">${o.label}</button>`
+  ).join('');
+}
+
+function setFilter(key){
+  currentFilter = key;
+  renderFilters();
+  renderList();
+}
+
+function renderList(){
+  const listEl = document.getElementById('listing-list');
+  const filtered = currentFilter === 'all'
+    ? allListings
+    : allListings.filter(l => l.status === currentFilter);
+
+  if(filtered.length === 0){
+    listEl.innerHTML = '<div class="empty-state"><strong>Aucune annonce ici</strong>Rien à traiter pour ce filtre en ce moment.</div>';
+    return;
+  }
+
+  listEl.innerHTML = filtered.map(l => {
+    const badgeTransaction = l.transaction === 'Vente'
+      ? '<span class="badge badge-vente">À vendre</span>'
+      : '<span class="badge badge-location">À louer</span>';
+    const badgeStatus = `<span class="badge ${STATUS_BADGE_CLASS[l.status] || ''}">${STATUS_LABELS[l.status] || l.status}</span>`;
+    const badgeAvailability = (l.status === 'valide' && l.available === false)
+      ? '<span class="badge badge-refuse">Retirée par le propriétaire</span>'
+      : '';
+    const date = l.created_at ? new Date(l.created_at).toLocaleString('fr-FR') : '—';
+    const ownerName = l.owners ? l.owners.name : '—';
+    const ownerPhone = l.owners ? l.owners.phone : '';
+    const ownerWhatsapp = l.owners ? (l.owners.whatsapp || l.owners.phone) : '';
+    const phoneDigits = (ownerPhone || '').replace(/\D/g,'');
+    const whatsappDigits = (ownerWhatsapp || '').replace(/\D/g,'');
+    const media = l.listing_media || [];
+    const photos = media.filter(m => m.media_type === 'photo');
+    const videos = media.filter(m => m.media_type === 'video');
+    const photoTags = photos.length
+      ? photos.map(m => `<a href="${m.url}" target="_blank" rel="noopener"><img src="${m.url}" class="media-photo" alt="Photo du bien"></a>`).join('')
+      : '<span class="media-tag">Aucune photo</span>';
+    const videoTags = videos.length
+      ? videos.map(m => `<a href="${m.url}" target="_blank" rel="noopener" class="media-tag">🎬 Voir la vidéo</a>`).join('')
+      : '<span class="media-tag">Aucune vidéo</span>';
+
+    let actions = '';
+    if(l.status === 'en_attente_verification'){
+      actions = `
+        <button class="btn-validate" onclick="setStatus('${l.id}','valide')">✅ Valider</button>
+        <button class="btn-refuse" onclick="setStatus('${l.id}','refuse')">❌ Refuser</button>`;
+    } else {
+      actions = `<button class="btn-revert" onclick="setStatus('${l.id}','en_attente_verification')">↩ Remettre en attente</button>`;
+    }
+    if(l.status === 'valide'){
+      actions += l.available === false
+        ? `<button class="btn-revert" onclick="setAvailability('${l.id}', true)">↩ Remettre disponible</button>`
+        : `<button class="btn-refuse" onclick="setAvailability('${l.id}', false)">🚫 Retirer (plus disponible)</button>`;
+    }
+
+    return `
+    <div class="listing-card">
+      <div class="lc-top">
+        <div class="lc-badges">${badgeTransaction}${badgeStatus}${badgeAvailability}</div>
+        <div class="lc-meta">Soumis le ${date}</div>
+      </div>
+      <div class="lc-title">${escapeHtml(l.title || l.type)}</div>
+      <div class="lc-meta">${escapeHtml(l.type)} · ${escapeHtml(l.city)}</div>
+      <div class="lc-price">${fmtPrice(l)}</div>
+      <div class="lc-desc">${escapeHtml(l.description) || '<em>Aucune description fournie.</em>'}</div>
+      <div class="lc-grid">
+        <div>
+          <div class="lc-block-label">Propriétaire</div>
+          <div class="lc-contact">
+            ${escapeHtml(ownerName)}<br>
+            <a href="tel:${phoneDigits}">📞 ${escapeHtml(ownerPhone)}</a><br>
+            <a href="https://wa.me/${whatsappDigits}" target="_blank" rel="noopener">💬 WhatsApp : ${escapeHtml(ownerWhatsapp)}</a>
+          </div>
+        </div>
+        <div>
+          <div class="lc-block-label">Photos et vidéos reçues</div>
+          <div class="media-tags">${photoTags}${videoTags}</div>
+        </div>
+      </div>
+      <div class="lc-actions">${actions}</div>
+    </div>`;
+  }).join('');
+}
+
+async function setStatus(id, newStatus){
+  try{
+    const { error } = await supabaseClient
+      .from('listings')
+      .update({ status: newStatus, reviewed_at: new Date().toISOString() })
+      .eq('id', id);
+    if(error) throw error;
+    await loadAllListings();
+    renderStats();
+    renderList();
+  }catch(err){
+    console.error('Erreur de mise à jour du statut', err);
+    alert("Impossible d'enregistrer ce changement pour le moment. Réessayez. (" + (err.message || '') + ")");
+  }
+}
+
+async function setAvailability(id, available){
+  if(!available && !confirm("Confirmez : ce bien n'est plus disponible et l'annonce doit disparaître du site public ?")) return;
+  try{
+    const { error } = await supabaseClient
+      .from('listings')
+      .update({ available })
+      .eq('id', id);
+    if(error) throw error;
+    if(!available){
+      // Désactive aussi tout boost actif sur cette annonce (cohérent avec le
+      // comportement de set_listing_availability() côté propriétaire).
+      await supabaseClient
+        .from('boosts')
+        .update({ status: 'expire', ends_at: new Date().toISOString() })
+        .eq('listing_id', id)
+        .eq('status', 'actif');
+    }
+    await loadAllListings();
+    renderStats();
+    renderList();
+    await refreshBoosts();
+  }catch(err){
+    console.error('Erreur de mise à jour de la disponibilité', err);
+    alert("Impossible d'enregistrer ce changement pour le moment. Réessayez. (" + (err.message || '') + ")");
+  }
+}
+
+/* ---------- Demandes de boost ---------- */
+
+let boostRequestsCache = [];
+
+async function loadBoostRequests(){
+  try{
+    const { data, error } = await supabaseClient
+      .from('boosts')
+      .select('id,plan_name,duration_days,price_usd,payment_reference,status,requested_at,ends_at,listings(title,city,owners(name,phone,whatsapp))')
+      .order('requested_at', { ascending:false });
+    if(error) throw error;
+    return data || [];
+  }catch(err){
+    console.error('Erreur de chargement des demandes de boost', err);
+    return [];
+  }
+}
+
+function renderBoostStats(){
+  document.getElementById('stat-boost-pending').textContent = boostRequestsCache.filter(b => b.status === 'en_attente_paiement').length;
+  document.getElementById('stat-boost-active').textContent = boostRequestsCache.filter(b => b.status === 'actif' && (!b.ends_at || new Date(b.ends_at) >= new Date())).length;
+}
+
+function renderBoostRequests(){
+  const el = document.getElementById('boost-list');
+  if(boostRequestsCache.length === 0){
+    el.innerHTML = '<div class="empty-state"><strong>Aucune demande de boost</strong>Rien à traiter pour le moment.</div>';
+    return;
+  }
+  const STATUS_LABEL = { en_attente_paiement:'En attente', actif:'Actif', refuse:'Refusé', expire:'Expiré' };
+  const STATUS_CLASS = { en_attente_paiement:'badge-attente', actif:'badge-valide', refuse:'badge-refuse', expire:'badge-refuse' };
+
+  el.innerHTML = boostRequestsCache.map(b => {
+    const listing = b.listings || {};
+    const owner = listing.owners || {};
+    const phoneDigits = (owner.phone || '').replace(/\D/g,'');
+    const ownerWhatsapp = owner.whatsapp || owner.phone || '';
+    const whatsappDigits = ownerWhatsapp.replace(/\D/g,'');
+    const dateReq = b.requested_at ? new Date(b.requested_at).toLocaleString('fr-FR') : '—';
+    const endDate = b.ends_at ? new Date(b.ends_at).toLocaleDateString('fr-FR') : null;
+
+    // Un boost "actif" dont la date de fin est dépassée est déjà invisible
+    // publiquement (RLS) — on l'affiche comme "Expiré" ici aussi, sans avoir
+    // besoin d'une tâche planifiée pour mettre à jour la base de données.
+    const effectiveStatus = (b.status === 'actif' && b.ends_at && new Date(b.ends_at) < new Date())
+      ? 'expire' : b.status;
+
+    let actions = '';
+    if(effectiveStatus === 'en_attente_paiement'){
+      actions = `
+        <button class="btn-validate" onclick="activateBoost('${b.id}')">✅ Confirmer paiement & activer</button>
+        <button class="btn-refuse" onclick="refuseBoost('${b.id}')">❌ Refuser</button>`;
+    } else if(effectiveStatus === 'actif'){
+      actions = `<button class="btn-refuse" onclick="refuseBoost('${b.id}')">Désactiver maintenant</button>`;
+    }
+
+    return `
+    <div class="listing-card">
+      <div class="lc-top">
+        <div class="lc-badges"><span class="badge ${STATUS_CLASS[effectiveStatus] || ''}">${STATUS_LABEL[effectiveStatus] || effectiveStatus}</span></div>
+        <div class="lc-meta">Demandé le ${dateReq}</div>
+      </div>
+      <div class="lc-title">${escapeHtml(listing.title || 'Annonce')}</div>
+      <div class="lc-meta">${escapeHtml(listing.city || '')} · Plan ${escapeHtml(b.plan_name)} (${b.duration_days} j) · $${b.price_usd}</div>
+      ${endDate ? `<div class="lc-meta">Actif jusqu'au ${endDate}</div>` : ''}
+      <div class="lc-grid">
+        <div>
+          <div class="lc-block-label">Propriétaire</div>
+          <div class="lc-contact">
+            ${escapeHtml(owner.name || '—')}<br>
+            <a href="tel:${phoneDigits}">📞 ${escapeHtml(owner.phone || '')}</a><br>
+            <a href="https://wa.me/${whatsappDigits}" target="_blank" rel="noopener">💬 WhatsApp : ${escapeHtml(ownerWhatsapp)}</a>
+          </div>
+        </div>
+        <div>
+          <div class="lc-block-label">Référence MonCash</div>
+          <div>${escapeHtml(b.payment_reference) || 'Non fournie'}</div>
+        </div>
+      </div>
+      <div class="lc-actions">${actions}</div>
+    </div>`;
+  }).join('');
+}
+
+async function refreshBoosts(){
+  boostRequestsCache = await loadBoostRequests();
+  renderBoostStats();
+  renderBoostRequests();
+}
+
+async function activateBoost(boostId){
+  try{
+    const { error } = await supabaseClient.rpc('activate_boost', { p_boost_id: boostId });
+    if(error) throw error;
+    await refreshBoosts();
+  }catch(err){
+    console.error('Erreur d\'activation du boost', err);
+    alert("Impossible d'activer ce boost pour le moment. (" + (err.message || '') + ")");
+  }
+}
+
+async function refuseBoost(boostId){
+  try{
+    const { error } = await supabaseClient.from('boosts').update({ status: 'refuse' }).eq('id', boostId);
+    if(error) throw error;
+    await refreshBoosts();
+  }catch(err){
+    console.error('Erreur lors du refus du boost', err);
+    alert("Impossible de mettre à jour ce boost pour le moment. (" + (err.message || '') + ")");
+  }
+}
+
+async function init(){
+  if(!supabaseClient){
+    document.getElementById('listing-list').innerHTML = '<div class="empty-state"><strong>Configuration Supabase manquante</strong>Renseignez SUPABASE_URL et SUPABASE_ANON_KEY dans le code (voir SETUP.md).</div>';
+    return;
+  }
+  await loadAllListings();
+  const ownerCount = await loadOwnerCount();
+  document.getElementById('stat-owners').textContent = ownerCount;
+  renderStats();
+  renderFilters();
+  renderList();
+  await refreshBoosts();
+}
+</script>
+
+<script>(function(){var lang=localStorage.getItem('kaypam_lang')||'fr';var maps={fr:{},en:{'Publier gratuitement':'List for free','Se connecter':'Log in','Créer un compte':'Create an account','Nom d utilisateur':'Username','Mot de passe':'Password','Confirmer le mot de passe':'Confirm password','Booster mes annonces':'Boost my listings','Comment ça marche':'How it works','Publier une annonce':'Publish a listing','Mes annonces':'My listings','Contact':'Contact','Publier':'Publish','Rechercher':'Search','Envoyer':'Submit','Enregistrer':'Save','Annuler':'Cancel','Tous':'All','Toutes les villes':'All cities','Recherche rapide':'Quick search','Ville':'City','Type de bien':'Property type','Budget max (USD)':'Max budget (USD)','Rechercher des biens →':'Search properties →','Biens en vedette':'Featured properties','Annonces':'Listings','Vedette':'Featured','Toutes les zones':'All zones','Retour':'Back','Fermer':'Close','Annonces immobilières · Haïti':'Real estate listings · Haiti','KayPam':'KayPam','Propriétaires et agents':'Owners and agents','Publiez votre annonce gratuitement':'Publish your listing for free','Créez votre compte propriétaire pour publier, gérer et booster vos annonces. Notre équipe vérifie chaque annonce — photos et vidéos incluses — avant sa mise en ligne.':'Create your owner account to publish, manage, and boost your listings. Our team verifies every listing — photos and videos included — before it goes live.','Publication gratuite, sans frais cachés':'Free listing, no hidden fees','Un seul compte pour toutes vos annonces':'One account for all your listings','Photos et vidéos vérifiées avant publication':'Photos and videos verified before publication','Retirez ou boostez vos annonces à tout moment':'Remove or boost your listings anytime','Propriétaires inscrits':'Registered owners','Annonces soumises':'Listings submitted','Retour au site':'Back to site','Vérification des annonces':'Listing verification','Chaque annonce reste invisible du public jusqu à validation. Suivez les 3 vérifications ci-dessous avant de cliquer sur « Valider ».':'Each listing stays invisible to the public until approved. Follow the 3 checks below before clicking “Validate”.','Guide de vérification':'Verification guide','Appel de courtoisie :':'Courtesy call:','Cohérence du prix :':'Price consistency:','Qualité des photos et vidéos :':'Photo and video quality:','En attente':'Pending','Validées':'Validated','Refusées':'Rejected','Propriétaires':'Owners','Demandes de boost':'Boost requests','Paiements en attente':'Pending payments','Boosts actifs':'Active boosts','Chargement des annonces…':'Loading listings…','Chargement des demandes de boost…':'Loading boost requests…','Déconnexion':'Logout','Espace réservé à l équipe de vérification':'Reserved for the verification team','Espace Admin KayPam':'KayPam Admin Area','Connectez-vous avec votre compte administrateur pour gérer les annonces.':'Log in with your admin account to manage listings.','Se connecter':'Log in','Se déconnecter':'Log out'},ht:{'Publier gratuitement':'Pibliye gratis','Se connecter':'Konekte','Créer un compte':'Kree yon kont','Nom d utilisateur':'Non itilizatè','Mot de passe':'Mo de pase','Confirmer le mot de passe':'Konfirme mo de pase','Booster mes annonces':'Booste anons mwen yo','Comment ça marche':'Kijan sa mache','Publier une annonce':'Pibliye yon anons','Mes annonces':'Anons mwen yo','Contact':'Kontak','Publier':'Pibliye','Rechercher':'Chèche','Envoyer':'Voye','Enregistrer':'Anrejistre','Annuler':'Anile','Tous':'Tout','Toutes les villes':'Tout vil yo','Recherche rapide':'Rechèch rapid','Ville':'Vil','Type de bien':'Kalite byen','Budget max (USD)':'Bidjè maksimòm (USD)','Rechercher des biens →':'Chèche byen →','Biens en vedette':'Byen an vedèt','Annonces':'Anons','Vedette':'Vedèt','Toutes les zones':'Tout zòn yo','Retour':'Retounen','Fermer':'Fèmen','Annonces immobilières · Haïti':'Anons imobilye · Ayiti','KayPam':'KayPam','Propriétaires et agents':'Pwopriyetè ak ajan','Publiez votre annonce gratuitement':'Pibliye anons ou gratis','Créez votre compte propriétaire pour publier, gérer et booster vos annonces. Notre équipe vérifie chaque annonce — photos et vidéos incluses — avant sa mise en ligne.':'Kree kont pwopriyetè ou pou pibliye, jere, ak booste anons ou yo. Ekip nou an tcheke chak anons — foto ak videyo ki enkli — anvan yo mete li sou entènèt.','Publication gratuite, sans frais cachés':'Piblikasyon gratis, san fra san kache','Un seul compte pour toutes vos annonces':'Yon sèl kont pou tout anons ou yo','Photos et vidéos vérifiées avant publication':'Foto ak videyo tcheke anvan piblikasyon','Retirez ou boostez vos annonces à tout moment':'Retire oswa booste anons ou yo nenpòt moman','Propriétaires inscrits':'Pwopriyetè ki enskri','Annonces soumises':'Anons soumèt','Retour au site':'Retounen sou sit la','Vérification des annonces':'Vérifikasyon anons yo','Chaque annonce reste invisible du public jusqu à validation. Suivez les 3 vérifications ci-dessous avant de cliquer sur « Valider ».':'Chak anons rete envizib pou piblik la jiskaske yo apwouve l. Swiv 3 verifikasyon yo anba a anvan ou klike sou “Valide”.','Guide de vérification':'Gid verifikasyon','Appel de courtoisie :':'Apele koutwazi:','Cohérence du prix :':'Konsistans pri:','Qualité des photos et vidéos :':'Kwalite foto ak videyo:','En attente':'Ann atann','Validées':'Valide','Refusées':'Refize','Propriétaires':'Pwopriyetè','Demandes de boost':'Demand boost','Paiements en attente':'Peman an atann','Boosts actifs':'Boost aktif','Chargement des annonces…':'Chajman anons yo…','Chargement des demandes de boost…':'Chajman demann boost yo…','Déconnexion':'Dekonekte','Espace réservé à l équipe de vérification':'Espas rezève pou ekip verifikasyon an','Espace Admin KayPam':'Espas Admin KayPam','Connectez-vous avec votre compte administrateur pour gérer les annonces.':'Konekte avèk kont administratè ou pou jere anons yo.','Se déconnecter':'Dekonekte'}};var map=maps[lang]||maps.fr;var applyToText=function(value){if(!value){return value;}var result=value;Object.keys(map).forEach(function(from){result=result.split(from).join(map[from]);});return result;};var updateElement=function(el){if(!el){return;}var aria=el.getAttribute('aria-label');if(aria){el.setAttribute('aria-label',applyToText(aria));}var title=el.getAttribute('title');if(title){el.setAttribute('title',applyToText(title));}if(el.placeholder){el.placeholder=applyToText(el.placeholder);}if(el.tagName==='INPUT'||el.tagName==='TEXTAREA'||el.tagName==='SELECT'){var value=el.value;if(value){el.value=applyToText(value);}}var text=el.textContent;if(text&&text.trim()){var newText=applyToText(text);if(newText!==text){el.textContent=newText;}}};document.documentElement.lang=lang;document.querySelectorAll('a, button, label, p, span, h1, h2, h3, h4, li, option, legend, input, textarea, select').forEach(updateElement);})();</script>
+</body>
+</html>
