@@ -55,7 +55,8 @@
   .benefits li::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green);margin-top:6px;flex-shrink:0;}
 
   .stats-bar{
-    display:flex;gap:28px;flex-wrap:wrap;margin:26px 0 8px;
+    display:none;
+    gap:28px;flex-wrap:wrap;margin:26px 0 8px;
     background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);
     padding:18px 22px;
   }
@@ -64,6 +65,7 @@
   }
   .stats-bar .stat span{font-size:11.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em;}
 
+  /* ---------- Porte de connexion / inscription ---------- */
   .auth-card{
     background:var(--card-bg);border:1px solid var(--border);border-radius:20px;
     padding:36px;margin:28px 0 60px;max-width:520px;
@@ -222,9 +224,10 @@
     </ul>
   </div>
 
-  <div class="stats-bar">
-    <div class="stat"><b id="stat-owners">—</b><span>Propriétaires inscrits</span></div>
-    <div class="stat"><b id="stat-listings">—</b><span>Annonces soumises</span></div>
+  <!-- Stats bar - cachée par défaut, affichée seulement quand connecté -->
+  <div class="stats-bar" id="stats-bar" style="display:none;">
+    <div class="stat"><b id="stat-owners">0</b><span>Propriétaires actifs</span></div>
+    <div class="stat"><b id="stat-listings">0</b><span>Annonces actives</span></div>
   </div>
 
   <!-- Porte de connexion / inscription -->
@@ -340,7 +343,7 @@
         <div class="field-group">
           <label for="p-zone">Zone / Quartier</label>
           <select id="p-zone">
-            <option value="">Choisir une zone </option>
+            <option value="">Choisir une zone (optionnel)</option>
           </select>
           <div class="zone-custom-input">
             <input type="text" id="p-zone-custom" placeholder="Ou précisez une zone personnalisée">
@@ -371,7 +374,7 @@
         </div>
       </div>
 
-      <!-- LIGNE 4: Titre et Description -->
+      <!-- LIGNE 4: Titre et Prix -->
       <div class="pform-row">
         <div class="field-group">
           <label for="p-title">Titre de l'annonce</label>
@@ -464,7 +467,95 @@ const EMAIL_DOMAIN = '@kaypam.local';
 
 /* ===== DONNÉES GÉOGRAPHIQUES ===== */
 const geoData = {
-  // Département de l'Ouest
+  'Artibonite': {
+    'villes': ['Gonaïves', 'Gros-Morne', 'Saint-Marc', 'Dessalines', 'Marmelade'],
+    'communes': {
+      'Gonaïves': ['Gonaïves', 'Ennery', "L'Estère"],
+      'Gros-Morne': ['Gros-Morne', 'Terre-Neuve', 'Anse-Rouge'],
+      'Saint-Marc': ['Saint-Marc', 'Verrettes', 'La Chapelle'],
+      'Dessalines': ['Dessalines', "Petite-Rivière-de-l'Artibonite", 'Grande-Saline', 'Desdunes'],
+      'Marmelade': ['Marmelade', "Saint-Michel-de-l'Attalaye"]
+    },
+    'zones': {
+      'Saint-Marc': ['Portail Guêpe', 'Pivert', 'Nissage Saget', 'Nan Poés', 'Freycineau', 'Deperos', 'Bois-Marchand', 'Gobinet', 'Robinet'],
+      'Gonaïves': ['Raboteau', 'Descahos', 'Jubilée', 'K-Soleil', 'Bigot', 'Bienac', 'Assifa', 'Pont-Gaudin', 'Mangnan', 'Passe-Reine']
+    }
+  },
+  'Centre': {
+    'villes': ['Hinche', 'Mirebalais', 'Lascahobas', 'Cerca-la-Source'],
+    'communes': {
+      'Hinche': ['Hinche', 'Maïssade', 'Thomonde', 'Cerca-Carvajal'],
+      'Mirebalais': ['Mirebalais', "Saut-d'Eau", 'Boucan-Carré'],
+      'Lascahobas': ['Lascahobas', 'Belladère', 'Savanette'],
+      'Cerca-la-Source': ['Cerca-la-Source', 'Thomassique']
+    },
+    'zones': {
+      'Hinche': ['Marmont', 'Cherival', 'Juanaria', 'Mapou', 'La Hoye', 'Siloe', 'Pandiassou', 'Los Palis'],
+      'Lascahobas': ['Petit-Fond', 'Juampas', 'Do-Rival', 'Lalomas', 'Savanette', 'Bois-Bleu'],
+      'Belladère': ['Renthe-Mathe', 'Croix-Fer', 'Roy-Sec', 'Los Pozo', 'Rospandre']
+    }
+  },
+  'Grand\'Anse': {
+    'villes': ['Jérémie', 'Anse-d\'Hainault', 'Corail'],
+    'communes': {
+      'Jérémie': ['Jérémie', 'Abricots', 'Bonbon', 'Moron', 'Chambellan', 'Marfranc'],
+      'Anse-d\'Hainault': ['Anse-d\'Hainault', 'Dame-Marie', 'Les Irois'],
+      'Corail': ['Corail', 'Roseaux', 'Beaumont', 'Pestel', 'Île de Cayemites']
+    },
+    'zones': {
+      'Jérémie': ['Bordes', 'Sainte-Hélène', 'Caracolie', 'Rochasse', 'Nan Lundi', 'Makandal', 'La Pointe', 'Desormeaux']
+    }
+  },
+  'Nippes': {
+    'villes': ['Miragoâne', 'Anse-à-Veau', 'Baradères'],
+    'communes': {
+      'Miragoâne': ['Miragoâne', 'Petite-Rivière-de-Nippes', 'Fonds-des-Nègres', 'Paillant'],
+      'Anse-à-Veau': ['Anse-à-Veau', 'Petit-Trou-de-Nippes', "L'Asile", 'Arnaud', 'Plaisance-du-Sud'],
+      'Baradères': ['Baradères', 'Grand-Boucan']
+    },
+    'zones': {
+      'Miragoâne': ['Port-Sainte-Hélène', 'Chalon', 'Saint-Michel-du-Sud', 'Berquin', 'Chardonnères', 'Belle-Rivière', 'Carrefour Moussignac']
+    }
+  },
+  'Nord': {
+    'villes': ['Cap-Haïtien', 'Acul-du-Nord', 'Grande-Rivière-du-Nord', 'Saint-Raphaël', 'Borgne', 'Limbé', 'Plaisance'],
+    'communes': {
+      'Cap-Haïtien': ['Cap-Haïtien', 'Quartier-Morin', 'Limonade'],
+      'Acul-du-Nord': ['Acul-du-Nord', 'Plaine-du-Nord', 'Milot'],
+      'Grande-Rivière-du-Nord': ['Grande-Rivière-du-Nord', 'Bahon'],
+      'Saint-Raphaël': ['Saint-Raphaël', 'Dondon', 'Ranquitte', 'Pignon', 'La Victoire'],
+      'Borgne': ['Borgne', 'Port-Margot'],
+      'Limbé': ['Limbé', 'Bas-Limbé'],
+      'Plaisance': ['Plaisance', 'Pilate']
+    },
+    'zones': {
+      'Cap-Haïtien': ['Carénage', 'Bande du Nord', 'Vertières', 'Lory', 'Madeline', 'Petite-Anse', 'Haut-du-Cap', 'Fort Saint-Michel', 'Champion']
+    }
+  },
+  'Nord-Est': {
+    'villes': ['Fort-Liberté', 'Ouanaminthe', 'Trou-du-Nord', 'Vallières'],
+    'communes': {
+      'Fort-Liberté': ['Fort-Liberté', 'Ferrier', 'Perches'],
+      'Ouanaminthe': ['Ouanaminthe', 'Capotille', 'Mont-Organisé'],
+      'Trou-du-Nord': ['Trou-du-Nord', 'Sainte-Suzanne', 'Terrier-Rouge', 'Caracol', 'Grand-Bassin'],
+      'Vallières': ['Vallières', 'Carice', 'Mombin-Crochu']
+    },
+    'zones': {
+      'Fort-Liberté': ['Bayaha', 'Derac', 'Drière', 'Marion', 'Dumas'],
+      'Ouanaminthe': ['Dajabon', 'Gens-de-Nantes', 'Haut-Maribahoux', 'Acul-des-Pins', 'Carisse', 'Gayot', 'Capotille']
+    }
+  },
+  'Nord-Ouest': {
+    'villes': ['Port-de-Paix', 'Saint-Louis-du-Nord', 'Môle-Saint-Nicolas'],
+    'communes': {
+      'Port-de-Paix': ['Port-de-Paix', 'La Tortue', 'Bassin-Bleu', 'Chansolme', 'La Pointe'],
+      'Saint-Louis-du-Nord': ['Saint-Louis-du-Nord', 'Anse-à-Foleur'],
+      'Môle-Saint-Nicolas': ['Môle-Saint-Nicolas', 'Baie-de-Henne', 'Bombardopolis', 'Jean-Rabel']
+    },
+    'zones': {
+      'Port-de-Paix': ['La Corne', 'Haut-de-Saint-Louis', 'Carenage', 'Nan Paul', 'Fond-de-Poussière', 'Baudin', 'Trois-Rivières', 'Chansolme']
+    }
+  },
   'Ouest': {
     'villes': ['Port-au-Prince', 'Léogâne', 'Croix-des-Bouquets', 'Arcahaie', 'La Gonâve'],
     'communes': {
@@ -482,79 +573,6 @@ const geoData = {
       'Léogâne': ['Grand-Rue', 'Dampus', 'Léogâne', 'Dufort', 'Trouin', 'Ca-Ira', 'Petite-Rivière', 'Gressier', 'Cormier', 'Chatuley', 'Orangers', 'Dessources']
     }
   },
-  // Département du Sud-Est
-  'Sud-Est': {
-    'villes': ['Jacmel', 'Bainet', 'Belle-Anse'],
-    'communes': {
-      'Jacmel': ['Jacmel', 'Marigot', 'Cayes-Jacmel', 'La Vallée-de-Jacmel'],
-      'Bainet': ['Bainet', 'Côtes-de-Fer'],
-      'Belle-Anse': ['Belle-Anse', 'Grand-Gosier', 'Thiotte', 'Anse-à-Pitres']
-    },
-    'zones': {
-      'Jacmel': ['Bel-Air', 'Bréman', 'Couchant', "L'Acul", 'Raymond-les-Bains', 'Meyer', 'Maniègue', 'Mapou']
-    }
-  },
-  // Département du Nord
-  'Nord': {
-    'villes': ['Cap-Haïtien', 'Acul-du-Nord', 'Grande-Rivière-du-Nord', 'Saint-Raphaël', 'Borgne', 'Limbé', 'Plaisance'],
-    'communes': {
-      'Cap-Haïtien': ['Cap-Haïtien', 'Quartier-Morin', 'Limonade'],
-      'Acul-du-Nord': ['Acul-du-Nord', 'Plaine-du-Nord', 'Milot'],
-      'Grande-Rivière-du-Nord': ['Grande-Rivière-du-Nord', 'Bahon'],
-      'Saint-Raphaël': ['Saint-Raphaël', 'Dondon', 'Ranquitte', 'Pignon', 'La Victoire'],
-      'Borgne': ['Borgne', 'Port-Margot'],
-      'Limbé': ['Limbé', 'Bas-Limbé'],
-      'Plaisance': ['Plaisance', 'Pilate']
-    },
-    'zones': {
-      'Cap-Haïtien': ['Carénage', 'Bande du Nord', 'Vertières', 'Lory', 'Madeline', 'Petite-Anse', 'Haut-du-Cap', 'Fort Saint-Michel', 'Champion']
-    }
-  },
-  // Département du Nord-Est
-  'Nord-Est': {
-    'villes': ['Fort-Liberté', 'Ouanaminthe', 'Trou-du-Nord', 'Vallières'],
-    'communes': {
-      'Fort-Liberté': ['Fort-Liberté', 'Ferrier', 'Perches'],
-      'Ouanaminthe': ['Ouanaminthe', 'Capotille', 'Mont-Organisé'],
-      'Trou-du-Nord': ['Trou-du-Nord', 'Sainte-Suzanne', 'Terrier-Rouge', 'Caracol', 'Grand-Bassin'],
-      'Vallières': ['Vallières', 'Carice', 'Mombin-Crochu']
-    },
-    'zones': {
-      'Fort-Liberté': ['Bayaha', 'Derac', 'Drière', 'Marion', 'Dumas'],
-      'Ouanaminthe': ['Dajabon', 'Gens-de-Nantes', 'Haut-Maribahoux', 'Acul-des-Pins', 'Carisse', 'Gayot', 'Capotille']
-    }
-  },
-  // Département de l'Artibonite
-  'Artibonite': {
-    'villes': ['Gonaïves', 'Gros-Morne', 'Saint-Marc', 'Dessalines', 'Marmelade'],
-    'communes': {
-      'Gonaïves': ['Gonaïves', 'Ennery', "L'Estère"],
-      'Gros-Morne': ['Gros-Morne', 'Terre-Neuve', 'Anse-Rouge'],
-      'Saint-Marc': ['Saint-Marc', 'Verrettes', 'La Chapelle'],
-      'Dessalines': ['Dessalines', "Petite-Rivière-de-l'Artibonite", 'Grande-Saline', 'Desdunes'],
-      'Marmelade': ['Marmelade', "Saint-Michel-de-l'Attalaye"]
-    },
-    'zones': {
-      'Saint-Marc': ['Portail Guêpe', 'Pivert', 'Nissage Saget', 'Nan Poés', 'Freycineau', 'Deperos', 'Bois-Marchand', 'Gobinet', 'Robinet'],
-      'Gonaïves': ['Raboteau', 'Descahos', 'Jubilée', 'K-Soleil', 'Bigot', 'Bienac', 'Assifa', 'Pont-Gaudin', 'Mangnan', 'Passe-Reine']
-    }
-  },
-  // Département du Centre
-  'Centre': {
-    'villes': ['Hinche', 'Mirebalais', 'Lascahobas', 'Cerca-la-Source'],
-    'communes': {
-      'Hinche': ['Hinche', 'Maïssade', 'Thomonde', 'Cerca-Carvajal'],
-      'Mirebalais': ['Mirebalais', "Saut-d'Eau", 'Boucan-Carré'],
-      'Lascahobas': ['Lascahobas', 'Belladère', 'Savanette'],
-      'Cerca-la-Source': ['Cerca-la-Source', 'Thomassique']
-    },
-    'zones': {
-      'Hinche': ['Marmont', 'Cherival', 'Juanaria', 'Mapou', 'La Hoye', 'Siloe', 'Pandiassou', 'Los Palis'],
-      'Lascahobas': ['Petit-Fond', 'Juampas', 'Do-Rival', 'Lalomas', 'Savanette', 'Bois-Bleu'],
-      'Belladère': ['Renthe-Mathe', 'Croix-Fer', 'Roy-Sec', 'Los Pozo', 'Rospandre']
-    }
-  },
-  // Département du Sud
   'Sud': {
     'villes': ['Cayes', 'Port-Salut', 'Aquin', 'Côteaux', 'Chardonnières'],
     'communes': {
@@ -568,40 +586,15 @@ const geoData = {
       'Les Cayes': ['La Savane', 'Gelée', 'Bourdet', 'Gabarre', 'Liautaud', 'Charpentier', 'Vernat', 'Derrière-Fort', 'Fonfrède']
     }
   },
-  // Département de la Grand'Anse
-  'Grand\'Anse': {
-    'villes': ['Jérémie', 'Anse-d\'Hainault', 'Corail'],
+  'Sud-Est': {
+    'villes': ['Jacmel', 'Bainet', 'Belle-Anse'],
     'communes': {
-      'Jérémie': ['Jérémie', 'Abricots', 'Bonbon', 'Moron', 'Chambellan', 'Marfranc'],
-      'Anse-d\'Hainault': ['Anse-d\'Hainault', 'Dame-Marie', 'Les Irois'],
-      'Corail': ['Corail', 'Roseaux', 'Beaumont', 'Pestel', 'Île de Cayemites']
+      'Jacmel': ['Jacmel', 'Marigot', 'Cayes-Jacmel', 'La Vallée-de-Jacmel'],
+      'Bainet': ['Bainet', 'Côtes-de-Fer'],
+      'Belle-Anse': ['Belle-Anse', 'Grand-Gosier', 'Thiotte', 'Anse-à-Pitres']
     },
     'zones': {
-      'Jérémie': ['Bordes', 'Sainte-Hélène', 'Caracolie', 'Rochasse', 'Nan Lundi', 'Makandal', 'La Pointe', 'Desormeaux']
-    }
-  },
-  // Département du Nord-Ouest
-  'Nord-Ouest': {
-    'villes': ['Port-de-Paix', 'Saint-Louis-du-Nord', 'Môle-Saint-Nicolas'],
-    'communes': {
-      'Port-de-Paix': ['Port-de-Paix', 'La Tortue', 'Bassin-Bleu', 'Chansolme', 'La Pointe'],
-      'Saint-Louis-du-Nord': ['Saint-Louis-du-Nord', 'Anse-à-Foleur'],
-      'Môle-Saint-Nicolas': ['Môle-Saint-Nicolas', 'Baie-de-Henne', 'Bombardopolis', 'Jean-Rabel']
-    },
-    'zones': {
-      'Port-de-Paix': ['La Corne', 'Haut-de-Saint-Louis', 'Carenage', 'Nan Paul', 'Fond-de-Poussière', 'Baudin', 'Trois-Rivières', 'Chansolme']
-    }
-  },
-  // Département des Nippes
-  'Nippes': {
-    'villes': ['Miragoâne', 'Anse-à-Veau', 'Baradères'],
-    'communes': {
-      'Miragoâne': ['Miragoâne', 'Petite-Rivière-de-Nippes', 'Fonds-des-Nègres', 'Paillant'],
-      'Anse-à-Veau': ['Anse-à-Veau', 'Petit-Trou-de-Nippes', "L'Asile", 'Arnaud', 'Plaisance-du-Sud'],
-      'Baradères': ['Baradères', 'Grand-Boucan']
-    },
-    'zones': {
-      'Miragoâne': ['Port-Sainte-Hélène', 'Chalon', 'Saint-Michel-du-Sud', 'Berquin', 'Chardonnères', 'Belle-Rivière', 'Carrefour Moussignac']
+      'Jacmel': ['Bel-Air', 'Bréman', 'Couchant', "L'Acul", 'Raymond-les-Bains', 'Meyer', 'Maniègue', 'Mapou']
     }
   }
 };
@@ -613,7 +606,6 @@ function updateVilles() {
   const communeSelect = document.getElementById('p-commune');
   const zoneSelect = document.getElementById('p-zone');
   
-  // Reset selects dépendants
   villeSelect.innerHTML = '<option value="">Choisir une ville</option>';
   communeSelect.innerHTML = '<option value="">Choisir une commune</option>';
   zoneSelect.innerHTML = '<option value="">Choisir une zone (optionnel)</option>';
@@ -635,7 +627,6 @@ function updateCommunes() {
   const communeSelect = document.getElementById('p-commune');
   const zoneSelect = document.getElementById('p-zone');
   
-  // Reset selects dépendants
   communeSelect.innerHTML = '<option value="">Choisir une commune</option>';
   zoneSelect.innerHTML = '<option value="">Choisir une zone (optionnel)</option>';
   
@@ -655,7 +646,6 @@ function updateZones() {
   const commune = document.getElementById('p-commune').value;
   const zoneSelect = document.getElementById('p-zone');
   
-  // Reset select
   zoneSelect.innerHTML = '<option value="">Choisir une zone (optionnel)</option>';
   
   if (!dept || !commune || !geoData[dept]) return;
@@ -840,14 +830,39 @@ async function checkExistingSession(){
   }
 }
 
-/* ===== STATISTIQUES ===== */
+/* ===== STATISTIQUES (sèlman pou itilizatè konekte) ===== */
 async function loadStats(){
   if(!supabaseClient) return;
+  
+  // Verifier si itilizatè a konekte
+  const { data: session } = await supabaseClient.auth.getSession();
+  if (!session?.session) {
+    // Si pa konekte, kache stats yo
+    document.getElementById('stats-bar').style.display = 'none';
+    return;
+  }
+  
   try{
-    const { data, error } = await supabaseClient.rpc('kaypam_stats');
-    if(error) throw error;
-    document.getElementById('stat-owners').textContent = data.owners;
-    document.getElementById('stat-listings').textContent = data.listings;
+    // Konte pwopriyetè ki gen omwen yon anons valide ak disponib
+    const { count: ownersCount, error: ownersErr } = await supabaseClient
+      .from('owners')
+      .select('id', { count: 'exact', head: true })
+      .eq('available', true);
+      
+    if(ownersErr) throw ownersErr;
+    
+    // Konte anons ki valide ak disponib
+    const { count: listingsCount, error: listingsErr } = await supabaseClient
+      .from('listings')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'valide')
+      .eq('available', true);
+      
+    if(listingsErr) throw listingsErr;
+    
+    document.getElementById('stat-owners').textContent = ownersCount || 0;
+    document.getElementById('stat-listings').textContent = listingsCount || 0;
+    document.getElementById('stats-bar').style.display = 'flex';
   }catch(err){
     console.error('Erreur de chargement des statistiques', err);
     document.getElementById('stat-owners').textContent = '—';
@@ -1048,6 +1063,7 @@ document.getElementById('publish-form').addEventListener('submit', async functio
       p_city: ville,
       p_commune: commune,
       p_zone: zone,
+      p_departement: departement,
       p_transaction: transaction,
       p_type: type,
       p_price: priceNumber,
@@ -1120,8 +1136,8 @@ checkExistingSession();
       'Un seul compte pour toutes vos annonces': 'One account for all your listings',
       'Photos et vidéos vérifiées avant publication': 'Photos and videos verified before publication',
       'Retirez ou boostez vos annonces à tout moment': 'Remove or boost your listings anytime',
-      'Propriétaires inscrits': 'Registered owners',
-      'Annonces soumises': 'Listings submitted',
+      'Propriétaires actifs': 'Active owners',
+      'Annonces actives': 'Active listings',
       'Retour au site': 'Back to site',
       'Se connecter': 'Log in',
       'Créer un compte': 'Create an account',
@@ -1131,10 +1147,13 @@ checkExistingSession();
       'Nom complet': 'Full name',
       'Téléphone': 'Phone',
       'Numéro WhatsApp': 'WhatsApp number',
+      'Le nom d\'utilisateur doit être unique — au moins 3 caractères, sans espace. Le mot de passe doit contenir au moins 6 caractères.': 'Username must be unique — at least 3 characters, no spaces. Password must be at least 6 characters.',
+      'Le numéro WhatsApp est celui qui apparaîtra sur le bouton « Contacter via WhatsApp » de vos annonces. Il peut être identique ou différent de votre téléphone.': 'The WhatsApp number is what will appear on the "Contact via WhatsApp" button of your listings. It can be the same or different from your phone.',
       'Créer mon compte': 'Create my account',
       'Connecté en tant que': 'Logged in as',
       'Se déconnecter': 'Log out',
       'Formulaire de publication': 'Publishing form',
+      'Chaque annonce est examinée par notre équipe — photos et vidéos incluses — avant d\'être publiée sur le site. Comptez jusqu\'à 24h pour la validation.': 'Each listing is reviewed by our team — photos and videos included — before being published on the site. Allow up to 24h for validation.',
       'Département': 'Department',
       'Ville': 'City',
       'Commune': 'Municipality',
@@ -1160,18 +1179,16 @@ checkExistingSession();
       'Photos du bien (au moins 1)': 'Property photos (at least 1)',
       'Ajouter des photos': 'Add photos',
       'Aucune photo sélectionnée': 'No photos selected',
+      'Formats JPG, PNG ou WEBP, 15 Mo max par photo, 10 photos maximum. Les images sont compressées automatiquement avant l\'envoi.': 'JPG, PNG or WEBP formats, 15 MB max per photo, 10 photos maximum. Images are automatically compressed before sending.',
       'Vidéos du bien (optionnel)': 'Property videos (optional)',
       'Ajouter des vidéos': 'Add videos',
       'Aucune vidéo sélectionnée': 'No videos selected',
+      '50 Mo max par vidéo, 3 vidéos maximum. Compressez la vidéo avant l\'envoi si besoin.': '50 MB max per video, 3 videos maximum. Compress the video before sending if needed.',
       'Soumettre l\'annonce pour vérification': 'Submit listing for verification',
       '✅ Annonce envoyée avec succès !': '✅ Listing sent successfully!',
       'Merci ! Votre annonce a bien été reçue avec ses photos et vidéos. Notre équipe la vérifiera et la publiera sous 24h. Vous pouvez publier une autre annonce dès maintenant grâce au formulaire ci-dessus, réinitialisé pour vous.': 'Thank you! Your listing has been received with its photos and videos. Our team will review it and publish it within 24h. You can publish another listing now using the form above, reset for you.',
       'Mèsi ! Annons ou a anrejistre. Ekip KayPam nan ap verifye enfòmasyon yo ak foto yo pou sekirite platfòm lan. L ap parèt an liy nan mwens pase 24 èdtan.': 'Thank you! Your listing is registered. The KayPam team will verify the information and photos for platform security. It will appear online in less than 24 hours.',
-      '© 2026 KayPam. Toutes les annonces sont vérifiées avant publication.': '© 2026 KayPam. All listings are verified before publication.',
-      'Choisir un département': 'Choose a department',
-      'Choisir une ville': 'Choose a city',
-      'Choisir une commune': 'Choose a municipality',
-      'Choisir une zone (optionnel)': 'Choose a zone (optional)'
+      '© 2026 KayPam. Toutes les annonces sont vérifiées avant publication.': '© 2026 KayPam. All listings are verified before publication.'
     },
     ht: {
       'Propriétaires et agents': 'Pwopriyetè ak ajan',
@@ -1181,8 +1198,8 @@ checkExistingSession();
       'Un seul compte pour toutes vos annonces': 'Yon sèl kont pou tout anons ou yo',
       'Photos et vidéos vérifiées avant publication': 'Foto ak videyo tcheke anvan piblikasyon',
       'Retirez ou boostez vos annonces à tout moment': 'Retire oswa booste anons ou yo nenpòt moman',
-      'Propriétaires inscrits': 'Pwopriyetè ki enskri',
-      'Annonces soumises': 'Anons soumèt',
+      'Propriétaires actifs': 'Pwopriyetè aktif',
+      'Annonces actives': 'Anons aktif',
       'Retour au site': 'Retounen sou sit la',
       'Se connecter': 'Konekte',
       'Créer un compte': 'Kree yon kont',
@@ -1192,10 +1209,13 @@ checkExistingSession();
       'Nom complet': 'Non konplè',
       'Téléphone': 'Telefòn',
       'Numéro WhatsApp': 'Nimewo WhatsApp',
+      'Le nom d\'utilisateur doit être unique — au moins 3 caractères, sans espace. Le mot de passe doit contenir au moins 6 caractères.': 'Non itilizatè a dwe inik — omwen 3 karaktè, san espas. Mo de pase a dwe gen omwen 6 karaktè.',
+      'Le numéro WhatsApp est celui qui apparaîtra sur le bouton « Contacter via WhatsApp » de vos annonces. Il peut être identique ou différent de votre téléphone.': 'Nimewo WhatsApp la se sa ki ap parèt sou bouton "Kontakte via WhatsApp" nan anons ou yo. Li kapab menm oswa diferan de telefòn ou.',
       'Créer mon compte': 'Kree kont mwen',
       'Connecté en tant que': 'Konekte kòm',
       'Se déconnecter': 'Dekonekte',
       'Formulaire de publication': 'Fòmilè piblikasyon',
+      'Chaque annonce est examinée par notre équipe — photos et vidéos incluses — avant d\'être publiée sur le site. Comptez jusqu\'à 24h pour la validation.': 'Chak anons egzamine pa ekip nou an — foto ak videyo ki enkli — anvan yo pibliye li sou sit la. Konte jiska 24è pou validasyon.',
       'Département': 'Depatman',
       'Ville': 'Vil',
       'Commune': 'Komin',
@@ -1221,18 +1241,16 @@ checkExistingSession();
       'Photos du bien (au moins 1)': 'Foto byen an (omwen 1)',
       'Ajouter des photos': 'Ajoute foto',
       'Aucune photo sélectionnée': 'Pa gen foto chwazi',
+      'Formats JPG, PNG ou WEBP, 15 Mo max par photo, 10 photos maximum. Les images sont compressées automatiquement avant l\'envoi.': 'Fòma JPG, PNG oswa WEBP, 15 Mo maksimòm pou chak foto, 10 foto maksimòm. Imaj yo konprese otomatikman anvan yo voye.',
       'Vidéos du bien (optionnel)': 'Videyo byen an (opsyonèl)',
       'Ajouter des vidéos': 'Ajoute videyo',
       'Aucune vidéo sélectionnée': 'Pa gen videyo chwazi',
+      '50 Mo max par vidéo, 3 vidéos maximum. Compressez la vidéo avant l\'envoi si besoin.': '50 Mo maksimòm pou chak videyo, 3 videyo maksimòm. Konprese videyo a anvan ou voye si sa nesesè.',
       'Soumettre l\'annonce pour vérification': 'Soumèt anons pou verifikasyon',
       '✅ Annonce envoyée avec succès !': '✅ Anons voye avèk siksè!',
       'Merci ! Votre annonce a bien été reçue avec ses photos et vidéos. Notre équipe la vérifiera et la publiera sous 24h. Vous pouvez publier une autre annonce dès maintenant grâce au formulaire ci-dessus, réinitialisé pour vous.': 'Mèsi! Anons ou te resevwa byen ak foto ak videyo li yo. Ekip nou an ap verifye l epi pibliye l nan mwens pase 24è. Ou ka pibliye yon lòt anons kounye a gras a fòmilè ki anwo a, ki reset pou ou.',
       'Mèsi ! Annons ou a anrejistre. Ekip KayPam nan ap verifye enfòmasyon yo ak foto yo pou sekirite platfòm lan. L ap parèt an liy nan mwens pase 24 èdtan.': 'Mèsi! Anons ou anrejistre. Ekip KayPam nan ap verifye enfòmasyon yo ak foto yo pou sekirite platfòm lan. L ap parèt an liy nan mwens pase 24 èdtan.',
-      '© 2026 KayPam. Toutes les annonces sont vérifiées avant publication.': '© 2026 KayPam. Tout anons yo verifye anvan piblikasyon.',
-      'Choisir un département': 'Chwazi yon depatman',
-      'Choisir une ville': 'Chwazi yon vil',
-      'Choisir une commune': 'Chwazi yon komin',
-      'Choisir une zone (optionnel)': 'Chwazi yon zòn (opsyonèl)'
+      '© 2026 KayPam. Toutes les annonces sont vérifiées avant publication.': '© 2026 KayPam. Tout anons yo verifye anvan piblikasyon.'
     }
   };
   var map = maps[lang] || maps.fr;
