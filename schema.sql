@@ -121,11 +121,28 @@ create policy "admins_self_select" on admins
 -- Aucune policy insert/update/delete : seul le SQL Editor (avec vos propres
 -- droits de propriétaire de projet) peut modifier cette table.
 
+-- ---------- TABLE VISITS (STATISTIQUES DE VISITES) ----------
+-- Table pour enregistrer toutes les visites du site
+create table if not exists visits (
+  id uuid primary key default gen_random_uuid(),
+  visitor_id text,
+  page text,
+  referrer text,
+  user_agent text,
+  visited_at timestamptz default now()
+);
+
+-- Endèks pour les visites
+create index if not exists idx_visits_visited_at on visits(visited_at);
+create index if not exists idx_visits_visitor_id on visits(visitor_id);
+create index if not exists idx_visits_page on visits(page);
+
 -- ---------- SÉCURITÉ (Row Level Security) ----------
 
 alter table owners enable row level security;
 alter table listings enable row level security;
 alter table listing_media enable row level security;
+alter table visits enable row level security;
 
 -- OWNERS : personne ne lit cette table directement, même pas un propriétaire
 -- connecté qui consulte ses propres infos (il passe par des fonctions dédiées
@@ -185,6 +202,16 @@ create policy "media_public_insert" on listing_media
         and o.auth_user_id = auth.uid()
     )
   );
+
+-- VISITS : tout le monde peut insérer (pour le tracking), seul l'admin peut lire
+drop policy if exists "visits_insert" on visits;
+drop policy if exists "visits_admin_select" on visits;
+create policy "visits_insert" on visits
+  for insert to anon, authenticated
+  with check (true);
+create policy "visits_admin_select" on visits
+  for select to authenticated
+  using (exists (select 1 from admins a where a.user_id = auth.uid()));
 
 -- ---------- FONCTIONS DE BASE ----------
 
@@ -543,6 +570,74 @@ $$;
 grant execute on function public.set_listing_availability to authenticated;
 
 -- ============================================================
+-- FONCTIONS POUR STATISTIQUES DE VISITES
+-- ============================================================
+
+-- Fonction pour obtenir le nombre de visites sur une période
+create or replace function public.get_visits_count(
+  p_start_date timestamptz,
+  p_end_date timestamptz default now()
+)
+returns bigint
+language sql
+security definer
+set search_path = public
+as $$
+  select count(*) from visits 
+  where visited_at between p_start_date and p_end_date;
+$$;
+
+grant execute on function public.get_visits_count to authenticated;
+
+-- Fonction pour obtenir le nombre de visiteurs uniques sur une période
+create or replace function public.get_unique_visitors(
+  p_start_date timestamptz,
+  p_end_date timestamptz default now()
+)
+returns bigint
+language sql
+security definer
+set search_path = public
+as $$
+  select count(distinct visitor_id) from visits 
+  where visited_at between p_start_date and p_end_date;
+$$;
+
+grant execute on function public.get_visits_count to authenticated;
+
+-- Fonction pour obtenir les statistiques complètes de visites (aujourd'hui, semaine, mois)
+create or replace function public.get_visits_stats()
+returns json
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_today timestamptz;
+  v_week_ago timestamptz;
+  v_month_ago timestamptz;
+  v_result json;
+begin
+  v_today := date_trunc('day', now());
+  v_week_ago := v_today - interval '7 days';
+  v_month_ago := v_today - interval '30 days';
+  
+  select json_build_object(
+    'today', (select count(*) from visits where visited_at >= v_today),
+    'today_unique', (select count(distinct visitor_id) from visits where visited_at >= v_today),
+    'week', (select count(*) from visits where visited_at >= v_week_ago),
+    'week_unique', (select count(distinct visitor_id) from visits where visited_at >= v_week_ago),
+    'month', (select count(*) from visits where visited_at >= v_month_ago),
+    'month_unique', (select count(distinct visitor_id) from visits where visited_at >= v_month_ago)
+  ) into v_result;
+  
+  return v_result;
+end;
+$$;
+
+grant execute on function public.get_visits_stats to authenticated;
+
+-- ============================================================
 -- FONCTION POUR RECHERCHER LES VILLES PAR DÉPARTEMENT
 -- ============================================================
 
@@ -696,6 +791,8 @@ grant execute on function public.search_listings to anon, authenticated;
 grant usage on schema public to anon, authenticated;
 grant all on all tables in schema public to anon, authenticated;
 grant all on all sequences in schema public to anon, authenticated;
+grant insert on visits to anon, authenticated;
+grant select on visits to authenticated;
 alter default privileges in schema public grant all on tables to anon, authenticated;
 alter default privileges in schema public grant all on sequences to anon, authenticated;
 
