@@ -57,6 +57,7 @@
   header{
     position:sticky;top:0;z-index:40;
     background:rgba(242,245,241,0.92);
+    -webkit-backdrop-filter:blur(8px);
     backdrop-filter:blur(8px);
     border-bottom:1px solid var(--border);
   }
@@ -88,6 +89,35 @@
   }
   .nav-cta-secondary:hover{background:var(--navy);color:#fff;}
   .nav-ctas{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;flex-shrink:0;}
+  .lang-dropdown{position:relative;flex-shrink:0;}
+  .lang-dropdown-trigger{
+    display:flex;align-items:center;gap:6px;
+    background:#fff;border:1.5px solid var(--border);border-radius:999px;
+    padding:8px 14px;font-size:13px;font-weight:700;color:var(--ink);
+    font-family:var(--font-mono);transition:border-color .15s, box-shadow .15s;
+  }
+  .lang-dropdown-trigger:hover{border-color:var(--navy);}
+  .lang-dropdown.open .lang-dropdown-trigger{border-color:var(--navy);box-shadow:0 0 0 3px rgba(22,36,59,0.08);}
+  .lang-globe{font-size:13px;line-height:1;}
+  .lang-caret{font-size:10px;transition:transform .15s;color:var(--ink-soft);}
+  .lang-dropdown.open .lang-caret{transform:rotate(180deg);}
+  .lang-dropdown-menu{
+    display:none;flex-direction:column;position:absolute;top:calc(100% + 8px);right:0;
+    background:#fff;border:1px solid var(--border);border-radius:12px;
+    box-shadow:0 12px 28px rgba(22,36,59,0.16);overflow:hidden;min-width:150px;z-index:50;
+  }
+  .lang-dropdown.open .lang-dropdown-menu{display:flex;}
+  .lang-option{
+    display:flex;align-items:center;gap:10px;padding:11px 16px;
+    background:none;border:none;text-align:left;font-size:13.5px;font-weight:600;color:var(--ink);
+    transition:background .12s;
+  }
+  .lang-option:hover{background:var(--bg-soft);}
+  .lang-option.active{color:var(--coral-dark);background:rgba(226,92,59,0.06);}
+  .lang-option .lang-code{
+    font-family:var(--font-mono);font-size:11px;color:var(--ink-soft);
+    width:22px;flex-shrink:0;
+  }
 
   /* ---------- HERO ---------- */
   .hero{
@@ -128,7 +158,9 @@
 
   /* search panel */
   .search-panel{
-    background:#fff;
+    background:rgba(255,255,255,0.95);
+    -webkit-backdrop-filter:blur(12px);
+    backdrop-filter:blur(12px);
     color:var(--ink);
     border-radius:var(--radius);
     padding:24px;
@@ -238,6 +270,7 @@
     display:flex;align-items:center;justify-content:center;
     position:relative;overflow:hidden;
   }
+  .card-art img{width:100%;height:100%;object-fit:cover;}
   .card-badge{
     position:absolute;top:12px;left:12px;
     font-family:var(--font-mono);font-size:11px;font-weight:700;
@@ -246,7 +279,13 @@
   }
   .badge-vente{background:var(--gold);color:#4A3300;}
   .badge-location{background:var(--green);color:#fff;}
-  .badge-boost{background:var(--gold);color:#4A3300;position:absolute;top:12px;right:12px;left:auto;}
+  .badge-boost{
+    background:var(--gold);color:#4A3300;
+    position:absolute;top:12px;right:12px;left:auto;
+    font-family:var(--font-mono);font-size:11px;font-weight:700;
+    padding:4px 10px;border-radius:999px;
+    text-transform:uppercase;letter-spacing:.04em;
+  }
   .card-body{padding:18px 18px 20px;display:flex;flex-direction:column;gap:8px;flex:1;}
   .card-city{
     font-family:var(--font-mono);font-size:12px;color:var(--ink-soft);
@@ -261,6 +300,16 @@
     display:flex;gap:14px;font-size:12.5px;color:var(--ink-soft);
     border-top:1px solid var(--border);padding-top:10px;margin-top:4px;
   }
+  .boost-indicator{
+    display:inline-block;font-size:10px;font-weight:700;
+    padding:3px 10px;border-radius:999px;margin-top:4px;
+  }
+  .boost-indicator.active{
+    color:var(--green);background:rgba(30,143,111,0.12);
+  }
+  .boost-indicator.expired{
+    color:var(--ink-soft);background:var(--bg-soft);
+  }
   .card-cta{
     border:none;background:var(--bg-soft);color:var(--ink);
     border-radius:9px;padding:10px;font-size:13.5px;font-weight:600;
@@ -272,6 +321,7 @@
     grid-column:1/-1;
   }
   .empty-state strong{display:block;color:var(--ink);font-size:18px;margin-bottom:6px;}
+  .empty-state .icon-big{font-size:48px;margin-bottom:16px;display:block;}
 
   /* ---------- HOW IT WORKS ---------- */
   .how{background:var(--navy);color:#fff;}
@@ -291,41 +341,6 @@
   }
   .step h3{color:#fff;font-size:18px;}
   .step p{color:rgba(255,255,255,0.65);font-size:14.5px;margin:0;}
-
-  /* ---------- PUBLISH CTA ---------- */
-  .publish{
-    background:var(--card-bg);
-    border:1px solid var(--border);
-    border-radius:20px;
-    padding:44px;
-    display:grid;grid-template-columns:0.9fr 1.1fr;gap:40px;
-  }
-  .publish-info h2{font-size:28px;}
-  .publish-info p{color:var(--ink-soft);}
-  .publish-list{list-style:none;padding:0;margin:20px 0 0;display:flex;flex-direction:column;gap:10px;}
-  .publish-list li{display:flex;gap:10px;font-size:14.5px;align-items:flex-start;}
-  .publish-list li::before{
-    content:'';width:7px;height:7px;border-radius:50%;background:var(--green);
-    margin-top:7px;flex-shrink:0;
-  }
-  .pform{display:flex;flex-direction:column;gap:12px;}
-  .pform-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-  .pform label{font-size:12.5px;font-weight:600;color:var(--ink-soft);display:block;margin-bottom:5px;}
-  .pform input,.pform select,.pform textarea{
-    width:100%;border:1px solid var(--border);border-radius:9px;
-    padding:11px 12px;font-family:var(--font-body);font-size:14.5px;background:var(--bg);color:var(--ink);
-  }
-  .pform textarea{resize:vertical;min-height:80px;}
-  .pform button{
-    background:var(--coral);color:#fff;border:none;border-radius:9px;
-    padding:13px;font-weight:600;font-size:15px;transition:background .15s;
-  }
-  .pform button:hover{background:var(--coral-dark);}
-  .pform-success{
-    display:none;background:rgba(30,143,111,0.1);border:1px solid var(--green);
-    color:#0f5c47;padding:14px 16px;border-radius:9px;font-size:14px;
-  }
-  .pform-success.show{display:block;}
 
   /* ---------- FOOTER ---------- */
   footer{background:var(--navy);color:rgba(255,255,255,0.7);padding:48px 0 28px;}
@@ -361,6 +376,7 @@
   }
   .modal-wide .publish{border:none;border-radius:0;padding:30px 30px 32px;grid-template-columns:1fr;gap:24px;}
   .modal-art{height:170px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+  .modal-art img{width:100%;height:100%;object-fit:cover;}
   .modal-close{
     position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.85);
     border:none;border-radius:50%;width:34px;height:34px;font-size:18px;
@@ -381,6 +397,14 @@
   .btn-whatsapp{background:var(--green);color:#fff;}
   .btn-close-secondary{background:var(--bg-soft);color:var(--ink);}
 
+  #boosted-section{display:none;padding-bottom:0;padding-top:32px;}
+  #boosted-section.show{display:block;}
+  #boosted-section .grid{margin-top:0;}
+
+  @media (max-width:1100px){
+    .nav-links{gap:16px;font-size:13.5px;}
+    .nav-links a{font-size:13.5px;}
+  }
   @media (max-width:880px){
     .hero-inner{grid-template-columns:1fr;}
     .hero h1{max-width:none;}
@@ -394,6 +418,7 @@
     .logo-text{font-size:17px;}
     .nav-cta,.nav-cta-secondary{padding:7px 11px;font-size:11.5px;}
     .nav-ctas{gap:6px;}
+    .lang-dropdown-trigger{padding:6px 9px;font-size:11px;}
   }
   @media (max-width:520px){
     .field-row,.pform-row{grid-template-columns:1fr;}
@@ -418,15 +443,20 @@
       <span class="logo-text">Kay<span>Pam</span></span>
     </a>
     <nav class="nav-links">
-      <a href="#listings" onclick="setTransactionFilter('Vente')">Acheter</a>
-      <a href="#listings" onclick="setTransactionFilter('Location')">Louer</a>
-      
-      <a href="mes-annonces.html" target="_blank" rel="noopener">Booster mes annonces</a>
-      <a href="#comment">Comment ça marche</a>
+      <a href="#listings" onclick="setTransactionFilter('Vente')" data-i18n="nav_buy">Acheter</a>
+      <a href="#listings" onclick="setTransactionFilter('Location')" data-i18n="nav_rent">Louer</a>
+      <a href="mes-annonces.html" target="_blank" rel="noopener" data-i18n="nav_boost">Booster mes annonces</a>
+      <a href="#comment" data-i18n="nav_how">Comment ça marche</a>
     </nav>
     <div class="nav-ctas">
-      <a href="mes-annonces.html" target="_blank" rel="noopener" class="nav-cta-secondary">Se connecter</a>
-      <a href="publier.html" target="_blank" rel="noopener" class="nav-cta">Publier gratuitement</a>
+      <div class="lang-dropdown" id="lang-dropdown">
+        <button class="lang-dropdown-trigger" onclick="toggleLangMenu()" aria-haspopup="true" aria-expanded="false">
+          <span class="lang-globe">🌐</span><span id="lang-current-label">FR</span><span class="lang-caret">▾</span>
+        </button>
+        <div class="lang-dropdown-menu" id="lang-dropdown-menu"></div>
+      </div>
+      <a href="mes-annonces.html" target="_blank" rel="noopener" class="nav-cta-secondary" data-i18n="nav_login">Se connecter</a>
+      <a href="publier.html" target="_blank" rel="noopener" class="nav-cta" data-i18n="nav_publish">Publier</a>
     </div>
   </div>
 </header>
@@ -443,68 +473,68 @@
   </svg>
   <div class="hero-inner">
     <div>
-      <span class="eyebrow">Annonces immobilières · Haïti</span>
-      <h1>Chaque quartier<br>a sa maison.<br><em>Trouvez la vôtre.</em></h1>
-      <p class="hero-sub">KayPam rassemble des centaines de maisons, appartements et terrains à vendre ou à louer partout en Haïti — et vous met en contact direct avec le propriétaire ou l'agent, sans détour.</p>
+      <span class="eyebrow" data-i18n="hero_eyebrow">Annonces immobilières · Haïti</span>
+      <h1 data-i18n-html="hero_title">Chaque quartier<br>a sa maison.<br><em>Trouvez la vôtre.</em></h1>
+      <p class="hero-sub" data-i18n="hero_sub">KayPam rassemble des centaines de maisons, appartements et terrains à vendre ou à louer partout en Haïti — et vous met en contact direct avec le propriétaire ou l'agent, sans détour.</p>
       <div class="hero-stats">
-        <div class="hero-stat"><b id="stat-count">0</b><span>Annonces actives</span></div>
-        <div class="hero-stat"><b>10</b><span>Villes couvertes</span></div>
-        <div class="hero-stat"><b>0%</b><span>Commission cachée</span></div>
+        <div class="hero-stat"><b id="stat-count">0</b><span data-i18n="stat_active">Annonces actives</span></div>
+        <div class="hero-stat"><b>10</b><span data-i18n="stat_cities">Villes couvertes</span></div>
+        <div class="hero-stat"><b>0%</b><span data-i18n="stat_commission">Commission cachée</span></div>
       </div>
     </div>
 
     <div class="search-panel">
-      <span class="panel-label">Recherche rapide</span>
+      <span class="panel-label" data-i18n="search_label">Recherche rapide</span>
       <div class="field-row">
         <div class="field">
-          <label for="f-city">Ville</label>
+          <label for="f-city" data-i18n="search_city">Ville</label>
           <select id="f-city">
-            <option value="">Toutes les villes</option>
+            <option value="" data-i18n="search_city_all">Toutes les villes</option>
           </select>
         </div>
         <div class="field">
-          <label for="f-transaction">Je veux</label>
+          <label for="f-transaction" data-i18n="search_want">Je veux</label>
           <select id="f-transaction">
-            <option value="">Acheter ou louer</option>
-            <option value="Vente">Acheter</option>
-            <option value="Location">Louer</option>
+            <option value="" data-i18n="search_want_placeholder">Acheter ou louer</option>
+            <option value="Vente" data-i18n="nav_buy">Acheter</option>
+            <option value="Location" data-i18n="nav_rent">Louer</option>
           </select>
         </div>
       </div>
       <div class="field-row">
         <div class="field">
-          <label for="f-type">Type de bien</label>
+          <label for="f-type" data-i18n="search_type">Type de bien</label>
           <select id="f-type">
-            <option value="">Tous les types</option>
-            <option value="Maison">Maison</option>
-            <option value="Appartement">Appartement</option>
-            <option value="Terrain">Terrain</option>
-            <option value="Local commercial">Local commercial</option>
+            <option value="" data-i18n="search_type_all">Tous les types</option>
+            <option value="Maison" data-i18n="type_house">Maison</option>
+            <option value="Appartement" data-i18n="type_apartment">Appartement</option>
+            <option value="Terrain" data-i18n="type_land">Terrain</option>
+            <option value="Local commercial" data-i18n="type_commercial">Local commercial</option>
           </select>
         </div>
         <div class="field">
-          <label for="f-budget">Budget max (USD)</label>
+          <label for="f-budget" data-i18n="search_budget">Budget max (USD)</label>
           <input type="number" id="f-budget" placeholder="Ex. 200000" min="0">
         </div>
       </div>
       <button class="search-btn" onclick="applySearchPanel()">
-        Rechercher des biens →
+        <span data-i18n="search_btn">Rechercher des biens →</span>
       </button>
     </div>
   </div>
 </section>
 
 <main>
-  <section id="boosted-section" class="wrap" style="display:none;padding-bottom:0;padding-top:32px;">
+  <section id="boosted-section" class="wrap">
     <div class="grid" id="boosted-grid"></div>
   </section>
 
   <section id="listings" class="wrap">
     <div class="section-head">
       <div>
-        <span class="eyebrow">Annonces</span>
-        <h2>Biens en vedette</h2>
-        <p>Filtrez par transaction, puis explorez par département, arrondissement, commune ou quartier.</p>
+        <span class="eyebrow" data-i18n="listings_eyebrow">Annonces</span>
+        <h2 data-i18n="listings_title">Biens en vedette</h2>
+        <p data-i18n="listings_sub">Filtrez par transaction, puis explorez par département, arrondissement, commune ou quartier.</p>
       </div>
     </div>
 
@@ -520,32 +550,30 @@
     <div class="wrap">
       <div class="section-head">
         <div>
-          <span class="eyebrow">Le parcours</span>
-          <h2 style="color:#fff;">Comment ça marche</h2>
-          <p>Trois étapes, aucun intermédiaire obligatoire.</p>
+          <span class="eyebrow" data-i18n="how_eyebrow">Le parcours</span>
+          <h2 style="color:#fff;" data-i18n="nav_how">Comment ça marche</h2>
+          <p data-i18n="how_sub">Trois étapes, aucun intermédiaire obligatoire.</p>
         </div>
       </div>
       <div class="steps">
         <div class="step">
-          <div class="step-num">01 — Cherchez</div>
-          <h3>Filtrez selon vos besoins</h3>
-          <p>Ville, budget, type de bien : trouvez en quelques clics les annonces qui correspondent à votre recherche, partout en Haïti.</p>
+          <div class="step-num" data-i18n="step1_num">01 — Cherchez</div>
+          <h3 data-i18n="step1_title">Filtrez selon vos besoins</h3>
+          <p data-i18n="step1_desc">Ville, budget, type de bien : trouvez en quelques clics les annonces qui correspondent à votre recherche, partout en Haïti.</p>
         </div>
         <div class="step">
-          <div class="step-num">02 — Contactez</div>
-          <h3>Parlez directement au propriétaire</h3>
-          <p>Chaque annonce vous met en relation directe avec le propriétaire ou l'agent, par WhatsApp ou téléphone.</p>
+          <div class="step-num" data-i18n="step2_num">02 — Contactez</div>
+          <h3 data-i18n="step2_title">Parlez directement au propriétaire</h3>
+          <p data-i18n="step2_desc">Chaque annonce vous met en relation directe avec le propriétaire ou l'agent, par WhatsApp ou téléphone.</p>
         </div>
         <div class="step">
-          <div class="step-num">03 — Emménagez</div>
-          <h3>Visitez, négociez, signez</h3>
-          <p>Organisez votre visite et finalisez l'accord en toute transparence, sans commission cachée.</p>
+          <div class="step-num" data-i18n="step3_num">03 — Emménagez</div>
+          <h3 data-i18n="step3_title">Visitez, négociez, signez</h3>
+          <p data-i18n="step3_desc">Organisez votre visite et finalisez l'accord en toute transparence, sans commission cachée.</p>
         </div>
       </div>
     </div>
   </section>
-
-
 </main>
 
 <footer>
@@ -560,10 +588,10 @@
           </svg>
           <span class="logo-text">KayPam</span>
         </div>
-        <p style="max-width:32ch;font-size:14px;">La plateforme qui connecte directement les Haïtiens aux maisons, appartements et terrains disponibles, partout au pays.</p>
+        <p style="max-width:32ch;font-size:14px;" data-i18n="footer_desc">La plateforme qui connecte directement les Haïtiens aux maisons, appartements et terrains disponibles, partout au pays.</p>
       </div>
       <div>
-        <h4>Couverture</h4>
+        <h4 data-i18n="footer_coverage">Couverture</h4>
         <ul>
           <li>Port-au-Prince</li>
           <li>Pétion-Ville · Delmas · Tabarre</li>
@@ -572,18 +600,18 @@
         </ul>
       </div>
       <div>
-        <h4>Contact</h4>
+        <h4 data-i18n="footer_contact">Contact</h4>
         <ul>
           <li>contact@kaypam.ht</li>
           <li>WhatsApp : +509 0000 0000</li>
-          <li><a href="publier.html" target="_blank" rel="noopener">Publier une annonce</a></li>
-          <li><a href="mes-annonces.html" target="_blank" rel="noopener">Booster mes annonces</a></li>
+          <li><a href="publier.html" target="_blank" rel="noopener" data-i18n="footer_publish_link">Publier une annonce</a></li>
+          <li><a href="mes-annonces.html" target="_blank" rel="noopener" data-i18n="nav_boost">Booster mes annonces</a></li>
         </ul>
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2026 KayPam. Tous droits réservés.</span>
-      <span>Conçu pour faciliter la recherche immobilière en Haïti.</span>
+      <span data-i18n="footer_copyright">© 2026 KayPam. Tous droits réservés.</span>
+      <span data-i18n="footer_tagline">Conçu pour faciliter la recherche immobilière en Haïti.</span>
     </div>
   </div>
 </footer>
@@ -600,8 +628,8 @@
       <div class="modal-specs" id="modal-specs"></div>
       <p class="modal-desc" id="modal-desc"></p>
       <div class="modal-actions">
-        <a href="#" class="btn-whatsapp" id="modal-whatsapp" target="_blank" rel="noopener">Contacter via WhatsApp</a>
-        <button class="btn-close-secondary" onclick="closeModal()">Fermer</button>
+        <a href="#" class="btn-whatsapp" id="modal-whatsapp" target="_blank" rel="noopener" data-i18n="modal_whatsapp">Contacter via WhatsApp</a>
+        <button class="btn-close-secondary" onclick="closeModal()" data-i18n="modal_close">Fermer</button>
       </div>
     </div>
   </div>
@@ -609,7 +637,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* ===== Configuration Supabase — à remplir après avoir suivi SETUP.md ===== */
+/* ===== Configuration Supabase ===== */
 const SUPABASE_URL = "https://hmbvlwwmwmkvfjpkfgye.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_nnesDNdLlyiS1-ekCZqXyQ_aYF1cOXY";
 const supabaseClient = (SUPABASE_URL.startsWith('http') && SUPABASE_ANON_KEY.length > 10)
@@ -617,8 +645,167 @@ const supabaseClient = (SUPABASE_URL.startsWith('http') && SUPABASE_ANON_KEY.len
   : null;
 /* =========================================================================== */
 
-const listings = [];
+/* ===== Système multilingue ===== */
+const translations = {
+  fr: {
+    nav_buy:"Acheter", nav_rent:"Louer", nav_boost:"Booster mes annonces", nav_how:"Comment ça marche",
+    nav_login:"Se connecter", nav_publish:"Publier",
+    hero_eyebrow:"Annonces immobilières · Haïti",
+    hero_title:"Chaque quartier<br>a sa maison.<br><em>Trouvez la vôtre.</em>",
+    hero_sub:"KayPam rassemble des centaines de maisons, appartements et terrains à vendre ou à louer partout en Haïti — et vous met en contact direct avec le propriétaire ou l'agent, sans détour.",
+    stat_active:"Annonces actives", stat_cities:"Villes couvertes", stat_commission:"Commission cachée",
+    search_label:"Recherche rapide", search_city:"Ville", search_city_all:"Toutes les villes",
+    search_want:"Je veux", search_want_placeholder:"Acheter ou louer",
+    search_type:"Type de bien", search_type_all:"Tous les types",
+    type_house:"Maison", type_apartment:"Appartement", type_land:"Terrain", type_commercial:"Local commercial",
+    search_budget:"Budget max (USD)", search_btn:"Rechercher des biens →",
+    listings_eyebrow:"Annonces", listings_title:"Biens en vedette",
+    listings_sub:"Filtrez par transaction, puis explorez par département, arrondissement, commune ou quartier.",
+    chip_all:"Toutes", chip_sale:"À vendre", chip_rent:"À louer",
+    loc_all_zones:"Toutes les zones", loc_back:"← Retour", loc_empty_note:"Aucun quartier détaillé pour {commune} pour le moment — toutes les annonces de la commune sont affichées ci-dessous.",
+    badge_sale:"À vendre", badge_rent:"À louer", badge_vedette:"⭐ Vedette",
+    boost_active:"⭐ Boost actif jusqu'au {date}",
+    boost_expired:"⏳ Boost expiré le {date}",
+    spec_beds:"ch.", spec_baths:"sdb", spec_beds_full:"Chambres", spec_baths_full:"Salles de bain", spec_area_full:"m²",
+    btn_view_details:"Voir les détails",
+    empty_none_title:"Aucune annonce publiée pour le moment", empty_none_sub:"Les premières annonces vérifiées apparaîtront ici très bientôt.",
+    empty_match_title:"Aucune annonce ne correspond", empty_match_sub:"Essayez d'élargir votre recherche ou de modifier vos filtres.",
+    modal_specs_fallback:"Détails supplémentaires à confirmer avec le propriétaire.",
+    modal_whatsapp:"Contacter via WhatsApp", modal_close:"Fermer",
+    whatsapp_interest_msg:"Bonjour, je suis intéressé(e) par : {title} à {city}",
+    how_eyebrow:"Le parcours", how_sub:"Trois étapes, aucun intermédiaire obligatoire.",
+    step1_num:"01 — Cherchez", step1_title:"Filtrez selon vos besoins", step1_desc:"Ville, budget, type de bien : trouvez en quelques clics les annonces qui correspondent à votre recherche, partout en Haïti.",
+    step2_num:"02 — Contactez", step2_title:"Parlez directement au propriétaire", step2_desc:"Chaque annonce vous met en relation directe avec le propriétaire ou l'agent, par WhatsApp ou téléphone.",
+    step3_num:"03 — Emménagez", step3_title:"Visitez, négociez, signez", step3_desc:"Organisez votre visite et finalisez l'accord en toute transparence, sans commission cachée.",
+    footer_desc:"La plateforme qui connecte directement les Haïtiens aux maisons, appartements et terrains disponibles, partout au pays.",
+    footer_coverage:"Couverture", footer_contact:"Contact", footer_publish_link:"Publier une annonce",
+    footer_copyright:"© 2026 KayPam. Tous droits réservés.", footer_tagline:"Conçu pour faciliter la recherche immobilière en Haïti.",
+  },
+  en: {
+    nav_buy:"Buy", nav_rent:"Rent", nav_boost:"Boost my listings", nav_how:"How it works",
+    nav_login:"Log in", nav_publish:"Publish",
+    hero_eyebrow:"Real estate listings · Haiti",
+    hero_title:"Every neighborhood<br>has its home.<br><em>Find yours.</em>",
+    hero_sub:"KayPam brings together hundreds of houses, apartments, and land for sale or rent across Haiti — connecting you directly with the owner or agent, no middleman.",
+    stat_active:"Active listings", stat_cities:"Cities covered", stat_commission:"Hidden commission",
+    search_label:"Quick search", search_city:"City", search_city_all:"All cities",
+    search_want:"I want to", search_want_placeholder:"Buy or rent",
+    search_type:"Property type", search_type_all:"All types",
+    type_house:"House", type_apartment:"Apartment", type_land:"Land", type_commercial:"Commercial space",
+    search_budget:"Max budget (USD)", search_btn:"Search properties →",
+    listings_eyebrow:"Listings", listings_title:"Featured properties",
+    listings_sub:"Filter by transaction, then browse by department, district, commune, or neighborhood.",
+    chip_all:"All", chip_sale:"For sale", chip_rent:"For rent",
+    loc_all_zones:"All zones", loc_back:"← Back", loc_empty_note:"No detailed neighborhoods for {commune} yet — all listings in this commune are shown below.",
+    badge_sale:"For sale", badge_rent:"For rent", badge_vedette:"⭐ Featured",
+    boost_active:"⭐ Active boost until {date}",
+    boost_expired:"⏳ Boost expired on {date}",
+    spec_beds:"bed", spec_baths:"bath", spec_beds_full:"Bedrooms", spec_baths_full:"Bathrooms", spec_area_full:"m²",
+    btn_view_details:"View details",
+    empty_none_title:"No listings published yet", empty_none_sub:"The first verified listings will appear here very soon.",
+    empty_match_title:"No listings match", empty_match_sub:"Try widening your search or adjusting your filters.",
+    modal_specs_fallback:"Additional details to confirm with the owner.",
+    modal_whatsapp:"Contact via WhatsApp", modal_close:"Close",
+    whatsapp_interest_msg:"Hello, I'm interested in: {title} in {city}",
+    how_eyebrow:"The process", how_sub:"Three steps, no mandatory middleman.",
+    step1_num:"01 — Search", step1_title:"Filter by your needs", step1_desc:"City, budget, property type: find listings matching your search in a few clicks, anywhere in Haiti.",
+    step2_num:"02 — Contact", step2_title:"Talk directly to the owner", step2_desc:"Every listing connects you directly with the owner or agent, via WhatsApp or phone.",
+    step3_num:"03 — Move in", step3_title:"Visit, negotiate, sign", step3_desc:"Arrange your visit and finalize the deal with full transparency, no hidden commission.",
+    footer_desc:"The platform that directly connects Haitians to available houses, apartments, and land, all across the country.",
+    footer_coverage:"Coverage", footer_contact:"Contact", footer_publish_link:"Publish a listing",
+    footer_copyright:"© 2026 KayPam. All rights reserved.", footer_tagline:"Built to make real estate search easier in Haiti.",
+  },
+  ht: {
+    nav_buy:"Achte", nav_rent:"Lwe", nav_boost:"Booste anons mwen yo", nav_how:"Kijan sa mache",
+    nav_login:"Konekte", nav_publish:"Pibliye",
+    hero_eyebrow:"Anons imobilye · Ayiti",
+    hero_title:"Chak katye<br>gen kay pa l.<br><em>Jwenn pa w la.</em>",
+    hero_sub:"KayPam ranmase dè santèn kay, apatman ak teren ki pou vann oswa pou lwe toupatou an Ayiti — epi li mete w an kontak dirèk ak pwopriyetè a oswa ajan an, san detou.",
+    stat_active:"Anons aktif", stat_cities:"Vil kouvri", stat_commission:"Komisyon kache",
+    search_label:"Rechèch rapid", search_city:"Vil", search_city_all:"Tout vil yo",
+    search_want:"Mwen vle", search_want_placeholder:"Achte oswa lwe",
+    search_type:"Kalite byen", search_type_all:"Tout kalite yo",
+    type_house:"Kay", type_apartment:"Apatman", type_land:"Teren", type_commercial:"Lokal komèsyal",
+    search_budget:"Bidjè maksimòm (USD)", search_btn:"Chèche byen →",
+    listings_eyebrow:"Anons", listings_title:"Byen an vedèt",
+    listings_sub:"Filtre pa tranzaksyon, epi eksplore pa depatman, awondisman, komin oswa katye.",
+    chip_all:"Tout", chip_sale:"Pou vann", chip_rent:"Pou lwe",
+    loc_all_zones:"Tout zòn yo", loc_back:"← Retounen", loc_empty_note:"Pa gen katye detaye pou {commune} kounye a — tout anons komin nan afiche anba a.",
+    badge_sale:"Pou vann", badge_rent:"Pou lwe", badge_vedette:"⭐ Vedèt",
+    boost_active:"⭐ Boost aktif jiskaske {date}",
+    boost_expired:"⏳ Boost ekspire le {date}",
+    spec_beds:"ch.", spec_baths:"sdb", spec_beds_full:"Chanm", spec_baths_full:"Twalèt", spec_area_full:"m²",
+    btn_view_details:"Wè detay yo",
+    empty_none_title:"Pa gen anons pibliye kounye a", empty_none_sub:"Premye anons verifye yo ap parèt isit la byento.",
+    empty_match_title:"Pa gen anons ki matche", empty_match_sub:"Eseye elaji rechèch ou oswa chanje filtè yo.",
+    modal_specs_fallback:"Lòt detay pou konfime dirèkteman ak pwopriyetè a.",
+    modal_whatsapp:"Kontakte sou WhatsApp", modal_close:"Fèmen",
+    whatsapp_interest_msg:"Bonjou, mwen enterese nan : {title} nan {city}",
+    how_eyebrow:"Pwosesis la", how_sub:"Twa etap, pa gen entèmedyè obligatwa.",
+    step1_num:"01 — Chèche", step1_title:"Filtre selon bezwen ou", step1_desc:"Vil, bidjè, kalite byen : jwenn nan kèk klik anons ki matche ak rechèch ou, toupatou an Ayiti.",
+    step2_num:"02 — Kontakte", step2_title:"Pale dirèkteman ak pwopriyetè a", step2_desc:"Chak anons mete w an relasyon dirèk ak pwopriyetè a oswa ajan an, pa WhatsApp oswa telefòn.",
+    step3_num:"03 — Enstale w", step3_title:"Vizite, negosye, siyen", step3_desc:"Òganize vizit ou epi finalize akò a an tout transparans, san komisyon kache.",
+    footer_desc:"Platfòm ki konekte Ayisyen yo dirèkteman ak kay, apatman ak teren ki disponib, toupatou nan peyi a.",
+    footer_coverage:"Kouvèti", footer_contact:"Kontak", footer_publish_link:"Pibliye yon anons",
+    footer_copyright:"© 2026 KayPam. Tout dwa rezève.", footer_tagline:"Fèt pou fasilite rechèch imobilye an Ayiti.",
+  }
+};
 
+let currentLang = localStorage.getItem('kaypam_lang') || 'fr';
+
+function t(key){
+  return (translations[currentLang] && translations[currentLang][key]) || translations.fr[key] || key;
+}
+
+function applyStaticTranslations(){
+  document.documentElement.lang = currentLang;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.getAttribute('data-i18n'));
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    el.innerHTML = t(el.getAttribute('data-i18n-html'));
+  });
+}
+
+const LANG_LABELS = {
+  fr: { code:"FR", name:"Français" },
+  en: { code:"EN", name:"English" },
+  ht: { code:"HT", name:"Kreyòl" }
+};
+
+function renderLangMenu(){
+  document.getElementById('lang-current-label').textContent = LANG_LABELS[currentLang].code;
+  const menu = document.getElementById('lang-dropdown-menu');
+  menu.innerHTML = Object.keys(LANG_LABELS).map(code => `
+    <button class="lang-option ${code === currentLang ? 'active' : ''}" onclick="setLang('${code}')">
+      <span class="lang-code">${LANG_LABELS[code].code}</span><span>${LANG_LABELS[code].name}</span>
+    </button>`).join('');
+}
+
+function toggleLangMenu(){
+  document.getElementById('lang-dropdown').classList.toggle('open');
+}
+
+document.addEventListener('click', (e) => {
+  const dropdown = document.getElementById('lang-dropdown');
+  if(dropdown && !dropdown.contains(e.target)){
+    dropdown.classList.remove('open');
+  }
+});
+
+function setLang(lang){
+  currentLang = lang;
+  localStorage.setItem('kaypam_lang', lang);
+  applyStaticTranslations();
+  renderLangMenu();
+  document.getElementById('lang-dropdown').classList.remove('open');
+  renderChips();
+  renderLocationNav();
+  renderListings();
+  renderBoosted();
+}
+
+/* ===== DONNÉES GÉOGRAPHIQUES ===== */
 const geoData = {
   "Artibonite": {
     "Dessalines": ["Dessalines","Desdunes","Grande-Saline","Petite-Rivière-de-l'Artibonite"],
@@ -634,13 +821,13 @@ const geoData = {
     "Mirebalais": ["Mirebalais","Boucan-Carré","Saut-d'Eau"]
   },
   "Grand'Anse": {
-    "Anse-d'Ainault": ["Anse-d'Ainault","Dame-Marie","Les Irois"],
+    "Anse-d'Hainault": ["Anse-d'Hainault","Dame-Marie","Les Irois"],
     "Corail": ["Corail","Beaumont","Pestel","Roseaux"],
     "Jérémie": ["Jérémie","Abricots","Bonbon","Chambellan","Marfranc","Moron"]
   },
   "Nippes": {
     "Anse-à-Veau": ["Anse-à-Veau","Arnaud","L'Asile","Petit-Trou-de-Nippes","Plaisance-du-Sud"],
-    "Barradères": ["Barradères","Grand-Boucan"],
+    "Baradères": ["Baradères","Grand-Boucan"],
     "Miragoâne": ["Miragoâne","Fonds-des-Nègres","Paillant","Petite-Rivière-de-Nippes"]
   },
   "Nord": {
@@ -684,10 +871,26 @@ const geoData = {
   }
 };
 
+/* ===== QUARTIERS (ZONES) ===== */
 const quartiersData = {
   "Pétion-Ville": ["Jalousie","Pétion-Ville","Laboule","Thomassin","Meyotte","Belvil","Vivy Michel","Diègue","Duplan","Girardo","Doco","Cargo","Fermathe","Puits-Blain","Frères","Peggyvil","Morne Hercule","Nerrette","Morne Calvaire","Juvénat","Berthé","Bois Monquette","Pelerin 1","Pelerin 2","Pelerin 3","Pelerin 4","Pelerin 5"],
   "Delmas": ["Delmas","Jacket","Siloé","Gérald Bataille","Mais Gâté","Clercine","Saint-Martin","Aéroport","Catalpa"],
-  "Port-au-Prince": ["Pacot","Turgeau","Christ-Roi","Bois-Verna","Lalue","Canapé-Vert"]
+  "Port-au-Prince": ["Pacot","Turgeau","Christ-Roi","Bois-Verna","Lalue","Canapé-Vert","Debussy","Martissant","Carrefour-Feuilles","Fontamara","Bolosse","Fort-National","Solino","Bel-Air","La Saline"],
+  "Carrefour": ["Thor","Mon repos","Carrefour","Diquini","Waney","Cote Plage","Mahotière","Bizoton","Arcachon","Brochette","Mariani","Fontamara","Rivière Froide","Lamentin"],
+  "Léogâne": ["Grand-Rue","Dampus","Léogâne","Dufort","Trouin","Ca-Ira","Petite-Rivière","Gressier","Cormier","Chatuley","Orangers","Dessources"],
+  "Cap-Haïtien": ["Carénage","Bande du Nord","Vertières","Lory","Madeline","Petite-Anse","Haut-du-Cap","Fort Saint-Michel","Champion"],
+  "Les Cayes": ["La Savane","Gelée","Bourdet","Gabarre","Liautaud","Charpentier","Vernat","Derrière-Fort","Fonfrède"],
+  "Jacmel": ["Bel-Air","Bréman","Couchant","L'Acul","Raymond-les-Bains","Meyer","Maniègue","Mapou"],
+  "Saint-Marc": ["Portail Guêpe","Pivert","Nissage Saget","Nan Poés","Freycineau","Deperos","Bois-Marchand","Gobinet","Robinet"],
+  "Gonaïves": ["Raboteau","Descahos","Jubilée","K-Soleil","Bigot","Bienac","Assifa","Pont-Gaudin","Mangnan","Passe-Reine"],
+  "Hinche": ["Marmont","Cherival","Juanaria","Mapou","La Hoye","Siloe","Pandiassou","Los Palis"],
+  "Lascahobas": ["Petit-Fond","Juampas","Do-Rival","Lalomas","Savanette","Bois-Bleu"],
+  "Belladère": ["Renthe-Mathe","Croix-Fer","Roy-Sec","Los Pozo","Rospandre"],
+  "Fort-Liberté": ["Bayaha","Derac","Drière","Marion","Dumas"],
+  "Ouanaminthe": ["Dajabon","Gens-de-Nantes","Haut-Maribahoux","Acul-des-Pins","Carisse","Gayot","Capotille"],
+  "Jérémie": ["Bordes","Sainte-Hélène","Caracolie","Rochasse","Nan Lundi","Makandal","La Pointe","Desormeaux"],
+  "Miragoâne": ["Port-Sainte-Hélène","Chalon","Saint-Michel-du-Sud","Berquin","Chardonnères","Belle-Rivière","Carrefour Moussignac"],
+  "Port-de-Paix": ["La Corne","Haut-de-Saint-Louis","Carenage","Nan Paul","Fond-de-Poussière","Baudin","Trois-Rivières","Chansolme"]
 };
 
 const palette = [
@@ -711,8 +914,9 @@ function houseSVG(i, size){
   </svg>`;
 }
 
-let state = { transaction:"", city:"", quartier:"" };
+let state = { transaction:"", city:"", quartier:"", type:"", budget:"" };
 let locState = { departement:null, arrondissement:null, commune:null, quartier:null };
+let listings = [];
 
 function fmtPrice(l){
   if(l.isReal){
@@ -725,17 +929,38 @@ function fmtPrice(l){
 }
 
 function locationLabel(l){
-  return (l.neighborhood && l.neighborhood !== l.city) ? `${l.neighborhood}, ${l.city}` : l.city;
+  // Afiche zòn, komin, vil nan lòd presizyon
+  if (l.neighborhood && l.neighborhood !== l.city) {
+    return `${l.neighborhood}, ${l.city}`;
+  }
+  return l.city;
 }
 
+/* ===== FONKSYON MAP REAL LISTING AVEC VERIFIKASYON BOOST ===== */
 function mapRealListing(raw){
   const media = raw.listing_media || [];
   const photos = media.filter(m => m.media_type === 'photo').map(m => m.url);
+  
+  // Verifikasyon boost aktif
+  const boosts = raw.boosts || [];
+  const now = new Date();
+  
+  // Chèche boost ki gen status 'actif' ak dat fini > dat jodi a
+  const activeBoost = boosts.find(b => 
+    b.status === 'actif' && new Date(b.ends_at) > now
+  );
+  
+  // Chèche boost ki fini (status 'actif' men ends_at < now, oswa status 'expire')
+  const expiredBoost = boosts.find(b => 
+    (b.status === 'actif' && new Date(b.ends_at) <= now) || b.status === 'expire'
+  );
+  
   return {
     id: raw.id,
     title: raw.title || `${raw.type} à ${raw.transaction === 'Vente' ? 'vendre' : 'louer'}`,
-    city: raw.city,
-    neighborhood: raw.city,
+    // KORIGE: Itilize commune kòm city, zone kòm neighborhood
+    city: raw.commune || raw.city,
+    neighborhood: raw.zone || raw.neighborhood || raw.commune || raw.city,
     type: raw.type,
     transaction: raw.transaction,
     price: raw.price,
@@ -745,9 +970,14 @@ function mapRealListing(raw){
     baths: null,
     area: null,
     desc: raw.description || '',
-    phone: raw.owners ? raw.owners.phone : '',
+    phone: raw.owners ? (raw.owners.whatsapp || raw.owners.phone) : '',
     photoUrl: photos[0] || null,
-    isReal: true
+    isReal: true,
+    // Estati boost la
+    hasActiveBoost: !!activeBoost,
+    hasExpiredBoost: !!expiredBoost,
+    boostEndsAt: activeBoost ? activeBoost.ends_at : (expiredBoost ? expiredBoost.ends_at : null),
+    boostStatus: activeBoost ? 'actif' : (expiredBoost ? 'expire' : 'aucun')
   };
 }
 
@@ -756,8 +986,14 @@ async function loadRealListings(){
   try{
     const { data, error } = await supabaseClient
       .from('listings')
-      .select('id,title,city,transaction,type,price,currency,period,description,owners(name,phone),listing_media(media_type,url)')
+      .select(`
+        id,title,city,commune,zone,neighborhood,transaction,type,price,currency,period,description,status,available,
+        owners(name,phone,whatsapp),
+        listing_media(media_type,url),
+        boosts(status,ends_at)
+      `)
       .eq('status', 'valide')
+      .eq('available', true)
       .order('created_at', { ascending:false });
     if(error) throw error;
     return (data || []).map(mapRealListing);
@@ -767,9 +1003,48 @@ async function loadRealListings(){
   }
 }
 
+async function loadBoostedListings(){
+  if(!supabaseClient) return [];
+  try{
+    const { data, error } = await supabaseClient
+      .from('listings')
+      .select(`
+        id,title,city,commune,zone,neighborhood,transaction,type,price,currency,period,description,status,available,
+        owners(name,phone,whatsapp),
+        listing_media(media_type,url),
+        boosts(status,ends_at)
+      `)
+      .eq('status', 'valide')
+      .eq('available', true)
+      .order('created_at', { ascending:false });
+    if(error) throw error;
+    
+    // Sèlman anons ki gen boost AKTIF (pokko fini)
+    const boosted = (data || []).filter(item => {
+      const boosts = item.boosts || [];
+      return boosts.some(b => 
+        b.status === 'actif' && new Date(b.ends_at) > new Date()
+      );
+    });
+    
+    return boosted.map(mapRealListing);
+  }catch(err){
+    console.error('Erreur de chargement des annonces boostées', err);
+    return [];
+  }
+}
+
 function populateCitySelect(){
-  const cities = [...new Set(listings.map(l => l.city))].sort();
+  const allCommunes = new Set();
+  Object.values(geoData).forEach(dept => {
+    Object.values(dept).forEach(communes => {
+      communes.forEach(c => allCommunes.add(c));
+    });
+  });
+  const cities = [...allCommunes].sort();
   const sel = document.getElementById('f-city');
+  // Vide select la anvan pou evite doub
+  sel.innerHTML = '<option value="" data-i18n="search_city_all">Toutes les villes</option>';
   cities.forEach(c => {
     const opt = document.createElement('option');
     opt.value = c; opt.textContent = c;
@@ -779,26 +1054,25 @@ function populateCitySelect(){
 
 function renderChips(){
   const row = document.getElementById('chip-row');
-  let html = `<button class="chip ${state.transaction==='' ? 'active':''}" onclick="setTransactionFilter('')">Toutes</button>`;
-  html += `<button class="chip ${state.transaction==='Vente' ? 'active':''}" onclick="setTransactionFilter('Vente')">À vendre</button>`;
-  html += `<button class="chip ${state.transaction==='Location' ? 'active':''}" onclick="setTransactionFilter('Location')">À louer</button>`;
+  let html = `<button class="chip ${state.transaction==='' ? 'active':''}" onclick="setTransactionFilter('')">${t('chip_all')}</button>`;
+  html += `<button class="chip ${state.transaction==='Vente' ? 'active':''}" onclick="setTransactionFilter('Vente')">${t('chip_sale')}</button>`;
+  html += `<button class="chip ${state.transaction==='Location' ? 'active':''}" onclick="setTransactionFilter('Location')">${t('chip_rent')}</button>`;
   row.innerHTML = html;
 }
 
-function setTransactionFilter(t){
-  state.transaction = (state.transaction === t) ? "" : t;
+function setTransactionFilter(txn){
+  state.transaction = (state.transaction === txn) ? "" : txn;
   document.getElementById('f-transaction').value = state.transaction;
   renderChips();
   renderListings();
 }
 
-/* ---------- Navigation géographique : Département > Arrondissement > Commune > Quartier ---------- */
-
+/* ===== Navigation géographique ===== */
 function renderLocationNav(){
   const crumb = document.getElementById('loc-breadcrumb');
   const row = document.getElementById('loc-chip-row');
 
-  let crumbHtml = `<button class="loc-crumb ${!locState.departement ? 'active':''}" onclick="resetLocation()">Toutes les zones</button>`;
+  let crumbHtml = `<button class="loc-crumb ${!locState.departement ? 'active':''}" onclick="resetLocation()">${t('loc_all_zones')}</button>`;
   if(locState.departement){
     crumbHtml += `<span class="loc-sep">›</span><button class="loc-crumb ${!locState.arrondissement ? 'active':''}" onclick="backToDepartement()">${locState.departement}</button>`;
   }
@@ -827,12 +1101,12 @@ function renderLocationNav(){
     if(quartiers && quartiers.length){
       chips = quartiers.map((q,i) => `<button class="chip" onclick="selectQuartier(${i})">${q}</button>`).join('');
     } else {
-      chips = `<span class="loc-empty-note">Aucun quartier détaillé pour ${locState.commune} pour le moment — toutes les annonces de la commune sont affichées ci-dessous.</span>`;
+      chips = `<span class="loc-empty-note">${t('loc_empty_note').replace('{commune}', locState.commune)}</span>`;
     }
   }
 
   const backBtn = locState.departement
-    ? `<button class="chip chip-back" onclick="goBackOneLevel()">← Retour</button>`
+    ? `<button class="chip chip-back" onclick="goBackOneLevel()">${t('loc_back')}</button>`
     : '';
   row.innerHTML = backBtn + chips;
 }
@@ -863,7 +1137,9 @@ function selectCommune(i){
   state.city = commune;
   state.quartier = "";
   const citySelect = document.getElementById('f-city');
-  citySelect.value = [...citySelect.options].some(o => o.value === commune) ? commune : "";
+  if(citySelect) {
+    citySelect.value = [...citySelect.options].some(o => o.value === commune) ? commune : "";
+  }
   renderLocationNav();
   renderListings();
 }
@@ -892,7 +1168,8 @@ function backToCommune(){
 function resetLocation(){
   locState = { departement:null, arrondissement:null, commune:null, quartier:null };
   state.city = ""; state.quartier = "";
-  document.getElementById('f-city').value = "";
+  const citySelect = document.getElementById('f-city');
+  if(citySelect) citySelect.value = "";
   renderLocationNav(); renderListings();
 }
 
@@ -925,20 +1202,45 @@ function syncLocStateToCity(commune){
   locState = { departement:null, arrondissement:null, commune:null, quartier:null };
 }
 
+/* ===== FONKSYON POU KONSTRUI KAT LA AK ENDIKATEUR ===== */
 function buildCardHtml(l, i, isBoosted){
   const specs = [];
-  if(l.beds !== null && l.beds !== undefined) specs.push(`${l.beds} ch.`);
-  if(l.baths !== null && l.baths !== undefined) specs.push(`${l.baths} sdb`);
+  if(l.beds !== null && l.beds !== undefined) specs.push(`${l.beds} ${t('spec_beds')}`);
+  if(l.baths !== null && l.baths !== undefined) specs.push(`${l.baths} ${t('spec_baths')}`);
   if(l.area !== null && l.area !== undefined) specs.push(`${l.area} m²`);
+  
   const p = palette[i % palette.length];
   const artInner = (l.isReal && l.photoUrl)
-    ? `<img src="${l.photoUrl}" alt="${l.title}" style="width:100%;height:100%;object-fit:cover;">`
+    ? `<img src="${l.photoUrl}" alt="${l.title}">`
     : houseSVG(i, 88);
-  const boostBadge = isBoosted ? `<span class="card-badge badge-boost">⭐ Vedette</span>` : '';
+  
+  // Badge boost la (parèt anwo a dwat)
+  let boostBadge = '';
+  if (l.hasActiveBoost) {
+    boostBadge = `<span class="card-badge badge-boost">${t('badge_vedette')}</span>`;
+  }
+  
+  // Endikatè estati boost la (anba a)
+  let boostIndicator = '';
+  if (l.hasActiveBoost && l.boostEndsAt) {
+    const endDate = new Date(l.boostEndsAt).toLocaleDateString(
+      currentLang === 'en' ? 'en-US' : currentLang === 'ht' ? 'ht' : 'fr-FR'
+    );
+    boostIndicator = `<span class="boost-indicator active">${t('boost_active').replace('{date}', endDate)}</span>`;
+  } else if (l.hasExpiredBoost && l.boostEndsAt) {
+    const endDate = new Date(l.boostEndsAt).toLocaleDateString(
+      currentLang === 'en' ? 'en-US' : currentLang === 'ht' ? 'ht' : 'fr-FR'
+    );
+    boostIndicator = `<span class="boost-indicator expired">${t('boost_expired').replace('{date}', endDate)}</span>`;
+  }
+  
+  // Badge tranzaksyon an (anwo a goch)
+  const transactionBadge = `<span class="card-badge ${l.transaction==='Vente'?'badge-vente':'badge-location'}">${l.transaction === 'Vente' ? t('badge_sale') : t('badge_rent')}</span>`;
+  
   return `
     <div class="card">
       <div class="card-art" style="background:${p.facade}1A;">
-        <span class="card-badge ${l.transaction==='Vente'?'badge-vente':'badge-location'}">${l.transaction === 'Vente' ? 'À vendre' : 'À louer'}</span>
+        ${transactionBadge}
         ${boostBadge}
         ${artInner}
       </div>
@@ -947,7 +1249,8 @@ function buildCardHtml(l, i, isBoosted){
         <div class="card-title">${l.title}</div>
         <div class="card-specs">${specs.join(' · ')}</div>
         <div class="card-price">${fmtPrice(l)}</div>
-        <button class="card-cta" onclick="openModal('${l.id}')">Voir les détails</button>
+        ${boostIndicator}
+        <button class="card-cta" onclick="openModal('${l.id}')">${t('btn_view_details')}</button>
       </div>
     </div>`;
 }
@@ -964,41 +1267,23 @@ function renderListings(){
   });
 
   document.getElementById('stat-count').textContent = listings.length;
-  renderBoosted();
 
   if(filtered.length === 0){
     grid.innerHTML = listings.length === 0
-      ? `<div class="empty-state"><strong>Aucune annonce publiée pour le moment</strong>Les premières annonces vérifiées apparaîtront ici très bientôt.</div>`
-      : `<div class="empty-state"><strong>Aucune annonce ne correspond</strong>Essayez d'élargir votre recherche ou de modifier vos filtres.</div>`;
+      ? `<div class="empty-state"><span class="icon-big">🏠</span><strong>${t('empty_none_title')}</strong>${t('empty_none_sub')}</div>`
+      : `<div class="empty-state"><span class="icon-big">🔍</span><strong>${t('empty_match_title')}</strong>${t('empty_match_sub')}</div>`;
     return;
   }
 
   grid.innerHTML = filtered.map((l) => buildCardHtml(l, listings.indexOf(l), false)).join('');
 }
 
-/* ---------- Annonces boostées : chargement + roulement toutes les 45s ---------- */
-
+/* ===== Annonces boostées ===== */
 let boostedPool = [];
 let boostIndex = 0;
 let boostTimer = null;
 const BOOST_BATCH_SIZE = 10;
 const BOOST_ROTATION_MS = 45000;
-
-async function loadBoostedListings(){
-  if(!supabaseClient) return [];
-  try{
-    const { data, error } = await supabaseClient
-      .from('listings')
-      .select('id,title,city,transaction,type,price,currency,period,description,owners(name,phone),listing_media(media_type,url),boosts!inner(status,ends_at)')
-      .eq('status', 'valide')
-      .order('created_at', { ascending:false });
-    if(error) throw error;
-    return (data || []).map(mapRealListing);
-  }catch(err){
-    console.error('Erreur de chargement des annonces boostées', err);
-    return [];
-  }
-}
 
 function circularSlice(arr, start, count){
   if(arr.length === 0) return [];
@@ -1017,44 +1302,51 @@ function hasActiveFilter(){
 function renderBoosted(){
   const section = document.getElementById('boosted-section');
   const grid = document.getElementById('boosted-grid');
-  if(boostedPool.length === 0 || hasActiveFilter()){
-    section.style.display = 'none';
+  
+  // Sèlman anons ki gen boost AKTIF (pokko fini)
+  const activeBoosted = boostedPool.filter(l => l.hasActiveBoost === true);
+  
+  if(activeBoosted.length === 0 || hasActiveFilter()){
+    section.classList.remove('show');
     return;
   }
-  section.style.display = '';
-  const batch = circularSlice(boostedPool, boostIndex, BOOST_BATCH_SIZE);
+  section.classList.add('show');
+  const batch = circularSlice(activeBoosted, boostIndex, BOOST_BATCH_SIZE);
   grid.innerHTML = batch.map((l, k) => buildCardHtml(l, k, true)).join('');
 }
 
 function startBoostRotation(){
   if(boostTimer) clearInterval(boostTimer);
-  if(boostedPool.length <= BOOST_BATCH_SIZE) return;
+  const activeBoosted = boostedPool.filter(l => l.hasActiveBoost === true);
+  if(activeBoosted.length <= BOOST_BATCH_SIZE) return;
   boostTimer = setInterval(() => {
-    boostIndex = (boostIndex + BOOST_BATCH_SIZE) % boostedPool.length;
+    boostIndex = (boostIndex + BOOST_BATCH_SIZE) % activeBoosted.length;
     renderBoosted();
   }, BOOST_ROTATION_MS);
 }
 
 function openModal(id){
   const l = listings.find(x => String(x.id) === String(id));
+  if(!l) return;
   const i = listings.indexOf(l);
   const p = palette[i % palette.length];
   document.getElementById('modal-art').style.background = p.facade + '1A';
   const modalArtInner = (l.isReal && l.photoUrl)
-    ? `<img src="${l.photoUrl}" alt="${l.title}" style="width:100%;height:100%;object-fit:cover;">`
+    ? `<img src="${l.photoUrl}" alt="${l.title}">`
     : houseSVG(i, 110);
-  document.getElementById('modal-art').innerHTML = `<button class="modal-close" onclick="closeModal()" aria-label="Fermer">✕</button>` + modalArtInner;
+  document.getElementById('modal-art').innerHTML = `<button class="modal-close" onclick="closeModal()" aria-label="${t('modal_close')}">✕</button>` + modalArtInner;
   document.getElementById('modal-city').textContent = locationLabel(l);
   document.getElementById('modal-title').textContent = l.title;
   document.getElementById('modal-price').textContent = fmtPrice(l);
   const specs = [];
-  if(l.beds !== null && l.beds !== undefined) specs.push(`<div><b>${l.beds}</b>Chambres</div>`);
-  if(l.baths !== null && l.baths !== undefined) specs.push(`<div><b>${l.baths}</b>Salles de bain</div>`);
-  if(l.area !== null && l.area !== undefined) specs.push(`<div><b>${l.area}</b>m²</div>`);
-  document.getElementById('modal-specs').innerHTML = specs.join('') || '<div style="color:var(--ink-soft);">Détails supplémentaires à confirmer avec le propriétaire.</div>';
+  if(l.beds !== null && l.beds !== undefined) specs.push(`<div><b>${l.beds}</b>${t('spec_beds_full')}</div>`);
+  if(l.baths !== null && l.baths !== undefined) specs.push(`<div><b>${l.baths}</b>${t('spec_baths_full')}</div>`);
+  if(l.area !== null && l.area !== undefined) specs.push(`<div><b>${l.area}</b>${t('spec_area_full')}</div>`);
+  document.getElementById('modal-specs').innerHTML = specs.join('') || `<div style="color:var(--ink-soft);">${t('modal_specs_fallback')}</div>`;
   document.getElementById('modal-desc').textContent = l.desc;
   const phoneDigits = l.phone ? l.phone.replace(/\D/g,'') : '50900000000';
-  document.getElementById('modal-whatsapp').href = `https://wa.me/${phoneDigits}?text=${encodeURIComponent('Bonjour, je suis intéressé(e) par : ' + l.title + ' à ' + l.city)}`;
+  const waMsg = t('whatsapp_interest_msg').replace('{title}', l.title).replace('{city}', l.city);
+  document.getElementById('modal-whatsapp').href = `https://wa.me/${phoneDigits}?text=${encodeURIComponent(waMsg)}`;
   document.getElementById('modal-overlay').classList.add('open');
 }
 function closeModal(){
@@ -1068,21 +1360,55 @@ document.addEventListener('keydown', (e) => {
 });
 
 async function init(){
+  applyStaticTranslations();
+  renderLangMenu();
+  
+  // Chaje tout anons
   const real = await loadRealListings();
   real.forEach(r => listings.push(r));
+  
+  // Chaje anons booste
+  boostedPool = await loadBoostedListings();
+  boostIndex = 0;
+  
   populateCitySelect();
   renderChips();
   renderLocationNav();
   renderListings();
-
-  boostedPool = await loadBoostedListings();
-  boostIndex = 0;
   renderBoosted();
   startBoostRotation();
 }
 init();
+
+/* ===== TRACKING DES VISITES ===== */
+async function trackVisit(){
+  // Jwenn id vizitè (nan localStorage oswa nouvo)
+  let visitorId = localStorage.getItem('kaypam_visitor_id');
+  if(!visitorId){
+    visitorId = 'visitor_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+    localStorage.setItem('kaypam_visitor_id', visitorId);
+  }
+  
+  // Jwenn paj aktyèl la
+  const page = window.location.pathname.split('/').pop() || 'kaypam.html';
+  
+  try{
+    await supabaseClient
+      .from('visits')
+      .insert({
+        visitor_id: visitorId,
+        page: page,
+        referrer: document.referrer || null,
+        user_agent: navigator.userAgent
+      });
+  }catch(err){
+    console.error('Erreur tracking:', err);
+  }
+}
+
+// Chaje tracking lè paj la fin chaje
+document.addEventListener('DOMContentLoaded', trackVisit);
 </script>
 
-<script>(function(){var lang=localStorage.getItem('kaypam_lang')||'fr';var maps={fr:{},en:{'Publier gratuitement':'List for free','Se connecter':'Log in','Créer un compte':'Create an account','Nom d utilisateur':'Username','Mot de passe':'Password','Confirmer le mot de passe':'Confirm password','Booster mes annonces':'Boost my listings','Comment ça marche':'How it works','Publier une annonce':'Publish a listing','Mes annonces':'My listings','Contact':'Contact','Publier':'Publish','Rechercher':'Search','Envoyer':'Submit','Enregistrer':'Save','Annuler':'Cancel','Tous':'All','Toutes les villes':'All cities','Recherche rapide':'Quick search','Ville':'City','Type de bien':'Property type','Budget max (USD)':'Max budget (USD)','Rechercher des biens →':'Search properties →','Biens en vedette':'Featured properties','Annonces':'Listings','Vedette':'Featured','Toutes les zones':'All zones','Retour':'Back','Fermer':'Close','Annonces immobilières · Haïti':'Real estate listings · Haiti','KayPam':'KayPam','Propriétaires et agents':'Owners and agents','Publiez votre annonce gratuitement':'Publish your listing for free','Créez votre compte propriétaire pour publier, gérer et booster vos annonces. Notre équipe vérifie chaque annonce — photos et vidéos incluses — avant sa mise en ligne.':'Create your owner account to publish, manage, and boost your listings. Our team verifies every listing — photos and videos included — before it goes live.','Publication gratuite, sans frais cachés':'Free listing, no hidden fees','Un seul compte pour toutes vos annonces':'One account for all your listings','Photos et vidéos vérifiées avant publication':'Photos and videos verified before publication','Retirez ou boostez vos annonces à tout moment':'Remove or boost your listings anytime','Propriétaires inscrits':'Registered owners','Annonces soumises':'Listings submitted','Retour au site':'Back to site','Vérification des annonces':'Listing verification','Chaque annonce reste invisible du public jusqu à validation. Suivez les 3 vérifications ci-dessous avant de cliquer sur « Valider ».':'Each listing stays invisible to the public until approved. Follow the 3 checks below before clicking “Validate”.','Guide de vérification':'Verification guide','Appel de courtoisie :':'Courtesy call:','Cohérence du prix :':'Price consistency:','Qualité des photos et vidéos :':'Photo and video quality:','En attente':'Pending','Validées':'Validated','Refusées':'Rejected','Propriétaires':'Owners','Demandes de boost':'Boost requests','Paiements en attente':'Pending payments','Boosts actifs':'Active boosts','Chargement des annonces…':'Loading listings…','Chargement des demandes de boost…':'Loading boost requests…','Déconnexion':'Logout','Espace réservé à l équipe de vérification':'Reserved for the verification team','Espace Admin KayPam':'KayPam Admin Area','Connectez-vous avec votre compte administrateur pour gérer les annonces.':'Log in with your admin account to manage listings.','Se connecter':'Log in','Se déconnecter':'Log out'},ht:{'Publier gratuitement':'Pibliye gratis','Se connecter':'Konekte','Créer un compte':'Kree yon kont','Nom d utilisateur':'Non itilizatè','Mot de passe':'Mo de pase','Confirmer le mot de passe':'Konfirme mo de pase','Booster mes annonces':'Booste anons mwen yo','Comment ça marche':'Kijan sa mache','Publier une annonce':'Pibliye yon anons','Mes annonces':'Anons mwen yo','Contact':'Kontak','Publier':'Pibliye','Rechercher':'Chèche','Envoyer':'Voye','Enregistrer':'Anrejistre','Annuler':'Anile','Tous':'Tout','Toutes les villes':'Tout vil yo','Recherche rapide':'Rechèch rapid','Ville':'Vil','Type de bien':'Kalite byen','Budget max (USD)':'Bidjè maksimòm (USD)','Rechercher des biens →':'Chèche byen →','Biens en vedette':'Byen an vedèt','Annonces':'Anons','Vedette':'Vedèt','Toutes les zones':'Tout zòn yo','Retour':'Retounen','Fermer':'Fèmen','Annonces immobilières · Haïti':'Anons imobilye · Ayiti','KayPam':'KayPam','Propriétaires et agents':'Pwopriyetè ak ajan','Publiez votre annonce gratuitement':'Pibliye anons ou gratis','Créez votre compte propriétaire pour publier, gérer et booster vos annonces. Notre équipe vérifie chaque annonce — photos et vidéos incluses — avant sa mise en ligne.':'Kree kont pwopriyetè ou pou pibliye, jere, ak booste anons ou yo. Ekip nou an tcheke chak anons — foto ak videyo ki enkli — anvan yo mete li sou entènèt.','Publication gratuite, sans frais cachés':'Piblikasyon gratis, san fra san kache','Un seul compte pour toutes vos annonces':'Yon sèl kont pou tout anons ou yo','Photos et vidéos vérifiées avant publication':'Foto ak videyo tcheke anvan piblikasyon','Retirez ou boostez vos annonces à tout moment':'Retire oswa booste anons ou yo nenpòt moman','Propriétaires inscrits':'Pwopriyetè ki enskri','Annonces soumises':'Anons soumèt','Retour au site':'Retounen sou sit la','Vérification des annonces':'Vérifikasyon anons yo','Chaque annonce reste invisible du public jusqu à validation. Suivez les 3 vérifications ci-dessous avant de cliquer sur « Valider ».':'Chak anons rete envizib pou piblik la jiskaske yo apwouve l. Swiv 3 verifikasyon yo anba a anvan ou klike sou “Valide”.','Guide de vérification':'Gid verifikasyon','Appel de courtoisie :':'Apele koutwazi:','Cohérence du prix :':'Konsistans pri:','Qualité des photos et vidéos :':'Kwalite foto ak videyo:','En attente':'Ann atann','Validées':'Valide','Refusées':'Refize','Propriétaires':'Pwopriyetè','Demandes de boost':'Demand boost','Paiements en attente':'Peman an atann','Boosts actifs':'Boost aktif','Chargement des annonces…':'Chajman anons yo…','Chargement des demandes de boost…':'Chajman demann boost yo…','Déconnexion':'Dekonekte','Espace réservé à l équipe de vérification':'Espas rezève pou ekip verifikasyon an','Espace Admin KayPam':'Espas Admin KayPam','Connectez-vous avec votre compte administrateur pour gérer les annonces.':'Konekte avèk kont administratè ou pou jere anons yo.','Se déconnecter':'Dekonekte'}};var map=maps[lang]||maps.fr;var applyToText=function(value){if(!value){return value;}var result=value;Object.keys(map).forEach(function(from){result=result.split(from).join(map[from]);});return result;};var updateElement=function(el){if(!el){return;}var aria=el.getAttribute('aria-label');if(aria){el.setAttribute('aria-label',applyToText(aria));}var title=el.getAttribute('title');if(title){el.setAttribute('title',applyToText(title));}if(el.placeholder){el.placeholder=applyToText(el.placeholder);}if(el.tagName==='INPUT'||el.tagName==='TEXTAREA'||el.tagName==='SELECT'){var value=el.value;if(value){el.value=applyToText(value);}}var text=el.textContent;if(text&&text.trim()){var newText=applyToText(text);if(newText!==text){el.textContent=newText;}}};document.documentElement.lang=lang;document.querySelectorAll('a, button, label, p, span, h1, h2, h3, h4, li, option, legend, input, textarea, select').forEach(updateElement);})();</script>
 </body>
 </html>

@@ -33,7 +33,15 @@
   .eyebrow::before{content:'';width:18px;height:2px;background:var(--coral);display:inline-block;}
   :focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
 
-  header{background:var(--navy);padding:18px 0;}
+  header{
+    background:var(--navy);
+    -webkit-backdrop-filter:blur(8px);
+    backdrop-filter:blur(8px);
+    padding:18px 0;
+    position:sticky;
+    top:0;
+    z-index:40;
+  }
   .header-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
   .logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
   .logo-mark{width:32px;height:32px;flex-shrink:0;}
@@ -64,7 +72,6 @@
   }
   .stats-bar .stat span{font-size:11.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em;}
 
-  /* ---------- Porte de connexion / inscription ---------- */
   .auth-card{
     background:var(--card-bg);border:1px solid var(--border);border-radius:20px;
     padding:36px;margin:28px 0 60px;max-width:520px;
@@ -125,6 +132,13 @@
   .pform textarea{resize:vertical;min-height:90px;}
   .field-hint{font-size:12px;color:var(--ink-soft);margin-top:5px;}
 
+  .zone-custom-input{display:block;margin-top:6px;}
+  .zone-custom-input input{
+    width:100%;border:1px solid var(--border);border-radius:9px;
+    padding:11px 12px;font-family:var(--font-body);font-size:14.5px;background:var(--bg);color:var(--ink);
+  }
+  .zone-custom-input .field-hint{font-size:11.5px;color:var(--ink-soft);margin-top:4px;font-style:italic;}
+
   .upload-box{
     border:1.5px dashed var(--border);border-radius:12px;padding:18px;
     display:flex;flex-direction:column;gap:12px;background:var(--bg);
@@ -155,8 +169,8 @@
   }
   .media-empty{font-size:13px;color:var(--ink-soft);font-style:italic;}
 
-  .price-row{display:grid;grid-template-columns:1fr 0.85fr;gap:14px;}
   #period-group{display:none;}
+  #period-group.show{display:block;}
 
   .submit-row{display:flex;flex-direction:column;gap:12px;margin-top:6px;}
   .pform button[type=submit]{
@@ -178,11 +192,23 @@
     color:var(--green);font-weight:800;font-size:15px;display:flex;align-items:center;gap:8px;margin-bottom:4px;
   }
   .pform-success.show{display:block;}
+  .pform-success-footer {
+    margin-top: 8px;
+    font-style: italic;
+    opacity: 0.85;
+  }
+  .file-input-hidden {
+    display: none;
+  }
+  #account-bar{display:none;}
+  #account-bar.show{display:flex;}
+  #form-card{display:none;}
+  #form-card.show{display:block;}
 
   footer{padding:26px 0 40px;text-align:center;font-size:12.5px;color:var(--ink-soft);}
 
   @media (max-width:640px){
-    .pform-row,.pform-row-3,.price-row,.auth-form-row{grid-template-columns:1fr;}
+    .pform-row,.pform-row-3,.auth-form-row{grid-template-columns:1fr;}
     .form-card,.auth-card{padding:24px;}
   }
 </style>
@@ -266,23 +292,31 @@
           <input type="text" id="re-name" placeholder="Jean Baptiste" autocomplete="name" required>
         </div>
         <div class="field-group">
-          <label for="re-phone">Téléphone / WhatsApp</label>
+          <label for="re-phone">Téléphone</label>
           <input type="tel" id="re-phone" placeholder="+509 0000 0000" autocomplete="tel" required>
         </div>
       </div>
+      <div class="auth-form-row">
+        <div class="field-group"></div>
+        <div class="field-group">
+          <label for="re-whatsapp">Numéro WhatsApp</label>
+          <input type="tel" id="re-whatsapp" placeholder="+509 0000 0000" autocomplete="tel" required>
+        </div>
+      </div>
+      <div class="auth-hint">Le numéro WhatsApp est celui qui apparaîtra sur le bouton « Contacter via WhatsApp » de vos annonces. Il peut être identique ou différent de votre téléphone.</div>
       <div class="form-error" id="register-error"></div>
       <button type="submit" class="auth-submit" id="register-submit">Créer mon compte</button>
     </form>
   </div>
 
   <!-- Barre de compte connecté (affichée une fois connecté) -->
-  <div class="account-bar" id="account-bar" style="display:none;">
-    <span>Connecté en tant que <b id="account-username"></b> (<span id="account-phone"></span>)</span>
+  <div class="account-bar" id="account-bar">
+    <span>Connecté en tant que <b id="account-username"></b> · ID <b id="account-code"></b> (<span id="account-phone"></span>)</span>
     <a href="javascript:void(0)" class="logout-link" onclick="logout()">Se déconnecter</a>
   </div>
 
   <!-- Formulaire de publication (affiché une fois connecté) -->
-  <div class="form-card" id="form-card" style="display:none;">
+  <div class="form-card" id="form-card">
     <h2>Formulaire de publication</h2>
     <div class="verif-note">
       <span class="icon">🛡️</span>
@@ -290,11 +324,54 @@
     </div>
 
     <form class="pform" id="publish-form" novalidate>
+      <!-- LIGNE 1: Département et Ville -->
       <div class="pform-row">
         <div class="field-group">
-          <label for="p-city">Ville / Commune</label>
-          <input type="text" id="p-city" placeholder="Pétion-Ville" required>
+          <label for="p-departement">Département</label>
+          <select id="p-departement" required>
+            <option value="">Choisir un département</option>
+            <option value="Artibonite">Artibonite</option>
+            <option value="Centre">Centre</option>
+            <option value="Grand'Anse">Grand'Anse</option>
+            <option value="Nippes">Nippes</option>
+            <option value="Nord">Nord</option>
+            <option value="Nord-Est">Nord-Est</option>
+            <option value="Nord-Ouest">Nord-Ouest</option>
+            <option value="Ouest">Ouest</option>
+            <option value="Sud">Sud</option>
+            <option value="Sud-Est">Sud-Est</option>
+          </select>
         </div>
+        <div class="field-group">
+          <label for="p-ville">Ville</label>
+          <select id="p-ville" required>
+            <option value="">Choisir une ville</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- LIGNE 2: Commune et Zone/Quartier -->
+      <div class="pform-row">
+        <div class="field-group">
+          <label for="p-commune">Commune</label>
+          <select id="p-commune" required>
+            <option value="">Choisir une commune</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label for="p-zone">Zone / Quartier</label>
+          <select id="p-zone">
+            <option value="">Choisir une zone (optionnel)</option>
+          </select>
+          <div class="zone-custom-input">
+            <input type="text" id="p-zone-custom" placeholder="Ou précisez une zone personnalisée">
+            <div class="field-hint">Vous pouvez taper le nom d'une zone qui n'est pas dans la liste ci-dessus.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIGNE 3: Transaction et Type -->
+      <div class="pform-row">
         <div class="field-group">
           <label for="p-transaction">Transaction</label>
           <select id="p-transaction" required>
@@ -303,9 +380,6 @@
             <option value="Location">Location</option>
           </select>
         </div>
-      </div>
-
-      <div class="pform-row">
         <div class="field-group">
           <label for="p-type">Type de bien</label>
           <select id="p-type" required>
@@ -316,17 +390,22 @@
             <option>Local commercial</option>
           </select>
         </div>
+      </div>
+
+      <!-- LIGNE 4: Titre et Prix -->
+      <div class="pform-row">
         <div class="field-group">
           <label for="p-title">Titre de l'annonce</label>
           <input type="text" id="p-title" placeholder="Ex. Villa moderne 3 chambres" required>
         </div>
-      </div>
-
-      <div class="pform-row-3">
         <div class="field-group">
           <label for="p-price">Prix demandé</label>
           <input type="number" id="p-price" placeholder="150000" min="0" required>
         </div>
+      </div>
+
+      <!-- LIGNE 5: Devise et Période -->
+      <div class="pform-row-3">
         <div class="field-group">
           <label for="p-currency">Devise</label>
           <select id="p-currency" required>
@@ -354,7 +433,7 @@
             <span class="upload-label">Photos du bien (au moins 1)</span>
             <label class="upload-btn">
               Ajouter des photos
-              <input type="file" id="p-photos" accept="image/*" multiple style="display:none;">
+              <input type="file" id="p-photos" accept="image/*" multiple class="file-input-hidden">
             </label>
           </div>
           <div class="media-grid" id="photo-preview"><span class="media-empty">Aucune photo sélectionnée</span></div>
@@ -368,7 +447,7 @@
             <span class="upload-label">Vidéos du bien (optionnel)</span>
             <label class="upload-btn">
               Ajouter des vidéos
-              <input type="file" id="p-videos" accept="video/*" multiple style="display:none;">
+              <input type="file" id="p-videos" accept="video/*" multiple class="file-input-hidden">
             </label>
           </div>
           <div class="media-grid" id="video-preview"><span class="media-empty">Aucune vidéo sélectionnée</span></div>
@@ -383,7 +462,7 @@
         <div class="pform-success" id="pform-success">
           <div class="pform-success-title">✅ Annonce envoyée avec succès !</div>
           Merci ! Votre annonce a bien été reçue avec ses photos et vidéos. Notre équipe la vérifiera et la publiera sous 24h. Vous pouvez publier une autre annonce dès maintenant grâce au formulaire ci-dessus, réinitialisé pour vous.
-          <div style="margin-top:8px;font-style:italic;opacity:0.85;">Mèsi ! Annons ou a anrejistre. Ekip KayPam nan ap verifye enfòmasyon yo ak foto yo pou sekirite platfòm lan. L ap parèt an liy nan mwens pase 24 èdtan.</div>
+          <div class="pform-success-footer">Mèsi ! Annons ou a anrejistre. Ekip KayPam nan ap verifye enfòmasyon yo ak foto yo pou sekirite platfòm lan. L ap parèt an liy nan mwens pase 24 èdtan.</div>
         </div>
       </div>
     </form>
@@ -396,20 +475,239 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* ===== Configuration Supabase — à remplir après avoir suivi SETUP.md ===== */
+/* ===== Configuration Supabase ===== */
 const SUPABASE_URL = "https://hmbvlwwmwmkvfjpkfgye.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_nnesDNdLlyiS1-ekCZqXyQ_aYF1cOXY";
 const supabaseClient = (SUPABASE_URL.startsWith('http') && SUPABASE_ANON_KEY.length > 10)
   ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   : null;
 const EMAIL_DOMAIN = '@kaypam.local';
-/* =========================================================================== */
 
+/* ===== DONNÉES GÉOGRAPHIQUES ===== */
+const geoData = {
+  // Département de l'Ouest
+  'Ouest': {
+    'villes': ['Port-au-Prince', 'Léogâne', 'Croix-des-Bouquets', 'Arcahaie', 'La Gonâve'],
+    'communes': {
+      'Port-au-Prince': ['Port-au-Prince', 'Carrefour', 'Delmas', 'Pétion-Ville', 'Kenscoff', 'Cité Soleil', 'Gressier', 'Tabarre'],
+      'Léogâne': ['Léogâne', 'Petit-Goâve', 'Grand-Goâve'],
+      'Croix-des-Bouquets': ['Croix-des-Bouquets', 'Ganthier', 'Thomazeau', 'Cornillon', 'Fonds-Verrettes'],
+      'Arcahaie': ['Arcahaie', 'Cabaret'],
+      'La Gonâve': ['Anse-à-Galets', 'Pointe-à-Raquette']
+    },
+    'zones': {
+      'Port-au-Prince': ['Turgeau', 'Pacot', 'Bois Verna', 'Canapé-Vert', 'Debussy', 'Martissant', 'Carrefour-Feuilles', 'Fontamara', 'Fort-National', 'Nazon', 'Lalue'],
+      'Pétion-Ville': ['Juvénat', 'Morne Calvaire', 'Laboule', 'Thomassin', 'Péguy-Ville', 'Vivy Mitchell', 'Belleville', 'Montagne Noire', 'Pèlerin 1', 'Pèlerin 2', 'Pèlerin 3', 'Pèlerin 4', 'Pèlerin 5', 'Meyotte', 'Puits-Blain', 'Jalousie', 'Belvil', 'Vivy Michel', 'Diègue', 'Duplan', 'Girardo', 'Doco', 'Cargo', 'Fermathe', 'Frères', 'Peggyvil', 'Morne Hercule', 'Nerrette', 'Berthé', 'Bois Monquette'],
+      'Delmas': ['Bas Delmas', 'Delmas', 'Haut Delmas', 'Cité Militaire', 'Siloe', 'Nazon', 'Christ-Roi', 'Simon Pelé', 'Maïs Gâté', 'Zone Aéroport'],
+      'Carrefour': ['Thor', 'Mon repos', 'Carrefour', 'Diquini', 'Waney', 'Cote Plage', 'Mahotière', 'Bizoton', 'Arcachon', 'Brochette', 'Mariani', 'Fontamara', 'Rivière Froide', 'Lamentin'],
+      'Léogâne': ['Grand-Rue', 'Dampus', 'Léogâne', 'Dufort', 'Trouin', 'Ca-Ira', 'Petite-Rivière', 'Gressier', 'Cormier', 'Chatuley', 'Orangers', 'Dessources']
+    }
+  },
+  // Département du Sud-Est
+  'Sud-Est': {
+    'villes': ['Jacmel', 'Bainet', 'Belle-Anse'],
+    'communes': {
+      'Jacmel': ['Jacmel', 'Marigot', 'Cayes-Jacmel', 'La Vallée-de-Jacmel'],
+      'Bainet': ['Bainet', 'Côtes-de-Fer'],
+      'Belle-Anse': ['Belle-Anse', 'Grand-Gosier', 'Thiotte', 'Anse-à-Pitres']
+    },
+    'zones': {
+      'Jacmel': ['Bel-Air', 'Bréman', 'Couchant', "L'Acul", 'Raymond-les-Bains', 'Meyer', 'Maniègue', 'Mapou']
+    }
+  },
+  // Département du Nord
+  'Nord': {
+    'villes': ['Cap-Haïtien', 'Acul-du-Nord', 'Grande-Rivière-du-Nord', 'Saint-Raphaël', 'Borgne', 'Limbé', 'Plaisance'],
+    'communes': {
+      'Cap-Haïtien': ['Cap-Haïtien', 'Quartier-Morin', 'Limonade'],
+      'Acul-du-Nord': ['Acul-du-Nord', 'Plaine-du-Nord', 'Milot'],
+      'Grande-Rivière-du-Nord': ['Grande-Rivière-du-Nord', 'Bahon'],
+      'Saint-Raphaël': ['Saint-Raphaël', 'Dondon', 'Ranquitte', 'Pignon', 'La Victoire'],
+      'Borgne': ['Borgne', 'Port-Margot'],
+      'Limbé': ['Limbé', 'Bas-Limbé'],
+      'Plaisance': ['Plaisance', 'Pilate']
+    },
+    'zones': {
+      'Cap-Haïtien': ['Carénage', 'Bande du Nord', 'Vertières', 'Lory', 'Madeline', 'Petite-Anse', 'Haut-du-Cap', 'Fort Saint-Michel', 'Champion']
+    }
+  },
+  // Département du Nord-Est
+  'Nord-Est': {
+    'villes': ['Fort-Liberté', 'Ouanaminthe', 'Trou-du-Nord', 'Vallières'],
+    'communes': {
+      'Fort-Liberté': ['Fort-Liberté', 'Ferrier', 'Perches'],
+      'Ouanaminthe': ['Ouanaminthe', 'Capotille', 'Mont-Organisé'],
+      'Trou-du-Nord': ['Trou-du-Nord', 'Sainte-Suzanne', 'Terrier-Rouge', 'Caracol', 'Grand-Bassin'],
+      'Vallières': ['Vallières', 'Carice', 'Mombin-Crochu']
+    },
+    'zones': {
+      'Fort-Liberté': ['Bayaha', 'Derac', 'Drière', 'Marion', 'Dumas'],
+      'Ouanaminthe': ['Dajabon', 'Gens-de-Nantes', 'Haut-Maribahoux', 'Acul-des-Pins', 'Carisse', 'Gayot', 'Capotille']
+    }
+  },
+  // Département de l'Artibonite
+  'Artibonite': {
+    'villes': ['Gonaïves', 'Gros-Morne', 'Saint-Marc', 'Dessalines', 'Marmelade'],
+    'communes': {
+      'Gonaïves': ['Gonaïves', 'Ennery', "L'Estère"],
+      'Gros-Morne': ['Gros-Morne', 'Terre-Neuve', 'Anse-Rouge'],
+      'Saint-Marc': ['Saint-Marc', 'Verrettes', 'La Chapelle'],
+      'Dessalines': ['Dessalines', "Petite-Rivière-de-l'Artibonite", 'Grande-Saline', 'Desdunes'],
+      'Marmelade': ['Marmelade', "Saint-Michel-de-l'Attalaye"]
+    },
+    'zones': {
+      'Saint-Marc': ['Portail Guêpe', 'Pivert', 'Nissage Saget', 'Nan Poés', 'Freycineau', 'Deperos', 'Bois-Marchand', 'Gobinet', 'Robinet'],
+      'Gonaïves': ['Raboteau', 'Descahos', 'Jubilée', 'K-Soleil', 'Bigot', 'Bienac', 'Assifa', 'Pont-Gaudin', 'Mangnan', 'Passe-Reine']
+    }
+  },
+  // Département du Centre
+  'Centre': {
+    'villes': ['Hinche', 'Mirebalais', 'Lascahobas', 'Cerca-la-Source'],
+    'communes': {
+      'Hinche': ['Hinche', 'Maïssade', 'Thomonde', 'Cerca-Carvajal'],
+      'Mirebalais': ['Mirebalais', "Saut-d'Eau", 'Boucan-Carré'],
+      'Lascahobas': ['Lascahobas', 'Belladère', 'Savanette'],
+      'Cerca-la-Source': ['Cerca-la-Source', 'Thomassique']
+    },
+    'zones': {
+      'Hinche': ['Marmont', 'Cherival', 'Juanaria', 'Mapou', 'La Hoye', 'Siloe', 'Pandiassou', 'Los Palis'],
+      'Lascahobas': ['Petit-Fond', 'Juampas', 'Do-Rival', 'Lalomas', 'Savanette', 'Bois-Bleu'],
+      'Belladère': ['Renthe-Mathe', 'Croix-Fer', 'Roy-Sec', 'Los Pozo', 'Rospandre']
+    }
+  },
+  // Département du Sud
+  'Sud': {
+    'villes': ['Cayes', 'Port-Salut', 'Aquin', 'Côteaux', 'Chardonnières'],
+    'communes': {
+      'Cayes': ['Les Cayes', 'Torbeck', 'Chantal', 'Camp-Perrin', 'Maniche', "Île-à-Vache"],
+      'Port-Salut': ['Port-Salut', 'Saint-Jean-du-Sud', 'Arniquet'],
+      'Aquin': ['Aquin', 'Saint-Louis-du-Sud', 'Cavaillon'],
+      'Côteaux': ['Côteaux', 'Port-à-Piment', 'Roche-à-Bateau'],
+      'Chardonnières': ['Chardonnières', 'Les Anglais', 'Tiburon']
+    },
+    'zones': {
+      'Les Cayes': ['La Savane', 'Gelée', 'Bourdet', 'Gabarre', 'Liautaud', 'Charpentier', 'Vernat', 'Derrière-Fort', 'Fonfrède']
+    }
+  },
+  // Département de la Grand'Anse
+  'Grand\'Anse': {
+    'villes': ['Jérémie', 'Anse-d\'Hainault', 'Corail'],
+    'communes': {
+      'Jérémie': ['Jérémie', 'Abricots', 'Bonbon', 'Moron', 'Chambellan', 'Marfranc'],
+      'Anse-d\'Hainault': ['Anse-d\'Hainault', 'Dame-Marie', 'Les Irois'],
+      'Corail': ['Corail', 'Roseaux', 'Beaumont', 'Pestel', 'Île de Cayemites']
+    },
+    'zones': {
+      'Jérémie': ['Bordes', 'Sainte-Hélène', 'Caracolie', 'Rochasse', 'Nan Lundi', 'Makandal', 'La Pointe', 'Desormeaux']
+    }
+  },
+  // Département du Nord-Ouest
+  'Nord-Ouest': {
+    'villes': ['Port-de-Paix', 'Saint-Louis-du-Nord', 'Môle-Saint-Nicolas'],
+    'communes': {
+      'Port-de-Paix': ['Port-de-Paix', 'La Tortue', 'Bassin-Bleu', 'Chansolme', 'La Pointe'],
+      'Saint-Louis-du-Nord': ['Saint-Louis-du-Nord', 'Anse-à-Foleur'],
+      'Môle-Saint-Nicolas': ['Môle-Saint-Nicolas', 'Baie-de-Henne', 'Bombardopolis', 'Jean-Rabel']
+    },
+    'zones': {
+      'Port-de-Paix': ['La Corne', 'Haut-de-Saint-Louis', 'Carenage', 'Nan Paul', 'Fond-de-Poussière', 'Baudin', 'Trois-Rivières', 'Chansolme']
+    }
+  },
+  // Département des Nippes
+  'Nippes': {
+    'villes': ['Miragoâne', 'Anse-à-Veau', 'Baradères'],
+    'communes': {
+      'Miragoâne': ['Miragoâne', 'Petite-Rivière-de-Nippes', 'Fonds-des-Nègres', 'Paillant'],
+      'Anse-à-Veau': ['Anse-à-Veau', 'Petit-Trou-de-Nippes', "L'Asile", 'Arnaud', 'Plaisance-du-Sud'],
+      'Baradères': ['Baradères', 'Grand-Boucan']
+    },
+    'zones': {
+      'Miragoâne': ['Port-Sainte-Hélène', 'Chalon', 'Saint-Michel-du-Sud', 'Berquin', 'Chardonnères', 'Belle-Rivière', 'Carrefour Moussignac']
+    }
+  }
+};
+
+/* ===== Fonctions de mise à jour des selects ===== */
+function updateVilles() {
+  const dept = document.getElementById('p-departement').value;
+  const villeSelect = document.getElementById('p-ville');
+  const communeSelect = document.getElementById('p-commune');
+  const zoneSelect = document.getElementById('p-zone');
+  
+  // Reset selects dépendants
+  villeSelect.innerHTML = '<option value="">Choisir une ville</option>';
+  communeSelect.innerHTML = '<option value="">Choisir une commune</option>';
+  zoneSelect.innerHTML = '<option value="">Choisir une zone (optionnel)</option>';
+  
+  if (!dept || !geoData[dept]) return;
+  
+  const villes = geoData[dept].villes || [];
+  villes.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v;
+    opt.textContent = v;
+    villeSelect.appendChild(opt);
+  });
+}
+
+function updateCommunes() {
+  const dept = document.getElementById('p-departement').value;
+  const ville = document.getElementById('p-ville').value;
+  const communeSelect = document.getElementById('p-commune');
+  const zoneSelect = document.getElementById('p-zone');
+  
+  // Reset selects dépendants
+  communeSelect.innerHTML = '<option value="">Choisir une commune</option>';
+  zoneSelect.innerHTML = '<option value="">Choisir une zone (optionnel)</option>';
+  
+  if (!dept || !ville || !geoData[dept]) return;
+  
+  const communes = geoData[dept].communes[ville] || [];
+  communes.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c;
+    opt.textContent = c;
+    communeSelect.appendChild(opt);
+  });
+}
+
+function updateZones() {
+  const dept = document.getElementById('p-departement').value;
+  const commune = document.getElementById('p-commune').value;
+  const zoneSelect = document.getElementById('p-zone');
+  
+  // Reset select
+  zoneSelect.innerHTML = '<option value="">Choisir une zone (optionnel)</option>';
+  
+  if (!dept || !commune || !geoData[dept]) return;
+  
+  const zones = geoData[dept].zones[commune] || [];
+  zones.forEach(z => {
+    const opt = document.createElement('option');
+    opt.value = z;
+    opt.textContent = z;
+    zoneSelect.appendChild(opt);
+  });
+}
+
+// Écouteurs d'événements
+document.getElementById('p-departement').addEventListener('change', function() {
+  updateVilles();
+});
+
+document.getElementById('p-ville').addEventListener('change', function() {
+  updateCommunes();
+});
+
+document.getElementById('p-commune').addEventListener('change', function() {
+  updateZones();
+});
+
+/* ===== AUTHENTIFICATION ===== */
 function usernameToEmail(username){
   return username.trim().toLowerCase() + EMAIL_DOMAIN;
 }
 
-/* ---------- Onglets connexion / inscription ---------- */
 function switchAuthTab(which){
   document.getElementById('tab-login').classList.toggle('active', which === 'login');
   document.getElementById('tab-register').classList.toggle('active', which === 'register');
@@ -426,12 +724,11 @@ function hideAuthError(id){
   document.getElementById(id).classList.remove('show');
 }
 
-/* ---------- Connexion ---------- */
 document.getElementById('login-form').addEventListener('submit', async function(e){
   e.preventDefault();
   hideAuthError('login-error');
   if(!supabaseClient){
-    showAuthError('login-error', "Configuration Supabase manquante dans le code (voir SETUP.md).");
+    showAuthError('login-error', "Configuration Supabase manquante.");
     return;
   }
   const username = document.getElementById('li-username').value.trim();
@@ -459,12 +756,11 @@ document.getElementById('login-form').addEventListener('submit', async function(
   }
 });
 
-/* ---------- Inscription ---------- */
 document.getElementById('register-form').addEventListener('submit', async function(e){
   e.preventDefault();
   hideAuthError('register-error');
   if(!supabaseClient){
-    showAuthError('register-error', "Configuration Supabase manquante dans le code (voir SETUP.md).");
+    showAuthError('register-error', "Configuration Supabase manquante.");
     return;
   }
   const username = document.getElementById('re-username').value.trim();
@@ -472,6 +768,7 @@ document.getElementById('register-form').addEventListener('submit', async functi
   const passwordConfirm = document.getElementById('re-password-confirm').value;
   const name = document.getElementById('re-name').value.trim();
   const phone = document.getElementById('re-phone').value.trim();
+  const whatsapp = document.getElementById('re-whatsapp').value.trim();
 
   if(!/^[a-zA-Z0-9_.-]{3,}$/.test(username)){
     showAuthError('register-error', "Le nom d'utilisateur doit contenir au moins 3 caractères, sans espace ni accent.");
@@ -491,6 +788,10 @@ document.getElementById('register-form').addEventListener('submit', async functi
   }
   if(!phone){
     showAuthError('register-error', 'Entrez votre numéro de téléphone.');
+    return;
+  }
+  if(!whatsapp){
+    showAuthError('register-error', 'Entrez votre numéro WhatsApp.');
     return;
   }
 
@@ -516,7 +817,8 @@ document.getElementById('register-form').addEventListener('submit', async functi
     const { error: linkErr } = await supabaseClient.rpc('link_owner_account', {
       p_username: username,
       p_name: name,
-      p_phone: phone
+      p_phone: phone,
+      p_whatsapp: whatsapp
     });
     if(linkErr) throw linkErr;
 
@@ -543,10 +845,11 @@ async function afterAuthSuccess(){
   }
   const profile = data[0];
   document.getElementById('account-username').textContent = profile.username;
+  document.getElementById('account-code').textContent = profile.account_code;
   document.getElementById('account-phone').textContent = profile.phone;
   document.getElementById('auth-card').style.display = 'none';
-  document.getElementById('account-bar').style.display = 'flex';
-  document.getElementById('form-card').style.display = '';
+  document.getElementById('account-bar').classList.add('show');
+  document.getElementById('form-card').classList.add('show');
   loadStats();
 }
 
@@ -558,7 +861,7 @@ async function checkExistingSession(){
   }
 }
 
-/* ---------- Statistiques ---------- */
+/* ===== STATISTIQUES ===== */
 async function loadStats(){
   if(!supabaseClient) return;
   try{
@@ -573,7 +876,7 @@ async function loadStats(){
   }
 }
 
-/* ---------- Photos / vidéos ---------- */
+/* ===== PHOTOS / VIDÉOS ===== */
 let photoFiles = [];
 let videoFiles = [];
 
@@ -607,6 +910,7 @@ document.getElementById('p-photos').addEventListener('change', function(e){
   renderPhotoPreview();
   this.value = '';
 });
+
 document.getElementById('p-videos').addEventListener('change', function(e){
   hideError();
   const incoming = Array.from(e.target.files);
@@ -688,10 +992,10 @@ document.getElementById('p-transaction').addEventListener('change', function(){
   const group = document.getElementById('period-group');
   const period = document.getElementById('p-period');
   if(this.value === 'Location'){
-    group.style.display = '';
+    group.classList.add('show');
     period.required = true;
   } else {
-    group.style.display = 'none';
+    group.classList.remove('show');
     period.required = false;
   }
 });
@@ -705,17 +1009,26 @@ function hideError(){
   document.getElementById('form-error').classList.remove('show');
 }
 
-/* ---------- Soumission de l'annonce ---------- */
+/* ===== SOUMISSION ===== */
 document.getElementById('publish-form').addEventListener('submit', async function(e){
   e.preventDefault();
   hideError();
 
   if(!supabaseClient){
-    showError("La configuration Supabase n'est pas encore renseignée dans le code (SUPABASE_URL / SUPABASE_ANON_KEY). Voir SETUP.md.");
+    showError("La configuration Supabase n'est pas encore renseignée dans le code.");
     return;
   }
 
-  const city = document.getElementById('p-city').value.trim();
+  const departement = document.getElementById('p-departement').value;
+  const ville = document.getElementById('p-ville').value;
+  const commune = document.getElementById('p-commune').value;
+  let zone = document.getElementById('p-zone').value;
+  const zoneCustom = document.getElementById('p-zone-custom').value.trim();
+  
+  if(zoneCustom){
+    zone = zoneCustom;
+  }
+  
   const transaction = document.getElementById('p-transaction').value;
   const type = document.getElementById('p-type').value;
   const title = document.getElementById('p-title').value.trim();
@@ -724,8 +1037,8 @@ document.getElementById('publish-form').addEventListener('submit', async functio
   const period = transaction === 'Location' ? document.getElementById('p-period').value : null;
   const desc = document.getElementById('p-desc').value.trim();
 
-  if(!city || !transaction || !type || !title || !price){
-    showError('Merci de remplir tous les champs obligatoires.');
+  if(!departement || !ville || !commune || !zone || !transaction || !type || !title || !price){
+    showError('Merci de remplir tous les champs obligatoires (département, ville, commune, zone, transaction, type, titre, prix).');
     return;
   }
   if(title.length < 5){
@@ -753,7 +1066,10 @@ document.getElementById('publish-form').addEventListener('submit', async functio
   try{
     const { data: listingId, error: listingErr } = await supabaseClient.rpc('create_listing', {
       p_title: title,
-      p_city: city,
+      p_city: ville,
+      p_commune: commune,
+      p_zone: zone,
+      p_departement: departement,
       p_transaction: transaction,
       p_type: type,
       p_price: priceNumber,
@@ -795,7 +1111,8 @@ document.getElementById('publish-form').addEventListener('submit', async functio
     videoFiles = [];
     renderPhotoPreview();
     renderVideoPreview();
-    document.getElementById('period-group').style.display = 'none';
+    document.getElementById('period-group').classList.remove('show');
+    document.getElementById('p-zone-custom').value = '';
     loadStats();
   }catch(err){
     console.error('Erreur de soumission', err);
@@ -812,6 +1129,192 @@ loadStats();
 checkExistingSession();
 </script>
 
-<script>(function(){var lang=localStorage.getItem('kaypam_lang')||'fr';var maps={fr:{},en:{'Publier gratuitement':'List for free','Se connecter':'Log in','Créer un compte':'Create an account','Nom d utilisateur':'Username','Mot de passe':'Password','Confirmer le mot de passe':'Confirm password','Booster mes annonces':'Boost my listings','Comment ça marche':'How it works','Publier une annonce':'Publish a listing','Mes annonces':'My listings','Contact':'Contact','Publier':'Publish','Rechercher':'Search','Envoyer':'Submit','Enregistrer':'Save','Annuler':'Cancel','Tous':'All','Toutes les villes':'All cities','Recherche rapide':'Quick search','Ville':'City','Type de bien':'Property type','Budget max (USD)':'Max budget (USD)','Rechercher des biens →':'Search properties →','Biens en vedette':'Featured properties','Annonces':'Listings','Vedette':'Featured','Toutes les zones':'All zones','Retour':'Back','Fermer':'Close','Annonces immobilières · Haïti':'Real estate listings · Haiti','KayPam':'KayPam','Propriétaires et agents':'Owners and agents','Publiez votre annonce gratuitement':'Publish your listing for free','Créez votre compte propriétaire pour publier, gérer et booster vos annonces. Notre équipe vérifie chaque annonce — photos et vidéos incluses — avant sa mise en ligne.':'Create your owner account to publish, manage, and boost your listings. Our team verifies every listing — photos and videos included — before it goes live.','Publication gratuite, sans frais cachés':'Free listing, no hidden fees','Un seul compte pour toutes vos annonces':'One account for all your listings','Photos et vidéos vérifiées avant publication':'Photos and videos verified before publication','Retirez ou boostez vos annonces à tout moment':'Remove or boost your listings anytime','Propriétaires inscrits':'Registered owners','Annonces soumises':'Listings submitted','Retour au site':'Back to site','Vérification des annonces':'Listing verification','Chaque annonce reste invisible du public jusqu à validation. Suivez les 3 vérifications ci-dessous avant de cliquer sur « Valider ».':'Each listing stays invisible to the public until approved. Follow the 3 checks below before clicking “Validate”.','Guide de vérification':'Verification guide','Appel de courtoisie :':'Courtesy call:','Cohérence du prix :':'Price consistency:','Qualité des photos et vidéos :':'Photo and video quality:','En attente':'Pending','Validées':'Validated','Refusées':'Rejected','Propriétaires':'Owners','Demandes de boost':'Boost requests','Paiements en attente':'Pending payments','Boosts actifs':'Active boosts','Chargement des annonces…':'Loading listings…','Chargement des demandes de boost…':'Loading boost requests…','Déconnexion':'Logout','Espace réservé à l équipe de vérification':'Reserved for the verification team','Espace Admin KayPam':'KayPam Admin Area','Connectez-vous avec votre compte administrateur pour gérer les annonces.':'Log in with your admin account to manage listings.','Se connecter':'Log in','Se déconnecter':'Log out'},ht:{'Publier gratuitement':'Pibliye gratis','Se connecter':'Konekte','Créer un compte':'Kree yon kont','Nom d utilisateur':'Non itilizatè','Mot de passe':'Mo de pase','Confirmer le mot de passe':'Konfirme mo de pase','Booster mes annonces':'Booste anons mwen yo','Comment ça marche':'Kijan sa mache','Publier une annonce':'Pibliye yon anons','Mes annonces':'Anons mwen yo','Contact':'Kontak','Publier':'Pibliye','Rechercher':'Chèche','Envoyer':'Voye','Enregistrer':'Anrejistre','Annuler':'Anile','Tous':'Tout','Toutes les villes':'Tout vil yo','Recherche rapide':'Rechèch rapid','Ville':'Vil','Type de bien':'Kalite byen','Budget max (USD)':'Bidjè maksimòm (USD)','Rechercher des biens →':'Chèche byen →','Biens en vedette':'Byen an vedèt','Annonces':'Anons','Vedette':'Vedèt','Toutes les zones':'Tout zòn yo','Retour':'Retounen','Fermer':'Fèmen','Annonces immobilières · Haïti':'Anons imobilye · Ayiti','KayPam':'KayPam','Propriétaires et agents':'Pwopriyetè ak ajan','Publiez votre annonce gratuitement':'Pibliye anons ou gratis','Créez votre compte propriétaire pour publier, gérer et booster vos annonces. Notre équipe vérifie chaque annonce — photos et vidéos incluses — avant sa mise en ligne.':'Kree kont pwopriyetè ou pou pibliye, jere, ak booste anons ou yo. Ekip nou an tcheke chak anons — foto ak videyo ki enkli — anvan yo mete li sou entènèt.','Publication gratuite, sans frais cachés':'Piblikasyon gratis, san fra san kache','Un seul compte pour toutes vos annonces':'Yon sèl kont pou tout anons ou yo','Photos et vidéos vérifiées avant publication':'Foto ak videyo tcheke anvan piblikasyon','Retirez ou boostez vos annonces à tout moment':'Retire oswa booste anons ou yo nenpòt moman','Propriétaires inscrits':'Pwopriyetè ki enskri','Annonces soumises':'Anons soumèt','Retour au site':'Retounen sou sit la','Vérification des annonces':'Vérifikasyon anons yo','Chaque annonce reste invisible du public jusqu à validation. Suivez les 3 vérifications ci-dessous avant de cliquer sur « Valider ».':'Chak anons rete envizib pou piblik la jiskaske yo apwouve l. Swiv 3 verifikasyon yo anba a anvan ou klike sou “Valide”.','Guide de vérification':'Gid verifikasyon','Appel de courtoisie :':'Apele koutwazi:','Cohérence du prix :':'Konsistans pri:','Qualité des photos et vidéos :':'Kwalite foto ak videyo:','En attente':'Ann atann','Validées':'Valide','Refusées':'Refize','Propriétaires':'Pwopriyetè','Demandes de boost':'Demand boost','Paiements en attente':'Peman an atann','Boosts actifs':'Boost aktif','Chargement des annonces…':'Chajman anons yo…','Chargement des demandes de boost…':'Chajman demann boost yo…','Déconnexion':'Dekonekte','Espace réservé à l équipe de vérification':'Espas rezève pou ekip verifikasyon an','Espace Admin KayPam':'Espas Admin KayPam','Connectez-vous avec votre compte administrateur pour gérer les annonces.':'Konekte avèk kont administratè ou pou jere anons yo.','Se déconnecter':'Dekonekte'}};var map=maps[lang]||maps.fr;var applyToText=function(value){if(!value){return value;}var result=value;Object.keys(map).forEach(function(from){result=result.split(from).join(map[from]);});return result;};var updateElement=function(el){if(!el){return;}var aria=el.getAttribute('aria-label');if(aria){el.setAttribute('aria-label',applyToText(aria));}var title=el.getAttribute('title');if(title){el.setAttribute('title',applyToText(title));}if(el.placeholder){el.placeholder=applyToText(el.placeholder);}if(el.tagName==='INPUT'||el.tagName==='TEXTAREA'||el.tagName==='SELECT'){var value=el.value;if(value){el.value=applyToText(value);}}var text=el.textContent;if(text&&text.trim()){var newText=applyToText(text);if(newText!==text){el.textContent=newText;}}};document.documentElement.lang=lang;document.querySelectorAll('a, button, label, p, span, h1, h2, h3, h4, li, option, legend, input, textarea, select').forEach(updateElement);})();</script>
+<script>
+(function(){
+  var lang = localStorage.getItem('kaypam_lang') || 'fr';
+  var maps = {
+    fr: {},
+    en: {
+      'Propriétaires et agents': 'Owners and agents',
+      'Publiez votre annonce gratuitement': 'Publish your listing for free',
+      'Créez votre compte propriétaire pour publier, gérer et booster vos annonces. Notre équipe vérifie chaque annonce — photos et vidéos incluses — avant sa mise en ligne.': 'Create your owner account to publish, manage, and boost your listings. Our team verifies every listing — photos and videos included — before it goes live.',
+      'Publication gratuite, sans frais cachés': 'Free listing, no hidden fees',
+      'Un seul compte pour toutes vos annonces': 'One account for all your listings',
+      'Photos et vidéos vérifiées avant publication': 'Photos and videos verified before publication',
+      'Retirez ou boostez vos annonces à tout moment': 'Remove or boost your listings anytime',
+      'Propriétaires inscrits': 'Registered owners',
+      'Annonces soumises': 'Listings submitted',
+      'Retour au site': 'Back to site',
+      'Se connecter': 'Log in',
+      'Créer un compte': 'Create an account',
+      "Nom d'utilisateur": 'Username',
+      'Mot de passe': 'Password',
+      'Confirmer le mot de passe': 'Confirm password',
+      'Nom complet': 'Full name',
+      'Téléphone': 'Phone',
+      'Numéro WhatsApp': 'WhatsApp number',
+      'Créer mon compte': 'Create my account',
+      'Connecté en tant que': 'Logged in as',
+      'Se déconnecter': 'Log out',
+      'Formulaire de publication': 'Publishing form',
+      'Département': 'Department',
+      'Ville': 'City',
+      'Commune': 'Municipality',
+      'Zone / Quartier': 'Zone / Neighborhood',
+      'Transaction': 'Transaction',
+      'Type de bien': 'Property type',
+      'Choisir': 'Choose',
+      'Vente': 'Sale',
+      'Location': 'Rental',
+      'Maison': 'House',
+      'Appartement': 'Apartment',
+      'Terrain': 'Land',
+      'Local commercial': 'Commercial space',
+      'Titre de l\'annonce': 'Listing title',
+      'Ex. Villa moderne 3 chambres': 'Ex. Modern 3-bedroom villa',
+      'Prix demandé': 'Asking price',
+      'Devise': 'Currency',
+      'Période': 'Period',
+      'Par mois': 'Per month',
+      'Par an': 'Per year',
+      'Description du bien': 'Property description',
+      'Décrivez le bien : nombre de chambres, surface, quartier, particularités...': 'Describe the property: number of bedrooms, area, neighborhood, features...',
+      'Photos du bien (au moins 1)': 'Property photos (at least 1)',
+      'Ajouter des photos': 'Add photos',
+      'Aucune photo sélectionnée': 'No photos selected',
+      'Vidéos du bien (optionnel)': 'Property videos (optional)',
+      'Ajouter des vidéos': 'Add videos',
+      'Aucune vidéo sélectionnée': 'No videos selected',
+      'Soumettre l\'annonce pour vérification': 'Submit listing for verification',
+      '✅ Annonce envoyée avec succès !': '✅ Listing sent successfully!',
+      'Merci ! Votre annonce a bien été reçue avec ses photos et vidéos. Notre équipe la vérifiera et la publiera sous 24h. Vous pouvez publier une autre annonce dès maintenant grâce au formulaire ci-dessus, réinitialisé pour vous.': 'Thank you! Your listing has been received with its photos and videos. Our team will review it and publish it within 24h. You can publish another listing now using the form above, reset for you.',
+      'Mèsi ! Annons ou a anrejistre. Ekip KayPam nan ap verifye enfòmasyon yo ak foto yo pou sekirite platfòm lan. L ap parèt an liy nan mwens pase 24 èdtan.': 'Thank you! Your listing is registered. The KayPam team will verify the information and photos for platform security. It will appear online in less than 24 hours.',
+      '© 2026 KayPam. Toutes les annonces sont vérifiées avant publication.': '© 2026 KayPam. All listings are verified before publication.',
+      'Choisir un département': 'Choose a department',
+      'Choisir une ville': 'Choose a city',
+      'Choisir une commune': 'Choose a municipality',
+      'Choisir une zone (optionnel)': 'Choose a zone (optional)'
+    },
+    ht: {
+      'Propriétaires et agents': 'Pwopriyetè ak ajan',
+      'Publiez votre annonce gratuitement': 'Pibliye anons ou gratis',
+      'Créez votre compte propriétaire pour publier, gérer et booster vos annonces. Notre équipe vérifie chaque annonce — photos et vidéos incluses — avant sa mise en ligne.': 'Kree kont pwopriyetè ou pou pibliye, jere, ak booste anons ou yo. Ekip nou an tcheke chak anons — foto ak videyo ki enkli — anvan yo mete li sou entènèt.',
+      'Publication gratuite, sans frais cachés': 'Piblikasyon gratis, san fra san kache',
+      'Un seul compte pour toutes vos annonces': 'Yon sèl kont pou tout anons ou yo',
+      'Photos et vidéos vérifiées avant publication': 'Foto ak videyo tcheke anvan piblikasyon',
+      'Retirez ou boostez vos annonces à tout moment': 'Retire oswa booste anons ou yo nenpòt moman',
+      'Propriétaires inscrits': 'Pwopriyetè ki enskri',
+      'Annonces soumises': 'Anons soumèt',
+      'Retour au site': 'Retounen sou sit la',
+      'Se connecter': 'Konekte',
+      'Créer un compte': 'Kree yon kont',
+      "Nom d'utilisateur": 'Non itilizatè',
+      'Mot de passe': 'Mo de pase',
+      'Confirmer le mot de passe': 'Konfime mo de pase',
+      'Nom complet': 'Non konplè',
+      'Téléphone': 'Telefòn',
+      'Numéro WhatsApp': 'Nimewo WhatsApp',
+      'Créer mon compte': 'Kree kont mwen',
+      'Connecté en tant que': 'Konekte kòm',
+      'Se déconnecter': 'Dekonekte',
+      'Formulaire de publication': 'Fòmilè piblikasyon',
+      'Département': 'Depatman',
+      'Ville': 'Vil',
+      'Commune': 'Komin',
+      'Zone / Quartier': 'Zòn / Katye',
+      'Transaction': 'Transaksyon',
+      'Type de bien': 'Kalite byen',
+      'Choisir': 'Chwazi',
+      'Vente': 'Lavant',
+      'Location': 'Lokasyon',
+      'Maison': 'Kay',
+      'Appartement': 'Apatman',
+      'Terrain': 'Tèren',
+      'Local commercial': 'Lokal komèsyal',
+      'Titre de l\'annonce': 'Tit anons',
+      'Ex. Villa moderne 3 chambres': 'Egzanp. Villa modèn 3 chanm',
+      'Prix demandé': 'Pri mande',
+      'Devise': 'Lajan',
+      'Période': 'Periyòd',
+      'Par mois': 'Pa mwa',
+      'Par an': 'Pa ane',
+      'Description du bien': 'Deskripsyon byen',
+      'Décrivez le bien : nombre de chambres, surface, quartier, particularités...': 'Dekri byen an: kantite chanm, sifas, katye, patikilarite...',
+      'Photos du bien (au moins 1)': 'Foto byen an (omwen 1)',
+      'Ajouter des photos': 'Ajoute foto',
+      'Aucune photo sélectionnée': 'Pa gen foto chwazi',
+      'Vidéos du bien (optionnel)': 'Videyo byen an (opsyonèl)',
+      'Ajouter des vidéos': 'Ajoute videyo',
+      'Aucune vidéo sélectionnée': 'Pa gen videyo chwazi',
+      'Soumettre l\'annonce pour vérification': 'Soumèt anons pou verifikasyon',
+      '✅ Annonce envoyée avec succès !': '✅ Anons voye avèk siksè!',
+      'Merci ! Votre annonce a bien été reçue avec ses photos et vidéos. Notre équipe la vérifiera et la publiera sous 24h. Vous pouvez publier une autre annonce dès maintenant grâce au formulaire ci-dessus, réinitialisé pour vous.': 'Mèsi! Anons ou te resevwa byen ak foto ak videyo li yo. Ekip nou an ap verifye l epi pibliye l nan mwens pase 24è. Ou ka pibliye yon lòt anons kounye a gras a fòmilè ki anwo a, ki reset pou ou.',
+      'Mèsi ! Annons ou a anrejistre. Ekip KayPam nan ap verifye enfòmasyon yo ak foto yo pou sekirite platfòm lan. L ap parèt an liy nan mwens pase 24 èdtan.': 'Mèsi! Anons ou anrejistre. Ekip KayPam nan ap verifye enfòmasyon yo ak foto yo pou sekirite platfòm lan. L ap parèt an liy nan mwens pase 24 èdtan.',
+      '© 2026 KayPam. Toutes les annonces sont vérifiées avant publication.': '© 2026 KayPam. Tout anons yo verifye anvan piblikasyon.',
+      'Choisir un département': 'Chwazi yon depatman',
+      'Choisir une ville': 'Chwazi yon vil',
+      'Choisir une commune': 'Chwazi yon komin',
+      'Choisir une zone (optionnel)': 'Chwazi yon zòn (opsyonèl)'
+    }
+  };
+  var map = maps[lang] || maps.fr;
+  function applyToText(value){
+    if(!value) return value;
+    var result = value;
+    Object.keys(map).forEach(function(from){
+      result = result.split(from).join(map[from]);
+    });
+    return result;
+  }
+  function updateElement(el){
+    if(!el) return;
+    var aria = el.getAttribute('aria-label');
+    if(aria) el.setAttribute('aria-label', applyToText(aria));
+    var title = el.getAttribute('title');
+    if(title) el.setAttribute('title', applyToText(title));
+    if(el.placeholder) el.placeholder = applyToText(el.placeholder);
+    if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT'){
+      var value = el.value;
+      if(value) el.value = applyToText(value);
+    }
+    var text = el.textContent;
+    if(text && text.trim()){
+      var newText = applyToText(text);
+      if(newText !== text) el.textContent = newText;
+    }
+  }
+  document.documentElement.lang = lang;
+  document.querySelectorAll('a, button, label, p, span, h1, h2, h3, h4, li, option, legend, input, textarea, select').forEach(updateElement);
+})();
+
+/* ===== TRACKING DES VISITES ===== */
+async function trackVisit(){
+  // Jwenn id vizitè (nan localStorage oswa nouvo)
+  let visitorId = localStorage.getItem('kaypam_visitor_id');
+  if(!visitorId){
+    visitorId = 'visitor_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+    localStorage.setItem('kaypam_visitor_id', visitorId);
+  }
+  
+  // Jwenn paj aktyèl la
+  const page = window.location.pathname.split('/').pop() || 'kaypam.html';
+  
+  try{
+    await supabaseClient
+      .from('visits')
+      .insert({
+        visitor_id: visitorId,
+        page: page,
+        referrer: document.referrer || null,
+        user_agent: navigator.userAgent
+      });
+  }catch(err){
+    console.error('Erreur tracking:', err);
+  }
+}
+
+// Chaje tracking lè paj la fin chaje
+document.addEventListener('DOMContentLoaded', trackVisit);
+</script>
 </body>
 </html>

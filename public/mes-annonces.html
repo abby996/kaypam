@@ -46,7 +46,6 @@
   .intro h1{font-size:clamp(24px,3.2vw,32px);}
   .intro p{color:var(--ink-soft);max-width:60ch;font-size:15px;}
 
-  /* ---------- Porte de connexion / inscription ---------- */
   .auth-card{
     background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);
     padding:28px;margin:22px 0;max-width:480px;
@@ -96,6 +95,7 @@
   .lc-title{font-size:17px;font-weight:700;font-family:var(--font-display);margin:0 0 4px;}
   .lc-meta{font-size:12.5px;color:var(--ink-soft);}
   .lc-price{font-family:var(--font-mono);font-weight:700;color:var(--coral-dark);font-size:15px;margin-top:4px;}
+  .lc-meta-top{margin-top:10px;}
 
   .boost-status{
     font-family:var(--font-mono);font-size:11px;font-weight:700;text-transform:uppercase;
@@ -106,7 +106,7 @@
   .bs-active{background:rgba(30,143,111,0.15);color:#0f5c47;}
   .bs-unavailable{background:rgba(226,92,59,0.14);color:var(--coral-dark);}
 
-  .boost-action{margin-top:14px;}
+  .boost-action{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px;}
   .boost-btn{
     background:var(--gold);color:#4A3300;border:none;border-radius:9px;
     padding:10px 18px;font-weight:700;font-size:13.5px;
@@ -187,7 +187,7 @@
 <main class="wrap">
   <div class="intro">
     <span class="eyebrow">Propriétaires</span>
-    <h1>Connectez vous</h1>
+    <h1>Mes annonces & boost</h1>
     <p>Connectez-vous avec votre compte propriétaire pour retrouver toutes vos annonces — en attente, validées ou refusées — les retirer si le bien n'est plus disponible, ou booster leur visibilité.</p>
   </div>
 
@@ -238,9 +238,12 @@
           <label for="re-phone">Téléphone</label>
           <input type="tel" id="re-phone" placeholder="+509 0000 0000" autocomplete="tel" required>
         </div>
+      </div>
+      <div class="auth-form-row">
+        <div class="field-group"></div>
         <div class="field-group">
-          <label for="re-phone">Téléphone WhatsApp</label>
-          <input type="tel" id="re-phone" placeholder="+509 0000 0000" autocomplete="tel" required>
+          <label for="re-whatsapp">Numéro WhatsApp</label>
+          <input type="tel" id="re-whatsapp" placeholder="+509 0000 0000" autocomplete="tel" required>
         </div>
       </div>
       <div class="form-error" id="register-error"></div>
@@ -249,7 +252,7 @@
   </div>
 
   <div class="account-bar" id="account-bar" style="display:none;">
-    <span>Connecté en tant que <b id="account-username"></b></span>
+    <span>Connecté en tant que <b id="account-username"></b> · ID <b id="account-code"></b></span>
     <a href="javascript:void(0)" class="logout-link" onclick="logout()">Se déconnecter</a>
   </div>
 
@@ -262,16 +265,151 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* ===== Configuration Supabase — à remplir après avoir suivi SETUP.md ===== */
+/* ===== Configuration Supabase ===== */
 const SUPABASE_URL = "https://hmbvlwwmwmkvfjpkfgye.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_nnesDNdLlyiS1-ekCZqXyQ_aYF1cOXY";
 const supabaseClient = (SUPABASE_URL.startsWith('http') && SUPABASE_ANON_KEY.length > 10)
   ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   : null;
 const EMAIL_DOMAIN = '@kaypam.local';
-/* ===== Numéro MonCash Business KayPam — à remplir ===== */
 const MONCASH_NUMBER = "+509 0000 0000";
-/* =========================================================================== */
+
+/* ===== DONNÉES MULTILINGUES ===== */
+const translations = {
+  fr: {
+    loading: "Chargement de vos annonces…",
+    load_error: "Impossible de charger vos annonces",
+    load_error_sub: "Réessayez dans un instant.",
+    no_listings: "Aucune annonce trouvée",
+    no_listings_sub: "Les annonces que vous publiez apparaîtront ici, quel que soit leur statut.",
+    pending_verification: "En attente de vérification",
+    pending_text: "Notre équipe vérifie votre annonce (sous 24h) avant de la publier.",
+    refused: "Refusée",
+    refused_text: "Contactez l'équipe KayPam pour en savoir plus sur cette décision.",
+    not_boosted: "Pas encore boostée",
+    boost_this: "⭐ Booster cette annonce",
+    pending_payment: "Paiement en attente",
+    payment_confirm: "Notre équipe confirme votre paiement MonCash sous 24h.",
+    active_until: "Boost actif jusqu'au",
+    active_text: "Votre annonce apparaît dans le bandeau vedette du site.",
+    expired_on: "Boost expiré le",
+    boost_again: "🔄 Booster à nouveau",
+    remove_listing: "🚫 Bien plus disponible — retirer l'annonce",
+    removed: "Retirée du site",
+    restore_listing: "↩ Remettre l'annonce en ligne",
+    priority_visibility: "Visibilité prioritaire",
+    send_exact_amount: "Envoyez le montant exact via",
+    to_number: "au numéro",
+    then_paste: "puis collez ci-dessous le numéro de référence reçu par SMS.",
+    moncash_ref: "Référence de paiement MonCash",
+    ref_placeholder: "Ex. 123456789",
+    confirm_boost: "Confirmer ma demande de boost",
+    choose_plan: "Choisissez une formule de boost.",
+    enter_reference: "Entrez le numéro de référence de votre paiement MonCash.",
+    boost_saved: "Demande de boost enregistrée ! Notre équipe confirme votre paiement MonCash sous 24h.",
+    error: "Erreur",
+    confirm_remove: "Confirmez : ce bien n'est plus disponible (loué, vendu, ou autre) et l'annonce doit disparaître du site public ?",
+    sending: "Envoi...",
+    login_error: "Nom d'utilisateur ou mot de passe incorrect.",
+    register_error: "Impossible de créer le compte. Réessayez.",
+    username_taken: "Ce nom d'utilisateur n'est pas disponible. Choisissez-en un autre.",
+    profile_error: "Profil propriétaire introuvable pour ce compte. Contactez l'équipe KayPam.",
+    plans_error: "Erreur de chargement des formules de boost",
+    connection: "Connexion...",
+    creating: "Création du compte..."
+  },
+  en: {
+    loading: "Loading your listings…",
+    load_error: "Unable to load your listings",
+    load_error_sub: "Please try again in a moment.",
+    no_listings: "No listings found",
+    no_listings_sub: "The listings you publish will appear here, regardless of their status.",
+    pending_verification: "Pending verification",
+    pending_text: "Our team is reviewing your listing (within 24h) before publishing it.",
+    refused: "Refused",
+    refused_text: "Contact the KayPam team to learn more about this decision.",
+    not_boosted: "Not boosted yet",
+    boost_this: "⭐ Boost this listing",
+    pending_payment: "Payment pending",
+    payment_confirm: "Our team confirms your MonCash payment within 24h.",
+    active_until: "Active boost until",
+    active_text: "Your listing appears in the site's featured banner.",
+    expired_on: "Boost expired on",
+    boost_again: "🔄 Boost again",
+    remove_listing: "🚫 Property no longer available — remove listing",
+    removed: "Removed from site",
+    restore_listing: "↩ Restore listing online",
+    priority_visibility: "Priority visibility",
+    send_exact_amount: "Send the exact amount via",
+    to_number: "to number",
+    then_paste: "then paste the reference number received by SMS below.",
+    moncash_ref: "MonCash payment reference",
+    ref_placeholder: "Ex. 123456789",
+    confirm_boost: "Confirm my boost request",
+    choose_plan: "Please choose a boost plan.",
+    enter_reference: "Please enter your MonCash payment reference number.",
+    boost_saved: "Boost request saved! Our team will confirm your MonCash payment within 24h.",
+    error: "Error",
+    confirm_remove: "Confirm: this property is no longer available (rented, sold, or other) and the listing must disappear from the public site?",
+    sending: "Sending...",
+    login_error: "Incorrect username or password.",
+    register_error: "Unable to create account. Please try again.",
+    username_taken: "This username is not available. Please choose another one.",
+    profile_error: "Owner profile not found for this account. Contact the KayPam team.",
+    plans_error: "Error loading boost plans",
+    connection: "Connecting...",
+    creating: "Creating account..."
+  },
+  ht: {
+    loading: "Chajman anons ou yo…",
+    load_error: "Pa ka chaje anons ou yo",
+    load_error_sub: "Tanpri eseye ankò nan yon ti moman.",
+    no_listings: "Pa gen anons jwenn",
+    no_listings_sub: "Anons ou pibliye yo ap parèt isit la, kèlkeswa sitiyasyon yo.",
+    pending_verification: "Ap tann verifikasyon",
+    pending_text: "Ekip nou an ap verifye anons ou (nan 24è) anvan yo pibliye l.",
+    refused: "Refize",
+    refused_text: "Kontakte ekip KayPam pou plis enfòmasyon sou desizyon sa a.",
+    not_boosted: "Pokko booste",
+    boost_this: "⭐ Booste anons sa a",
+    pending_payment: "Peman ann atann",
+    payment_confirm: "Ekip nou an konfime peman MonCash ou nan 24è.",
+    active_until: "Boost aktif jiskaske",
+    active_text: "Anons ou parèt nan banyè vedèt sit la.",
+    expired_on: "Boost ekspire le",
+    boost_again: "🔄 Booste ankò",
+    remove_listing: "🚫 Byen pa disponib ankò — retire anons",
+    removed: "Retire nan sit la",
+    restore_listing: "↩ Mete anons sou entènèt ankò",
+    priority_visibility: "Vizibilite priyorite",
+    send_exact_amount: "Voye montan egzak la via",
+    to_number: "nan nimewo",
+    then_paste: "apre kopye nimewo referans ou resevwa pa SMS anba a.",
+    moncash_ref: "Referans peman MonCash",
+    ref_placeholder: "Egzanp. 123456789",
+    confirm_boost: "Konfime demann boost mwen",
+    choose_plan: "Tanpri chwazi yon fòmil boost.",
+    enter_reference: "Tanpri antre nimewo referans peman MonCash ou.",
+    boost_saved: "Demann boost anrejistre! Ekip nou an ap konfime peman MonCash ou nan 24è.",
+    error: "Erè",
+    confirm_remove: "Konfime: byen sa a pa disponib ankò (loue, vann, oswa lòt) epi anons lan dwe disparèt sou sit piblik la?",
+    sending: "Voye...",
+    login_error: "Non itilizatè oswa modpas pa kòrèk.",
+    register_error: "Pa ka kreye kont lan. Tanpri eseye ankò.",
+    username_taken: "Non itilizatè sa a pa disponib. Tanpri chwazi yon lòt.",
+    profile_error: "Pwofil pwopriyetè pa jwenn pou kont sa a. Kontakte ekip KayPam.",
+    plans_error: "Erè nan chajman fòmil boost yo",
+    connection: "Koneksyon...",
+    creating: "Kreyasyon kont..."
+  }
+};
+
+const currentLang = localStorage.getItem('kaypam_lang') || 'fr';
+
+function t(key) {
+  return (translations[currentLang] && translations[currentLang][key]) || 
+         (translations.fr && translations.fr[key]) || key;
+}
 
 function usernameToEmail(username){
   return username.trim().toLowerCase() + EMAIL_DOMAIN;
@@ -308,14 +446,14 @@ document.getElementById('login-form').addEventListener('submit', async function(
   e.preventDefault();
   hideAuthError('login-error');
   if(!supabaseClient){
-    showAuthError('login-error', "Configuration Supabase manquante dans le code (voir SETUP.md).");
+    showAuthError('login-error', "Configuration Supabase manquante dans le code.");
     return;
   }
   const username = document.getElementById('li-username').value.trim();
   const password = document.getElementById('li-password').value;
   const btn = document.getElementById('login-submit');
   btn.disabled = true;
-  btn.textContent = 'Connexion...';
+  btn.textContent = t('connection');
   try{
     const { error } = await supabaseClient.auth.signInWithPassword({
       email: usernameToEmail(username),
@@ -325,7 +463,7 @@ document.getElementById('login-form').addEventListener('submit', async function(
     await afterAuthSuccess();
   }catch(err){
     console.error('Erreur de connexion', err);
-    showAuthError('login-error', "Nom d'utilisateur ou mot de passe incorrect.");
+    showAuthError('login-error', t('login_error'));
   }finally{
     btn.disabled = false;
     btn.textContent = 'Se connecter';
@@ -336,7 +474,7 @@ document.getElementById('register-form').addEventListener('submit', async functi
   e.preventDefault();
   hideAuthError('register-error');
   if(!supabaseClient){
-    showAuthError('register-error', "Configuration Supabase manquante dans le code (voir SETUP.md).");
+    showAuthError('register-error', "Configuration Supabase manquante dans le code.");
     return;
   }
   const username = document.getElementById('re-username').value.trim();
@@ -344,6 +482,7 @@ document.getElementById('register-form').addEventListener('submit', async functi
   const passwordConfirm = document.getElementById('re-password-confirm').value;
   const name = document.getElementById('re-name').value.trim();
   const phone = document.getElementById('re-phone').value.trim();
+  const whatsapp = document.getElementById('re-whatsapp').value.trim();
 
   if(!/^[a-zA-Z0-9_.-]{3,}$/.test(username)){
     showAuthError('register-error', "Le nom d'utilisateur doit contenir au moins 3 caractères, sans espace ni accent.");
@@ -361,10 +500,14 @@ document.getElementById('register-form').addEventListener('submit', async functi
     showAuthError('register-error', 'Complétez le nom et le téléphone.');
     return;
   }
+  if(!whatsapp){
+    showAuthError('register-error', 'Entrez votre numéro WhatsApp.');
+    return;
+  }
 
   const btn = document.getElementById('register-submit');
   btn.disabled = true;
-  btn.textContent = 'Création du compte...';
+  btn.textContent = t('creating');
 
   try{
     const { data, error } = await supabaseClient.auth.signUp({
@@ -373,7 +516,7 @@ document.getElementById('register-form').addEventListener('submit', async functi
     });
     if(error){
       if(/already registered|already exists|duplicate/i.test(error.message || '')){
-        throw new Error("Ce nom d'utilisateur n'est pas disponible. Choisissez-en un autre.");
+        throw new Error(t('username_taken'));
       }
       throw error;
     }
@@ -381,13 +524,13 @@ document.getElementById('register-form').addEventListener('submit', async functi
       throw new Error("Impossible de finaliser l'inscription automatiquement. Contactez l'équipe KayPam.");
     }
     const { error: linkErr } = await supabaseClient.rpc('link_owner_account', {
-      p_username: username, p_name: name, p_phone: phone
+      p_username: username, p_name: name, p_phone: phone, p_whatsapp: whatsapp
     });
     if(linkErr) throw linkErr;
     await afterAuthSuccess();
   }catch(err){
     console.error('Erreur d\'inscription', err);
-    showAuthError('register-error', err.message || "Impossible de créer le compte. Réessayez.");
+    showAuthError('register-error', err.message || t('register_error'));
   }finally{
     btn.disabled = false;
     btn.textContent = 'Créer mon compte';
@@ -402,7 +545,7 @@ async function logout(){
 async function afterAuthSuccess(){
   const { data, error } = await supabaseClient.rpc('get_my_owner_profile');
   if(error || !data || data.length === 0){
-    showAuthError('login-error', "Profil propriétaire introuvable pour ce compte. Contactez l'équipe KayPam.");
+    showAuthError('login-error', t('profile_error'));
     return;
   }
   document.getElementById('account-username').textContent = data[0].username;
@@ -437,7 +580,7 @@ async function loadPlans(){
 
 async function loadMyListings(){
   const resultsEl = document.getElementById('results');
-  resultsEl.innerHTML = '<div class="empty-state">Chargement de vos annonces…</div>';
+  resultsEl.innerHTML = `<div class="empty-state">${t('loading')}</div>`;
   try{
     const { data, error } = await supabaseClient.rpc('get_owner_boosts');
     if(error) throw error;
@@ -445,19 +588,18 @@ async function loadMyListings(){
     renderResults();
   }catch(err){
     console.error('Erreur de chargement des annonces', err);
-    resultsEl.innerHTML = '<div class="empty-state"><strong>Impossible de charger vos annonces</strong>Réessayez dans un instant.</div>';
+    resultsEl.innerHTML = `<div class="empty-state"><strong>${t('load_error')}</strong>${t('load_error_sub')}</div>`;
   }
 }
 
 function renderResults(){
   const resultsEl = document.getElementById('results');
   if(ownerListings.length === 0){
-    resultsEl.innerHTML = '<div class="empty-state"><strong>Aucune annonce trouvée</strong>Les annonces que vous publiez apparaîtront ici, quel que soit leur statut.</div>';
+    resultsEl.innerHTML = `<div class="empty-state"><strong>${t('no_listings')}</strong>${t('no_listings_sub')}</div>`;
     return;
   }
 
   resultsEl.innerHTML = ownerListings.map((l, idx) => {
-    // Annonce pas encore validée : on affiche juste son statut, aucune action de boost/retrait.
     if(l.listing_status === 'en_attente_verification'){
       return `
       <div class="listing-card">
@@ -467,9 +609,9 @@ function renderResults(){
             <div class="lc-meta">${escapeHtml(l.listing_transaction)} · ${escapeHtml(l.listing_city)}</div>
             <div class="lc-price">${fmtPrice(l)}</div>
           </div>
-          <span class="boost-status bs-pending">En attente de vérification</span>
+          <span class="boost-status bs-pending">${t('pending_verification')}</span>
         </div>
-        <div class="lc-meta" style="margin-top:10px;">Notre équipe vérifie votre annonce (sous 24h) avant de la publier.</div>
+        <div class="lc-meta lc-meta-top">${t('pending_text')}</div>
       </div>`;
     }
     if(l.listing_status === 'refuse'){
@@ -481,45 +623,44 @@ function renderResults(){
             <div class="lc-meta">${escapeHtml(l.listing_transaction)} · ${escapeHtml(l.listing_city)}</div>
             <div class="lc-price">${fmtPrice(l)}</div>
           </div>
-          <span class="boost-status bs-unavailable">Refusée</span>
+          <span class="boost-status bs-unavailable">${t('refused')}</span>
         </div>
-        <div class="lc-meta" style="margin-top:10px;">Contactez l'équipe KayPam pour en savoir plus sur cette décision.</div>
+        <div class="lc-meta lc-meta-top">${t('refused_text')}</div>
       </div>`;
     }
 
-    // Annonce validée : boost + disponibilité, comme avant.
     const isAvailable = l.listing_available !== false;
 
-    let statusHtml = '<span class="boost-status bs-none">Pas encore boostée</span>';
-    let boostActionHtml = `<button class="boost-btn" onclick="togglePlanPicker(${idx})">⭐ Booster cette annonce</button>`;
+    let statusHtml = `<span class="boost-status bs-none">${t('not_boosted')}</span>`;
+    let boostActionHtml = `<button class="boost-btn" onclick="togglePlanPicker(${idx})">${t('boost_this')}</button>`;
 
     if(l.boost_status === 'en_attente_paiement'){
-      statusHtml = `<span class="boost-status bs-pending">Paiement en attente (${escapeHtml(l.plan_name)})</span>`;
-      boostActionHtml = '<span class="lc-meta">Notre équipe confirme votre paiement MonCash sous 24h.</span>';
+      statusHtml = `<span class="boost-status bs-pending">${t('pending_payment')} (${escapeHtml(l.plan_name)})</span>`;
+      boostActionHtml = `<span class="lc-meta">${t('payment_confirm')}</span>`;
     } else if(l.boost_status === 'actif'){
       const endDate = l.ends_at ? new Date(l.ends_at).toLocaleDateString('fr-FR') : '—';
-      statusHtml = `<span class="boost-status bs-active">Boost actif jusqu'au ${endDate}</span>`;
-      boostActionHtml = '<span class="lc-meta">Votre annonce apparaît dans le bandeau vedette du site.</span>';
+      statusHtml = `<span class="boost-status bs-active">${t('active_until')} ${endDate}</span>`;
+      boostActionHtml = `<span class="lc-meta">${t('active_text')}</span>`;
     } else if(l.boost_status === 'expire'){
       const endDate = l.ends_at ? new Date(l.ends_at).toLocaleDateString('fr-FR') : '—';
-      statusHtml = `<span class="boost-status bs-none">Boost expiré le ${endDate}</span>`;
-      boostActionHtml = `<button class="boost-btn" onclick="togglePlanPicker(${idx})">🔄 Booster à nouveau</button>`;
+      statusHtml = `<span class="boost-status bs-none">${t('expired_on')} ${endDate}</span>`;
+      boostActionHtml = `<button class="boost-btn" onclick="togglePlanPicker(${idx})">${t('boost_again')}</button>`;
     }
 
     let availabilityAction;
     if(isAvailable){
-      availabilityAction = `<button class="remove-btn" onclick="removeListing(${idx})">🚫 Bien plus disponible — retirer l'annonce</button>`;
+      availabilityAction = `<button class="remove-btn" onclick="removeListing(${idx})">${t('remove_listing')}</button>`;
     } else {
-      statusHtml = '<span class="boost-status bs-unavailable">Retirée du site</span>';
+      statusHtml = `<span class="boost-status bs-unavailable">${t('removed')}</span>`;
       boostActionHtml = '';
-      availabilityAction = `<button class="restore-btn" onclick="restoreListing(${idx})">↩ Remettre l'annonce en ligne</button>`;
+      availabilityAction = `<button class="restore-btn" onclick="restoreListing(${idx})">${t('restore_listing')}</button>`;
     }
 
     const plansHtml = boostPlans.map((p, pi) => `
       <div class="plan-card" id="plan-${idx}-${pi}" onclick="selectPlan(${idx},${pi})">
         <div class="plan-name">${escapeHtml(p.name)}</div>
         <div class="plan-price">$${p.price_usd}</div>
-        <div class="plan-sub">Visibilité prioritaire</div>
+        <div class="plan-sub">${t('priority_visibility')}</div>
       </div>`).join('');
 
     return `
@@ -532,7 +673,7 @@ function renderResults(){
         </div>
         ${statusHtml}
       </div>
-      <div class="boost-action" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+      <div class="boost-action">
         ${boostActionHtml}
         ${availabilityAction}
       </div>
@@ -540,14 +681,14 @@ function renderResults(){
       <div class="plan-picker" id="picker-${idx}">
         <div class="plans-row">${plansHtml}</div>
         <div class="moncash-box">
-          Envoyez le montant exact via <b>MonCash</b> au numéro <b>${escapeHtml(MONCASH_NUMBER)}</b>,
-          puis collez ci-dessous le numéro de référence reçu par SMS.
+          ${t('send_exact_amount')} <b>MonCash</b> ${t('to_number')} <b>${escapeHtml(MONCASH_NUMBER)}</b>,
+          ${t('then_paste')}
         </div>
         <div class="ref-field">
-          <label for="ref-${idx}">Référence de paiement MonCash</label>
-          <input type="text" id="ref-${idx}" placeholder="Ex. 123456789">
+          <label for="ref-${idx}">${t('moncash_ref')}</label>
+          <input type="text" id="ref-${idx}" placeholder="${t('ref_placeholder')}">
         </div>
-        <button class="confirm-boost-btn" id="confirm-${idx}" onclick="submitBoost(${idx})" disabled>Confirmer ma demande de boost</button>
+        <button class="confirm-boost-btn" id="confirm-${idx}" onclick="submitBoost(${idx})" disabled>${t('confirm_boost')}</button>
       </div>` : ''}
     </div>`;
   }).join('');
@@ -572,17 +713,17 @@ async function submitBoost(idx){
   const reference = document.getElementById('ref-' + idx).value.trim();
 
   if(!planId){
-    alert('Choisissez une formule de boost.');
+    alert(t('choose_plan'));
     return;
   }
   if(!reference){
-    alert('Entrez le numéro de référence de votre paiement MonCash.');
+    alert(t('enter_reference'));
     return;
   }
 
   const btn = document.getElementById('confirm-' + idx);
   btn.disabled = true;
-  btn.textContent = 'Envoi...';
+  btn.textContent = t('sending');
 
   try{
     const { error } = await supabaseClient.rpc('request_boost', {
@@ -591,19 +732,19 @@ async function submitBoost(idx){
       p_reference: reference
     });
     if(error) throw error;
-    alert('Demande de boost enregistrée ! Notre équipe confirme votre paiement MonCash sous 24h.');
+    alert(t('boost_saved'));
     await loadMyListings();
   }catch(err){
     console.error('Erreur de demande de boost', err);
-    alert("Erreur : " + (err.message || "impossible d'enregistrer la demande."));
+    alert(t('error') + " : " + (err.message || "impossible d'enregistrer la demande."));
     btn.disabled = false;
-    btn.textContent = 'Confirmer ma demande de boost';
+    btn.textContent = t('confirm_boost');
   }
 }
 
 async function removeListing(idx){
   const listing = ownerListings[idx];
-  if(!confirm("Confirmez : ce bien n'est plus disponible (loué, vendu, ou autre) et l'annonce doit disparaître du site public ?")) return;
+  if(!confirm(t('confirm_remove'))) return;
   try{
     const { error } = await supabaseClient.rpc('set_listing_availability', {
       p_listing_id: listing.listing_id,
@@ -613,7 +754,7 @@ async function removeListing(idx){
     await loadMyListings();
   }catch(err){
     console.error('Erreur de retrait de l\'annonce', err);
-    alert("Erreur : " + (err.message || "impossible de retirer l'annonce."));
+    alert(t('error') + " : " + (err.message || "impossible de retirer l'annonce."));
   }
 }
 
@@ -628,13 +769,114 @@ async function restoreListing(idx){
     await loadMyListings();
   }catch(err){
     console.error('Erreur de réactivation de l\'annonce', err);
-    alert("Erreur : " + (err.message || "impossible de remettre l'annonce en ligne."));
+    alert(t('error') + " : " + (err.message || "impossible de remettre l'annonce en ligne."));
   }
 }
 
 checkExistingSession();
 </script>
+<script>
+(function(){
+  var lang = localStorage.getItem('kaypam_lang') || 'fr';
+  var maps = {
+    fr: {},
+    en: {
+      'Propriétaires': 'Owners',
+      'Mes annonces & boost': 'My listings & boost',
+      'Connectez-vous avec votre compte propriétaire pour retrouver toutes vos annonces — en attente, validées ou refusées — les retirer si le bien n\'est plus disponible, ou booster leur visibilité.': 'Log in with your owner account to find all your listings — pending, approved or rejected — remove them if the property is no longer available, or boost their visibility.',
+      'Se connecter': 'Log in',
+      'Créer un compte': 'Create an account',
+      "Nom d'utilisateur": 'Username',
+      'Mot de passe': 'Password',
+      'Confirmer le mot de passe': 'Confirm password',
+      'Nom complet': 'Full name',
+      'Téléphone': 'Phone',
+      'Numéro WhatsApp': 'WhatsApp number',
+      'Au moins 3 caractères pour le nom d\'utilisateur, 6 pour le mot de passe.': 'At least 3 characters for username, 6 for password.',
+      'Créer mon compte': 'Create my account',
+      'Connecté en tant que': 'Logged in as',
+      'Se déconnecter': 'Log out',
+      'Retour au site': 'Back to site',
+      '© 2026 KayPam. Les boosts sont confirmés manuellement par l\'équipe après paiement MonCash.': '© 2026 KayPam. Boosts are manually confirmed by the team after MonCash payment.'
+    },
+    ht: {
+      'Propriétaires': 'Pwopriyetè',
+      'Mes annonces & boost': 'Anons mwen & boost',
+      'Connectez-vous avec votre compte propriétaire pour retrouver toutes vos annonces — en attente, validées ou refusées — les retirer si le bien n\'est plus disponible, ou booster leur visibilité.': 'Konekte ak kont pwopriyetè ou pou jwenn tout anons ou yo — ann atann, valide oswa refize — retire yo si byen an pa disponib ankò, oswa booste vizibilite yo.',
+      'Se connecter': 'Konekte',
+      'Créer un compte': 'Kree yon kont',
+      "Nom d'utilisateur": 'Non itilizatè',
+      'Mot de passe': 'Mo de pase',
+      'Confirmer le mot de passe': 'Konfime mo de pase',
+      'Nom complet': 'Non konplè',
+      'Téléphone': 'Telefòn',
+      'Numéro WhatsApp': 'Nimewo WhatsApp',
+      'Au moins 3 caractères pour le nom d\'utilisateur, 6 pour le mot de passe.': 'Omwen 3 karaktè pou non itilizatè, 6 pou mo de pase.',
+      'Créer mon compte': 'Kree kont mwen',
+      'Connecté en tant que': 'Konekte kòm',
+      'Se déconnecter': 'Dekonekte',
+      'Retour au site': 'Retounen sou sit la',
+      '© 2026 KayPam. Les boosts sont confirmés manuellement par l\'équipe après paiement MonCash.': '© 2026 KayPam. Boosts yo konfime manyèlman pa ekip la apre peman MonCash.'
+    }
+  };
+  var map = maps[lang] || maps.fr;
+  function applyToText(value){
+    if(!value) return value;
+    var result = value;
+    Object.keys(map).forEach(function(from){
+      result = result.split(from).join(map[from]);
+    });
+    return result;
+  }
+  function updateElement(el){
+    if(!el) return;
+    var aria = el.getAttribute('aria-label');
+    if(aria) el.setAttribute('aria-label', applyToText(aria));
+    var title = el.getAttribute('title');
+    if(title) el.setAttribute('title', applyToText(title));
+    if(el.placeholder) el.placeholder = applyToText(el.placeholder);
+    if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT'){
+      var value = el.value;
+      if(value) el.value = applyToText(value);
+    }
+    var text = el.textContent;
+    if(text && text.trim()){
+      var newText = applyToText(text);
+      if(newText !== text) el.textContent = newText;
+    }
+  }
+  document.documentElement.lang = lang;
+  document.querySelectorAll('a, button, label, p, span, h1, h2, h3, h4, li, option, legend, input, textarea, select').forEach(updateElement);
+})();
 
-<script>(function(){var lang=localStorage.getItem('kaypam_lang')||'fr';var maps={fr:{},en:{'Publier gratuitement':'List for free','Se connecter':'Log in','Créer un compte':'Create an account','Nom d utilisateur':'Username','Mot de passe':'Password','Confirmer le mot de passe':'Confirm password','Booster mes annonces':'Boost my listings','Comment ça marche':'How it works','Publier une annonce':'Publish a listing','Mes annonces':'My listings','Contact':'Contact','Publier':'Publish','Rechercher':'Search','Envoyer':'Submit','Enregistrer':'Save','Annuler':'Cancel','Tous':'All','Toutes les villes':'All cities','Recherche rapide':'Quick search','Ville':'City','Type de bien':'Property type','Budget max (USD)':'Max budget (USD)','Rechercher des biens →':'Search properties →','Biens en vedette':'Featured properties','Annonces':'Listings','Vedette':'Featured','Toutes les zones':'All zones','Retour':'Back','Fermer':'Close','Annonces immobilières · Haïti':'Real estate listings · Haiti','KayPam':'KayPam','Propriétaires et agents':'Owners and agents','Publiez votre annonce gratuitement':'Publish your listing for free','Créez votre compte propriétaire pour publier, gérer et booster vos annonces. Notre équipe vérifie chaque annonce — photos et vidéos incluses — avant sa mise en ligne.':'Create your owner account to publish, manage, and boost your listings. Our team verifies every listing — photos and videos included — before it goes live.','Publication gratuite, sans frais cachés':'Free listing, no hidden fees','Un seul compte pour toutes vos annonces':'One account for all your listings','Photos et vidéos vérifiées avant publication':'Photos and videos verified before publication','Retirez ou boostez vos annonces à tout moment':'Remove or boost your listings anytime','Propriétaires inscrits':'Registered owners','Annonces soumises':'Listings submitted','Retour au site':'Back to site','Vérification des annonces':'Listing verification','Chaque annonce reste invisible du public jusqu à validation. Suivez les 3 vérifications ci-dessous avant de cliquer sur « Valider ».':'Each listing stays invisible to the public until approved. Follow the 3 checks below before clicking “Validate”.','Guide de vérification':'Verification guide','Appel de courtoisie :':'Courtesy call:','Cohérence du prix :':'Price consistency:','Qualité des photos et vidéos :':'Photo and video quality:','En attente':'Pending','Validées':'Validated','Refusées':'Rejected','Propriétaires':'Owners','Demandes de boost':'Boost requests','Paiements en attente':'Pending payments','Boosts actifs':'Active boosts','Chargement des annonces…':'Loading listings…','Chargement des demandes de boost…':'Loading boost requests…','Déconnexion':'Logout','Espace réservé à l équipe de vérification':'Reserved for the verification team','Espace Admin KayPam':'KayPam Admin Area','Connectez-vous avec votre compte administrateur pour gérer les annonces.':'Log in with your admin account to manage listings.','Se connecter':'Log in','Se déconnecter':'Log out'},ht:{'Publier gratuitement':'Pibliye gratis','Se connecter':'Konekte','Créer un compte':'Kree yon kont','Nom d utilisateur':'Non itilizatè','Mot de passe':'Mo de pase','Confirmer le mot de passe':'Konfirme mo de pase','Booster mes annonces':'Booste anons mwen yo','Comment ça marche':'Kijan sa mache','Publier une annonce':'Pibliye yon anons','Mes annonces':'Anons mwen yo','Contact':'Kontak','Publier':'Pibliye','Rechercher':'Chèche','Envoyer':'Voye','Enregistrer':'Anrejistre','Annuler':'Anile','Tous':'Tout','Toutes les villes':'Tout vil yo','Recherche rapide':'Rechèch rapid','Ville':'Vil','Type de bien':'Kalite byen','Budget max (USD)':'Bidjè maksimòm (USD)','Rechercher des biens →':'Chèche byen →','Biens en vedette':'Byen an vedèt','Annonces':'Anons','Vedette':'Vedèt','Toutes les zones':'Tout zòn yo','Retour':'Retounen','Fermer':'Fèmen','Annonces immobilières · Haïti':'Anons imobilye · Ayiti','KayPam':'KayPam','Propriétaires et agents':'Pwopriyetè ak ajan','Publiez votre annonce gratuitement':'Pibliye anons ou gratis','Créez votre compte propriétaire pour publier, gérer et booster vos annonces. Notre équipe vérifie chaque annonce — photos et vidéos incluses — avant sa mise en ligne.':'Kree kont pwopriyetè ou pou pibliye, jere, ak booste anons ou yo. Ekip nou an tcheke chak anons — foto ak videyo ki enkli — anvan yo mete li sou entènèt.','Publication gratuite, sans frais cachés':'Piblikasyon gratis, san fra san kache','Un seul compte pour toutes vos annonces':'Yon sèl kont pou tout anons ou yo','Photos et vidéos vérifiées avant publication':'Foto ak videyo tcheke anvan piblikasyon','Retirez ou boostez vos annonces à tout moment':'Retire oswa booste anons ou yo nenpòt moman','Propriétaires inscrits':'Pwopriyetè ki enskri','Annonces soumises':'Anons soumèt','Retour au site':'Retounen sou sit la','Vérification des annonces':'Vérifikasyon anons yo','Chaque annonce reste invisible du public jusqu à validation. Suivez les 3 vérifications ci-dessous avant de cliquer sur « Valider ».':'Chak anons rete envizib pou piblik la jiskaske yo apwouve l. Swiv 3 verifikasyon yo anba a anvan ou klike sou “Valide”.','Guide de vérification':'Gid verifikasyon','Appel de courtoisie :':'Apele koutwazi:','Cohérence du prix :':'Konsistans pri:','Qualité des photos et vidéos :':'Kwalite foto ak videyo:','En attente':'Ann atann','Validées':'Valide','Refusées':'Refize','Propriétaires':'Pwopriyetè','Demandes de boost':'Demand boost','Paiements en attente':'Peman an atann','Boosts actifs':'Boost aktif','Chargement des annonces…':'Chajman anons yo…','Chargement des demandes de boost…':'Chajman demann boost yo…','Déconnexion':'Dekonekte','Espace réservé à l équipe de vérification':'Espas rezève pou ekip verifikasyon an','Espace Admin KayPam':'Espas Admin KayPam','Connectez-vous avec votre compte administrateur pour gérer les annonces.':'Konekte avèk kont administratè ou pou jere anons yo.','Se déconnecter':'Dekonekte'}};var map=maps[lang]||maps.fr;var applyToText=function(value){if(!value){return value;}var result=value;Object.keys(map).forEach(function(from){result=result.split(from).join(map[from]);});return result;};var updateElement=function(el){if(!el){return;}var aria=el.getAttribute('aria-label');if(aria){el.setAttribute('aria-label',applyToText(aria));}var title=el.getAttribute('title');if(title){el.setAttribute('title',applyToText(title));}if(el.placeholder){el.placeholder=applyToText(el.placeholder);}if(el.tagName==='INPUT'||el.tagName==='TEXTAREA'||el.tagName==='SELECT'){var value=el.value;if(value){el.value=applyToText(value);}}var text=el.textContent;if(text&&text.trim()){var newText=applyToText(text);if(newText!==text){el.textContent=newText;}}};document.documentElement.lang=lang;document.querySelectorAll('a, button, label, p, span, h1, h2, h3, h4, li, option, legend, input, textarea, select').forEach(updateElement);})();</script>
+/* ===== TRACKING DES VISITES ===== */
+async function trackVisit(){
+  // Jwenn id vizitè (nan localStorage oswa nouvo)
+  let visitorId = localStorage.getItem('kaypam_visitor_id');
+  if(!visitorId){
+    visitorId = 'visitor_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+    localStorage.setItem('kaypam_visitor_id', visitorId);
+  }
+  
+  // Jwenn paj aktyèl la
+  const page = window.location.pathname.split('/').pop() || 'kaypam.html';
+  
+  try{
+    await supabaseClient
+      .from('visits')
+      .insert({
+        visitor_id: visitorId,
+        page: page,
+        referrer: document.referrer || null,
+        user_agent: navigator.userAgent
+      });
+  }catch(err){
+    console.error('Erreur tracking:', err);
+  }
+}
+
+// Chaje tracking lè paj la fin chaje
+document.addEventListener('DOMContentLoaded', trackVisit);
+</script>
 </body>
 </html>
