@@ -849,34 +849,60 @@ checkExistingSession();
   document.querySelectorAll('a, button, label, p, span, h1, h2, h3, h4, li, option, legend, input, textarea, select').forEach(updateElement);
 })();
 
-/* ===== TRACKING DES VISITES ===== */
-async function trackVisit(){
-  // Jwenn id vizitè (nan localStorage oswa nouvo)
-  let visitorId = localStorage.getItem('kaypam_visitor_id');
-  if(!visitorId){
-    visitorId = 'visitor_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-    localStorage.setItem('kaypam_visitor_id', visitorId);
+/* ===== TRACKING DES VISITES - VERSION STABLE ===== */
+
+// Fonksyon pou jwenn ID vizitè a (ki rete menm)
+function getVisitorId() {
+  let id = localStorage.getItem('kaypam_visitor_id');
+  if (!id) {
+    // Kreye yon ID ki stab (baze sou tan + random)
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substr(2, 6);
+    id = 'v_' + timestamp + '_' + random;
+    try {
+      localStorage.setItem('kaypam_visitor_id', id);
+    } catch(e) {
+      // Si localStorage pa disponib, itilize yon ID tanporè
+      id = 'tmp_' + Date.now().toString(36);
+    }
   }
-  
-  // Jwenn paj aktyèl la
-  const page = window.location.pathname.split('/').pop() || 'kaypam.html';
-  
-  try{
-    await supabaseClient
+  return id;
+}
+
+// Fonksyon pou anrejistre vizit la
+async function trackVisit() {
+  if (!supabaseClient) return;
+  try {
+    const visitorId = getVisitorId();
+    const page = window.location.pathname.split('/').pop() || 'index.html';
+    
+    const { error } = await supabaseClient
       .from('visits')
       .insert({
         visitor_id: visitorId,
         page: page,
         referrer: document.referrer || null,
-        user_agent: navigator.userAgent
+        user_agent: navigator.userAgent,
+        visited_at: new Date().toISOString()
       });
-  }catch(err){
-    console.error('Erreur tracking:', err);
+    
+    if (error) {
+      console.error('❌ Erreur tracking:', error);
+    } else {
+      console.log('✅ Visite enregistrée:', page, '| ID:', visitorId);
+    }
+  } catch(err) {
+    console.error('❌ Erreur tracking:', err);
   }
 }
 
-// Chaje tracking lè paj la fin chaje
-document.addEventListener('DOMContentLoaded', trackVisit);
+// Lè paj la fin chaje, anrejistre vizit la
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(trackVisit, 500);
+});
+
+
+
 </script>
 </body>
 </html>

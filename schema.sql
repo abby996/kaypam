@@ -805,3 +805,164 @@ alter default privileges in schema public grant all on sequences to anon, authen
 -- insert into admins (user_id)
 -- select id from auth.users where email = 'VOTRE_EMAIL_ADMIN'
 -- on conflict (user_id) do nothing;
+
+
+-- Tab pou anrejistre rezime chak jou
+create table if not exists visits_summary (
+  id uuid primary key default gen_random_uuid(),
+  date date not null unique,
+  total_visits int not null default 0,
+  unique_visitors int not null default 0,
+  created_at timestamptz default now()
+);
+
+-- Endèks
+create index if not exists idx_visits_summary_date on visits_summary(date);
+
+-- Fonksyon pou ajoute rezime vizit chak jou
+create or replace function public.add_daily_visits_summary()
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_date date;
+  v_total int;
+  v_unique int;
+begin
+  -- Jwenn dènye dat ki gen rezime
+  select max(date) into v_date from visits_summary;
+  
+  -- Si pa gen rezime, kòmanse depi 30 jou avan
+  if v_date is null then
+    v_date := date_trunc('day', now()) - interval '30 days';
+  else
+    v_date := v_date + interval '1 day';
+  end if;
+  
+  -- Pou chak jou ki poko gen rezime
+  while v_date <= date_trunc('day', now())::date loop
+    -- Konte vizit pou jou sa a
+    select count(*) into v_total
+    from visits
+    where date_trunc('day', visited_at) = v_date;
+    
+    -- Konte vizitè inik pou jou sa a
+    select count(distinct visitor_id) into v_unique
+    from visits
+    where date_trunc('day', visited_at) = v_date;
+    
+    -- Enrejistre rezime a
+    insert into visits_summary (date, total_visits, unique_visitors)
+    values (v_date, v_total, v_unique)
+    on conflict (date) do update
+    set 
+      total_visits = excluded.total_visits,
+      unique_visitors = excluded.unique_visitors;
+    
+    v_date := v_date + interval '1 day';
+  end loop;
+end;
+$$;
+
+grant execute on function public.add_daily_visits_summary to authenticated;
+
+
+
+-- Fonksyon pou jwenn rezime vizit pa peryòd
+create or replace function public.get_visits_summary(
+  p_start_date date,
+  p_end_date date
+)
+returns table(
+  period text,
+  total_visits bigint,
+  unique_visitors bigint
+)
+language sql
+security definer
+set search_path = public
+as $$
+  select 
+    to_char(date, 'YYYY-MM') as period,
+    sum(total_visits) as total_visits,
+    sum(unique_visitors) as unique_visitors
+  from visits_summary
+  where date between p_start_date and p_end_date
+  group by to_char(date, 'YYYY-MM')
+  order by period;
+$$;
+
+grant execute on function public.get_visits_summary to authenticated;
+
+-- Fonksyon pou rezime pa jou
+create or replace function public.get_visits_daily(
+  p_start_date date,
+  p_end_date date
+)
+returns table(
+  jour date,
+  total_visits bigint,
+  unique_visitors bigint
+)
+language sql
+security definer
+set search_path = public
+as $$
+  select 
+    date,
+    total_visits,
+    unique_visitors
+  from visits_summary
+  where date between p_start_date and p_end_date
+  order by date;
+$$;
+
+grant execute on function public.get_visits_daily to authenticated;
+
+
+
+-- Rezime mwa a (mwa aktyèl la)
+create or replace function public.get_current_month_summary()
+returns table(
+  month text,
+  total_visits bigint,
+  unique_visitors bigint
+)
+language sql
+security definer
+set search_path = public
+as $$
+  select 
+    to_char(date_trunc('month', now()), 'YYYY-MM') as month,
+    sum(total_visits) as total_visits,
+    sum(unique_visitors) as unique_visitors
+  from visits_summary
+  where date >= date_trunc('month', now())
+    and date <= now()::date;
+$$;
+
+grant execute on function public.get_current_month_summary to authenticated;
+
+-- Rezime ane a (ane aktyèl la)
+create or replace function public.get_current_year_summary()
+returns table(
+  year text,
+  total_visits bigint,
+  unique_visitors bigint
+)
+language sql
+security definer
+set search_path = public
+as $$
+  select 
+    to_char(date_trunc('year', now()), 'YYYY') as year,
+    sum(total_visits) as total_visits,
+    sum(unique_visitors) as unique_visitors
+  from visits_summary
+  where date >= date_trunc('year', now())
+    and date <= now()::date;
+$$;
+
+grant execute on function public.get_current_year_summary to authenticated;

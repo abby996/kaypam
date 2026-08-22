@@ -1379,35 +1379,67 @@ async function init(){
   startBoostRotation();
 }
 init();
-
-/* ===== TRACKING DES VISITES ===== */
-async function trackVisit(){
-  // Jwenn id vizitè (nan localStorage oswa nouvo)
-  let visitorId = localStorage.getItem('kaypam_visitor_id');
-  if(!visitorId){
-    visitorId = 'visitor_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-    localStorage.setItem('kaypam_visitor_id', visitorId);
-  }
-  
-  // Jwenn paj aktyèl la
-  const page = window.location.pathname.split('/').pop() || 'kaypam.html';
-  
+/* ===== CHARGER STATISTIQUES VISITES RÉELLES ===== */
+async function loadVisitsStats(){
   try{
-    await supabaseClient
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const weekAgo = new Date(today);
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const monthAgo = new Date(today);
+    monthAgo.setDate(monthAgo.getDate() - 30);
+    
+    // Vizit jodi a
+    const { count: todayCount, error: todayError } = await supabaseClient
       .from('visits')
-      .insert({
-        visitor_id: visitorId,
-        page: page,
-        referrer: document.referrer || null,
-        user_agent: navigator.userAgent
-      });
+      .select('*', { count: 'exact', head: true })
+      .gte('visited_at', today.toISOString());
+      
+    if(todayError) throw todayError;
+    
+    // Vizit semèn sa a
+    const { count: weekCount, error: weekError } = await supabaseClient
+      .from('visits')
+      .select('*', { count: 'exact', head: true })
+      .gte('visited_at', weekAgo.toISOString());
+      
+    if(weekError) throw weekError;
+    
+    // Vizit mwa sa a
+    const { count: monthCount, error: monthError } = await supabaseClient
+      .from('visits')
+      .select('*', { count: 'exact', head: true })
+      .gte('visited_at', monthAgo.toISOString());
+      
+    if(monthError) throw monthError;
+    
+    // Vizitè inik jodi a
+    const { data: uniqueData, error: uniqueError } = await supabaseClient
+      .from('visits')
+      .select('visitor_id')
+      .gte('visited_at', today.toISOString());
+      
+    if(uniqueError) throw uniqueError;
+    
+    // Konte vizitè inik (ID diferan)
+    const uniqueVisitors = new Set(uniqueData.map(v => v.visitor_id)).size;
+    
+    // Mete a jou afichaj la
+    document.getElementById('visits-today').textContent = todayCount || 0;
+    document.getElementById('visits-week').textContent = weekCount || 0;
+    document.getElementById('visits-month').textContent = monthCount || 0;
+    document.getElementById('visitors-today').textContent = uniqueVisitors || 0;
+    
   }catch(err){
-    console.error('Erreur tracking:', err);
+    console.error('Erreur chargement stats visites:', err);
+    document.getElementById('visits-today').textContent = '—';
+    document.getElementById('visits-week').textContent = '—';
+    document.getElementById('visits-month').textContent = '—';
+    document.getElementById('visitors-today').textContent = '—';
   }
 }
 
-// Chaje tracking lè paj la fin chaje
-document.addEventListener('DOMContentLoaded', trackVisit);
+
 </script>
 
 </body>

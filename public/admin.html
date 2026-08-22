@@ -250,6 +250,31 @@
       </div>
     </div>
 
+
+    <!-- Ajoute anba stats-visits la -->
+<div class="admin-grid" style="margin-bottom:32px;">
+  <div class="admin-card">
+    <h3>📅 Ce mois</h3>
+    <div class="stat-number" id="month-visits">0</div>
+    <span class="stat-label">Visites ce mois</span>
+  </div>
+  <div class="admin-card">
+    <h3>📅 Ce mois (unique)</h3>
+    <div class="stat-number" id="month-unique">0</div>
+    <span class="stat-label">Visiteurs uniques</span>
+  </div>
+  <div class="admin-card">
+    <h3>📆 Cette année</h3>
+    <div class="stat-number" id="year-visits">0</div>
+    <span class="stat-label">Visites cette année</span>
+  </div>
+  <div class="admin-card">
+    <h3>📆 Cette année (unique)</h3>
+    <div class="stat-number" id="year-unique">0</div>
+    <span class="stat-label">Visiteurs uniques</span>
+  </div>
+</div>
+
     <!-- Tabs Navigation -->
     <div class="tab-nav">
       <button class="active" data-tab="tab-listings">📄 Annonces</button>
@@ -950,6 +975,28 @@ checkExistingSession();
   document.documentElement.lang = lang;
   document.querySelectorAll('a, button, label, p, span, h1, h2, h3, h4, li, option, legend, input, textarea, select, th, td').forEach(updateElement);
 })();
+
+
+
+
+// Kòd senp ki pa bloke paj la
+async function loadSimpleVisits(){
+  try {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    
+    const { count } = await supabaseClient
+      .from('visits')
+      .select('*', { count: 'exact', head: true })
+      .gte('visited_at', today.toISOString());
+      
+    document.getElementById('visits-today').textContent = count || 0;
+  } catch(e) {
+    // Si gen erè, pa montre anyen
+    document.getElementById('visits-today').textContent = '—';
+  }
+}
+
 </script>
 </body>
 </html>
