@@ -1027,3 +1027,14 @@ create policy "media_bucket_public_read" on storage.objects
 create policy "media_bucket_public_upload" on storage.objects
   for insert to authenticated 
   with check (bucket_id = 'listing-media');
+
+
+  -- 1. Ajoute kolòn imaj yo anndan tab listings la
+ALTER TABLE public.listings 
+ADD COLUMN IF NOT EXISTS image_url text,
+ADD COLUMN IF NOT EXISTS images text[];
+
+-- 2. Asire w RLS Policy pèmèt tout moun li anons yo
+DROP POLICY IF EXISTS "listings_public_read" ON public.listings;
+CREATE POLICY "listings_public_read" ON public.listings
+  FOR SELECT TO anon, authenticated USING (true);
