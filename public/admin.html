@@ -101,6 +101,7 @@
   .stats-visits .visit-card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;text-align:center;}
   .stats-visits .visit-card .num{font-family:var(--font-mono);font-size:32px;font-weight:700;color:var(--navy);}
   .stats-visits .visit-card .label{font-size:12px;color:var(--ink-soft);margin-top:4px;}
+  .stats-visits .visit-card .sub-label{font-size:11px;color:var(--ink-soft);margin-top:4px;}
 
   .admin-table-wrap{overflow-x:auto;}
   .admin-table{width:100%;border-collapse:collapse;font-size:13px;min-width:700px;}
@@ -238,7 +239,7 @@
       <div class="visit-card">
         <div class="num" id="visits-today">0</div>
         <div class="label">📍 Visites aujourd'hui</div>
-        <div style="font-size:11px;color:var(--ink-soft);margin-top:4px;">👤 <span id="visitors-today">0</span> visiteurs uniques</div>
+        <div class="sub-label">👤 <span id="visitors-today">0</span> visiteurs uniques</div>
       </div>
       <div class="visit-card">
         <div class="num" id="visits-week">0</div>
@@ -250,30 +251,29 @@
       </div>
     </div>
 
-
-    <!-- Ajoute anba stats-visits la -->
-<div class="admin-grid" style="margin-bottom:32px;">
-  <div class="admin-card">
-    <h3>📅 Ce mois</h3>
-    <div class="stat-number" id="month-visits">0</div>
-    <span class="stat-label">Visites ce mois</span>
-  </div>
-  <div class="admin-card">
-    <h3>📅 Ce mois (unique)</h3>
-    <div class="stat-number" id="month-unique">0</div>
-    <span class="stat-label">Visiteurs uniques</span>
-  </div>
-  <div class="admin-card">
-    <h3>📆 Cette année</h3>
-    <div class="stat-number" id="year-visits">0</div>
-    <span class="stat-label">Visites cette année</span>
-  </div>
-  <div class="admin-card">
-    <h3>📆 Cette année (unique)</h3>
-    <div class="stat-number" id="year-unique">0</div>
-    <span class="stat-label">Visiteurs uniques</span>
-  </div>
-</div>
+    <!-- Statistiques mensuelles et annuelles -->
+    <div class="admin-grid" style="margin-bottom:32px;">
+      <div class="admin-card">
+        <h3>📅 Ce mois</h3>
+        <div class="stat-number" id="month-visits">0</div>
+        <span class="stat-label">Visites</span>
+      </div>
+      <div class="admin-card">
+        <h3>👤 Ce mois (unique)</h3>
+        <div class="stat-number" id="month-unique">0</div>
+        <span class="stat-label">Visiteurs uniques</span>
+      </div>
+      <div class="admin-card">
+        <h3>📆 Cette année</h3>
+        <div class="stat-number" id="year-visits">0</div>
+        <span class="stat-label">Visites</span>
+      </div>
+      <div class="admin-card">
+        <h3>👤 Cette année (unique)</h3>
+        <div class="stat-number" id="year-unique">0</div>
+        <span class="stat-label">Visiteurs uniques</span>
+      </div>
+    </div>
 
     <!-- Tabs Navigation -->
     <div class="tab-nav">
@@ -362,7 +362,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================================================
-   ADMIN.HTML - JAVASCRIPT COMPLET
+   ADMIN.HTML - JAVASCRIPT COMPLET (KOREK)
    ============================================================ */
 
 /* ===== 1. CONFIGURATION SUPABASE ===== */
@@ -376,7 +376,6 @@ let isAdmin = false;
 
 /* ===== 2. FONCTIONS UTILITAIRES ===== */
 
-// Sekirize kont XSS
 function escapeHtml(s){
   return String(s || '').replace(/[&<>"']/g, c => ({
     '&': '&amp;',
@@ -387,14 +386,12 @@ function escapeHtml(s){
   })[c]);
 }
 
-// Fòma pri selon deviz
 function formatPrice(price, currency){
   return currency === 'HTG' 
     ? `${Number(price).toLocaleString('en-US')} HTG` 
     : `$${Number(price).toLocaleString('en-US')}`;
 }
 
-// Badge estati annonce
 function getStatusBadge(status){
   const map = {
     'en_attente_verification': 'pending',
@@ -409,7 +406,6 @@ function getStatusBadge(status){
   return `<span class="status-badge ${map[status] || ''}">${labels[status] || status}</span>`;
 }
 
-// Badge estati boost
 function getBoostStatusBadge(status){
   const map = {
     'en_attente_paiement': 'waiting',
@@ -457,7 +453,6 @@ document.getElementById('admin-login-form').addEventListener('submit', async fun
     });
     if(error) throw error;
     
-    // Vérifier si l'utilisateur est admin
     const { data: adminData, error: adminError } = await supabaseClient
       .from('admins')
       .select('user_id')
@@ -494,7 +489,7 @@ async function loadDashboard(){
   if(!supabaseClient || !isAdmin) return;
   
   try{
-    // 6a. Charger toutes les annonces
+    // 6a. Charger toutes les annonces AVEC les médias
     const { data: listings, error: listingsError } = await supabaseClient
       .from('listings')
       .select(`
@@ -517,7 +512,7 @@ async function loadDashboard(){
       
     if(boostsError) throw boostsError;
     
-    // 6c. Charger tous les utilisateurs (owners)
+    // 6c. Charger tous les utilisateurs
     const { data: users, error: usersError } = await supabaseClient
       .from('owners')
       .select('id, username, name, phone, whatsapp, created_at')
@@ -527,6 +522,7 @@ async function loadDashboard(){
     
     // 6d. Charger statistiques visites
     await loadVisitsStats();
+    await loadMonthlyYearlyStats();
     
     // 6e. Calculer statistiques
     const pending = (listings || []).filter(l => l.status === 'en_attente_verification').length;
@@ -536,7 +532,6 @@ async function loadDashboard(){
     const total = (listings || []).length;
     const totalUsers = (users || []).length;
     
-    // Nouveaux utilisateurs cette semaine (7 derniers jours)
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
     const newUsers = (users || []).filter(u => new Date(u.created_at) > weekAgo).length;
@@ -572,7 +567,6 @@ async function loadVisitsStats(){
     const monthAgo = new Date(today);
     monthAgo.setDate(monthAgo.getDate() - 30);
     
-    // Vizit jodi a
     const { count: todayCount, error: todayError } = await supabaseClient
       .from('visits')
       .select('*', { count: 'exact', head: true })
@@ -580,7 +574,6 @@ async function loadVisitsStats(){
       
     if(todayError) throw todayError;
     
-    // Vizit semèn sa a
     const { count: weekCount, error: weekError } = await supabaseClient
       .from('visits')
       .select('*', { count: 'exact', head: true })
@@ -588,7 +581,6 @@ async function loadVisitsStats(){
       
     if(weekError) throw weekError;
     
-    // Vizit mwa sa a
     const { count: monthCount, error: monthError } = await supabaseClient
       .from('visits')
       .select('*', { count: 'exact', head: true })
@@ -596,7 +588,6 @@ async function loadVisitsStats(){
       
     if(monthError) throw monthError;
     
-    // Vizitè inik jodi a
     const { data: uniqueData, error: uniqueError } = await supabaseClient
       .from('visits')
       .select('visitor_id')
@@ -613,7 +604,6 @@ async function loadVisitsStats(){
     
   }catch(err){
     console.error('Erreur chargement stats visites:', err);
-    // Si tab visits pa egziste, montre "—"
     document.getElementById('visits-today').textContent = '—';
     document.getElementById('visits-week').textContent = '—';
     document.getElementById('visits-month').textContent = '—';
@@ -621,7 +611,69 @@ async function loadVisitsStats(){
   }
 }
 
-/* ===== 8. RENDU DES ANNONCES ===== */
+/* ===== 8. STATISTIQUES MENSUELLES ET ANNUELLES ===== */
+async function loadMonthlyYearlyStats(){
+  try{
+    // Mwa aktyèl la
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    
+    const { count: monthTotal, error: monthError } = await supabaseClient
+      .from('visits')
+      .select('*', { count: 'exact', head: true })
+      .gte('visited_at', startOfMonth.toISOString())
+      .lte('visited_at', endOfMonth.toISOString());
+      
+    if(monthError) throw monthError;
+    
+    const { data: monthUniqueData, error: uniqueError } = await supabaseClient
+      .from('visits')
+      .select('visitor_id')
+      .gte('visited_at', startOfMonth.toISOString())
+      .lte('visited_at', endOfMonth.toISOString());
+      
+    if(uniqueError) throw uniqueError;
+    
+    const monthUnique = new Set(monthUniqueData.map(v => v.visitor_id)).size;
+    
+    // Ane aktyèl la
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+    const endOfYear = new Date(now.getFullYear(), 11, 31);
+    
+    const { count: yearTotal, error: yearError } = await supabaseClient
+      .from('visits')
+      .select('*', { count: 'exact', head: true })
+      .gte('visited_at', startOfYear.toISOString())
+      .lte('visited_at', endOfYear.toISOString());
+      
+    if(yearError) throw yearError;
+    
+    const { data: yearUniqueData, error: yearUniqueError } = await supabaseClient
+      .from('visits')
+      .select('visitor_id')
+      .gte('visited_at', startOfYear.toISOString())
+      .lte('visited_at', endOfYear.toISOString());
+      
+    if(yearUniqueError) throw yearUniqueError;
+    
+    const yearUnique = new Set(yearUniqueData.map(v => v.visitor_id)).size;
+    
+    document.getElementById('month-visits').textContent = monthTotal || 0;
+    document.getElementById('month-unique').textContent = monthUnique || 0;
+    document.getElementById('year-visits').textContent = yearTotal || 0;
+    document.getElementById('year-unique').textContent = yearUnique || 0;
+    
+  }catch(err){
+    console.error('Erreur chargement stats mensuelles/annuelles:', err);
+    document.getElementById('month-visits').textContent = '—';
+    document.getElementById('month-unique').textContent = '—';
+    document.getElementById('year-visits').textContent = '—';
+    document.getElementById('year-unique').textContent = '—';
+  }
+}
+
+/* ===== 9. RENDU DES ANNONCES AVEC PREVIEW FOTO ===== */
 function renderListings(listings){
   const tbody = document.getElementById('listings-body');
   
@@ -634,22 +686,31 @@ function renderListings(listings){
     const media = l.listing_media || [];
     const photos = media.filter(m => m.media_type === 'photo');
     const videos = media.filter(m => m.media_type === 'video');
-    const mediaHtml = [];
-    if(photos.length > 0) mediaHtml.push(`📷 ${photos.length}`);
-    if(videos.length > 0) mediaHtml.push(`🎬 ${videos.length}`);
-    const mediaDisplay = mediaHtml.length > 0 ? mediaHtml.join(' ') : 'Aucun';
+    
+    // Preview premye foto
+    let previewHtml = '';
+    if(photos.length > 0){
+      previewHtml = `<img src="${photos[0].url}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;border:1px solid var(--border);">`;
+    }
+    
+    const mediaCount = `📷 ${photos.length} | 🎬 ${videos.length}`;
     
     return `
     <tr>
       <td>
-        <strong>${escapeHtml(l.title)}</strong>
-        <br><span style="font-size:11px;color:var(--ink-soft);">${escapeHtml(l.owners?.name || 'Inconnu')}</span>
+        <div style="display:flex;align-items:center;gap:10px;">
+          ${previewHtml}
+          <div>
+            <strong>${escapeHtml(l.title)}</strong>
+            <br><span style="font-size:11px;color:var(--ink-soft);">${escapeHtml(l.owners?.name || 'Inconnu')}</span>
+          </div>
+        </div>
       </td>
       <td>${escapeHtml(l.city)}</td>
       <td>${formatPrice(l.price, l.currency)}</td>
       <td>${getStatusBadge(l.status)}</td>
       <td style="font-size:12px;text-align:center;">
-        ${mediaDisplay}
+        ${mediaCount}
         ${(photos.length > 0 || videos.length > 0) ? `<br><button class="admin-btn admin-btn-view admin-btn-sm" onclick="viewMedia('${l.id}')">👁️ Voir</button>` : ''}
       </td>
       <td>
@@ -670,7 +731,7 @@ function renderListings(listings){
   `}).join('');
 }
 
-/* ===== 9. RENDU DES BOOSTS ===== */
+/* ===== 10. RENDU DES BOOSTS ===== */
 function renderBoosts(boosts){
   const tbody = document.getElementById('boosts-body');
   const pending = boosts.filter(b => b.status === 'en_attente_paiement');
@@ -699,7 +760,7 @@ function renderBoosts(boosts){
   `).join('');
 }
 
-/* ===== 10. RENDU DES UTILISATEURS ===== */
+/* ===== 11. RENDU DES UTILISATEURS ===== */
 function renderUsers(users){
   const tbody = document.getElementById('users-body');
   
@@ -720,9 +781,8 @@ function renderUsers(users){
   `).join('');
 }
 
-/* ===== 11. ACTIONS ADMIN ===== */
+/* ===== 12. ACTIONS ADMIN ===== */
 
-// 11a. Valider une annonce
 async function validateListing(listingId){
   if(!confirm("Confirmer la validation de cette annonce ?")) return;
   try{
@@ -737,7 +797,6 @@ async function validateListing(listingId){
   }
 }
 
-// 11b. Refuser une annonce
 async function refuseListing(listingId){
   if(!confirm("Confirmer le refus de cette annonce ?")) return;
   try{
@@ -752,7 +811,6 @@ async function refuseListing(listingId){
   }
 }
 
-// 11c. Retirer une annonce (admin)
 async function removeListingAdmin(listingId){
   if(!confirm("Confirmer le retrait définitif de cette annonce ?")) return;
   try{
@@ -767,7 +825,6 @@ async function removeListingAdmin(listingId){
   }
 }
 
-// 11d. Activer un boost
 async function activateBoost(boostId){
   if(!confirm("Confirmer l'activation de ce boost ? Le paiement a bien été reçu ?")) return;
   try{
@@ -779,7 +836,6 @@ async function activateBoost(boostId){
   }
 }
 
-// 11e. Refuser un boost
 async function refuseBoost(boostId){
   if(!confirm("Confirmer le refus de ce boost ?")) return;
   try{
@@ -794,7 +850,7 @@ async function refuseBoost(boostId){
   }
 }
 
-// 11f. Voir les médias d'une annonce
+/* ===== 13. VOIR MEDIAS ===== */
 async function viewMedia(listingId){
   try{
     const { data, error } = await supabaseClient
@@ -836,7 +892,7 @@ async function viewMedia(listingId){
   }
 }
 
-/* ===== 12. VERIFIER SESSION EXISTANTE ===== */
+/* ===== 14. VERIFIER SESSION EXISTANTE ===== */
 async function checkExistingSession(){
   if(!supabaseClient) return;
   try{
@@ -859,10 +915,9 @@ async function checkExistingSession(){
   }
 }
 
-// Lancer la vérification
 checkExistingSession();
 
-/* ===== 13. MULTILINGUE ===== */
+/* ===== 15. MULTILINGUE ===== */
 (function(){
   var lang = localStorage.getItem('kaypam_lang') || 'fr';
   var maps = {
@@ -975,28 +1030,6 @@ checkExistingSession();
   document.documentElement.lang = lang;
   document.querySelectorAll('a, button, label, p, span, h1, h2, h3, h4, li, option, legend, input, textarea, select, th, td').forEach(updateElement);
 })();
-
-
-
-
-// Kòd senp ki pa bloke paj la
-async function loadSimpleVisits(){
-  try {
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    
-    const { count } = await supabaseClient
-      .from('visits')
-      .select('*', { count: 'exact', head: true })
-      .gte('visited_at', today.toISOString());
-      
-    document.getElementById('visits-today').textContent = count || 0;
-  } catch(e) {
-    // Si gen erè, pa montre anyen
-    document.getElementById('visits-today').textContent = '—';
-  }
-}
-
 </script>
 </body>
 </html>

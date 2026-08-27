@@ -8,8 +8,7 @@
 -- 4. Créez ensuite un bucket de stockage nommé "listing-media"
 --    dans "Storage" (voir SETUP.md pour les détails)
 -- 5. IMPORTANT : ajoutez votre compte admin existant dans la table
---    "admins" (voir tout en bas de ce fichier) — sans cette étape,
---    votre compte admin perdra l'accès après cette mise à jour.
+--    "admins" — zionmaket@gmail.com deja ajoute
 -- ============================================================
 
 create extension if not exists "pgcrypto";
@@ -781,31 +780,8 @@ $$;
 grant execute on function public.search_listings to anon, authenticated;
 
 -- ============================================================
--- PRIVILÈGES DE BASE — obligatoires en plus de RLS
+-- TAB VISITS_SUMMARY POUR STATISTIQUES MENSUELLES/ANNUELLES
 -- ============================================================
--- Sans ces GRANT, PostgreSQL refuse l'accès à une table AVANT même de
--- vérifier les règles RLS ("permission denied for table ..."). RLS reste
--- la vraie barrière de sécurité : ces GRANT ouvrent seulement la porte
--- d'entrée générale ; RLS décide ensuite, ligne par ligne, ce que chaque
--- rôle (anon / authenticated) a le droit de voir ou modifier.
-grant usage on schema public to anon, authenticated;
-grant all on all tables in schema public to anon, authenticated;
-grant all on all sequences in schema public to anon, authenticated;
-grant insert on visits to anon, authenticated;
-grant select on visits to authenticated;
-alter default privileges in schema public grant all on tables to anon, authenticated;
-alter default privileges in schema public grant all on sequences to anon, authenticated;
-
--- ============================================================
--- ÉTAPE FINALE OBLIGATOIRE — ajoutez votre compte admin existant
--- ============================================================
--- Remplacez 'VOTRE_EMAIL_ADMIN' par l'email exact utilisé pour créer votre
--- compte admin dans Authentication > Users, puis exécutez cette requête :
---
--- insert into admins (user_id)
--- select id from auth.users where email = 'VOTRE_EMAIL_ADMIN'
--- on conflict (user_id) do nothing;
-
 
 -- Tab pou anrejistre rezime chak jou
 create table if not exists visits_summary (
@@ -868,8 +844,6 @@ $$;
 
 grant execute on function public.add_daily_visits_summary to authenticated;
 
-
-
 -- Fonksyon pou jwenn rezime vizit pa peryòd
 create or replace function public.get_visits_summary(
   p_start_date date,
@@ -921,8 +895,6 @@ $$;
 
 grant execute on function public.get_visits_daily to authenticated;
 
-
-
 -- Rezime mwa a (mwa aktyèl la)
 create or replace function public.get_current_month_summary()
 returns table(
@@ -966,3 +938,27 @@ as $$
 $$;
 
 grant execute on function public.get_current_year_summary to authenticated;
+
+-- ============================================================
+-- PRIVILÈGES DE BASE — obligatoires en plus de RLS
+-- ============================================================
+-- Sans ces GRANT, PostgreSQL refuse l'accès à une table AVANT même de
+-- vérifier les règles RLS ("permission denied for table ..."). RLS reste
+-- la vraie barrière de sécurité : ces GRANT ouvrent seulement la porte
+-- d'entrée générale ; RLS décide ensuite, ligne par ligne, ce que chaque
+-- rôle (anon / authenticated) a le droit de voir ou modifier.
+grant usage on schema public to anon, authenticated;
+grant all on all tables in schema public to anon, authenticated;
+grant all on all sequences in schema public to anon, authenticated;
+grant insert on visits to anon, authenticated;
+grant select on visits to authenticated;
+alter default privileges in schema public grant all on tables to anon, authenticated;
+alter default privileges in schema public grant all on sequences to anon, authenticated;
+
+-- ============================================================
+-- ÉTAPE FINALE OBLIGATOIRE — ajoutez votre compte admin existant
+-- ============================================================
+-- Admin email: zionmaket@gmail.com
+insert into admins (user_id)
+select id from auth.users where email = 'zionmaket@gmail.com'
+on conflict (user_id) do nothing;
