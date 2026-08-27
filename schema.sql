@@ -219,9 +219,21 @@ create policy "visits_admin_select" on visits
 -- (l'inscription utilise un email synthétique "username@kaypam.local" —
 -- si le username existe déjà, l'inscription elle-même échoue avant d'arriver
 -- ici). L'index unique sur owners.username est une deuxième sécurité.
--- (drop explicite car l'ancienne version n'avait pas de paramètre WhatsApp —
--- une signature différente n'est pas remplacée par "or replace")
+
+-- Efase tout vèsyon ki egziste
+drop function if exists public.link_owner_account();
+drop function if exists public.link_owner_account(text);
+drop function if exists public.link_owner_account(text, text);
 drop function if exists public.link_owner_account(text, text, text);
+drop function if exists public.link_owner_account(text, text, text, text);
+drop function if exists public.link_owner_account(text, text, text, text, text);
+drop function if exists public.link_owner_account(uuid);
+drop function if exists public.link_owner_account(uuid, text);
+drop function if exists public.link_owner_account(uuid, text, text);
+drop function if exists public.link_owner_account(uuid, text, text, text);
+drop function if exists public.link_owner_account(uuid, text, text, text, text);
+
+-- Rekreye fonksyon an ak 4 paramèt
 create or replace function public.link_owner_account(
   p_username text,
   p_name text,
@@ -247,7 +259,7 @@ begin
 end;
 $$;
 
-grant execute on function public.link_owner_account to authenticated;
+grant execute on function public.link_owner_account(text, text, text, text) to authenticated;
 
 -- Retourne le profil propriétaire lié au compte actuellement connecté
 -- (ou aucune ligne si l'inscription n'a jamais été finalisée), y compris
@@ -962,3 +974,56 @@ alter default privileges in schema public grant all on sequences to anon, authen
 insert into admins (user_id)
 select id from auth.users where email = 'zionmaket@gmail.com'
 on conflict (user_id) do nothing;
+
+-- ============================================================
+-- VERIFICATION FINALE
+-- ============================================================
+
+-- Verifye policies pou listing_media
+select 
+  schemaname, 
+  tablename, 
+  policyname, 
+  permissive, 
+  roles, 
+  cmd, 
+  qual, 
+  with_check
+from pg_policies 
+where tablename = 'listing_media';
+
+-- Verifye fonksyon link_owner_account
+select 
+  proname as function_name,
+  pg_get_function_identity_arguments(oid) as arguments
+from pg_proc 
+where proname = 'link_owner_account' 
+  and pronamespace = 'public'::regnamespace;
+
+-- Verifye fonksyon create_listing
+select 
+  proname as function_name,
+  pg_get_function_identity_arguments(oid) as arguments
+from pg_proc 
+where proname = 'create_listing' 
+  and pronamespace = 'public'::regnamespace;
+
+
+
+
+  -- ============================================================
+-- KOREKSYON POLICIES STORAGE
+-- ============================================================
+
+-- Efase ansyen policies yo
+drop policy if exists "media_bucket_public_read" on storage.objects;
+drop policy if exists "media_bucket_public_upload" on storage.objects;
+
+-- Rekreye policies ak bon non bucket la
+create policy "media_bucket_public_read" on storage.objects
+  for select to anon, authenticated 
+  using (bucket_id = 'listing-media');
+
+create policy "media_bucket_public_upload" on storage.objects
+  for insert to authenticated 
+  with check (bucket_id = 'listing-media');
