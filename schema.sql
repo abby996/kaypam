@@ -1065,3 +1065,30 @@ ADD COLUMN IF NOT EXISTS images text[];
 DROP POLICY IF EXISTS "listings_public_read" ON public.listings;
 CREATE POLICY "listings_public_read" ON public.listings
   FOR SELECT TO anon, authenticated USING (true);
+
+
+  -- Mete tout anons valide yo disponib
+update listings 
+set available = true 
+where status = 'valide';
+
+-- Verifye
+select id, title, status, available from listings where status = 'valide';
+
+
+-- Trigger pou mete available = true lè status vin 'valide'
+create or replace function set_available_on_validate()
+returns trigger as $$
+begin
+  if new.status = 'valide' and old.status != 'valide' then
+    new.available := true;
+  end if;
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists trigger_set_available_on_validate on listings;
+create trigger trigger_set_available_on_validate
+before update on listings
+for each row
+execute function set_available_on_validate();

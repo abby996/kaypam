@@ -788,7 +788,11 @@ async function validateListing(listingId){
   try{
     const { error } = await supabaseClient
       .from('listings')
-      .update({ status: 'valide', reviewed_at: new Date().toISOString() })
+      .update({ 
+        status: 'valide', 
+        available: true,        // ← AJOUTE SA
+        reviewed_at: new Date().toISOString() 
+      })
       .eq('id', listingId);
     if(error) throw error;
     loadDashboard();
@@ -796,7 +800,6 @@ async function validateListing(listingId){
     alert("Erreur : " + err.message);
   }
 }
-
 async function refuseListing(listingId){
   if(!confirm("Confirmer le refus de cette annonce ?")) return;
   try{
@@ -810,20 +813,35 @@ async function refuseListing(listingId){
     alert("Erreur : " + err.message);
   }
 }
-
+/* ===== RETIRER UNE ANNONCE (ADMIN) ===== */
 async function removeListingAdmin(listingId){
-  if(!confirm("Confirmer le retrait définitif de cette annonce ?")) return;
+  console.log('🔍 Tentative retrait ID:', listingId);
+  if(!listingId){
+    alert("❌ ID annonce manquant !");
+    return;
+  }
+  if(!confirm("⚠️ Confirmer le retrait définitif de cette annonce ?")) return;
   try{
-    const { error } = await supabaseClient.rpc('delete_listing_admin', {
-      p_listing_id: listingId
-    });
-    if(error) throw error;
-    await loadDashboard();
+    console.log('📤 Envoi requête...');
+    const { error } = await supabaseClient
+      .from('listings')
+      .update({ 
+        available: false,
+        reviewed_at: new Date().toISOString()
+      })
+      .eq('id', listingId);
+    if(error) {
+      console.error('❌ Erreur Supabase:', error);
+      throw error;
+    }
+    console.log('✅ Retrait réussi !');
+    alert("✅ Annonce retirée avec succès !");
+    loadDashboard();
   }catch(err){
-    alert("Erreur : " + err.message);
+    console.error('❌ Erreur retrait:', err);
+    alert("❌ Erreur : " + err.message);
   }
 }
-
 async function activateBoost(boostId){
   if(!confirm("Confirmer l'activation de ce boost ? Le paiement a bien été reçu ?")) return;
   try{
