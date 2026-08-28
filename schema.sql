@@ -580,6 +580,33 @@ $$;
 
 grant execute on function public.set_listing_availability to authenticated;
 
+-- Supprime définitivement une annonce depuis l'espace admin.
+-- La vérification est faite dans la fonction pour que l'opération reste
+-- protégée même si elle est appelée en dehors de l'interface web.
+drop function if exists public.delete_listing_admin(uuid);
+create or replace function public.delete_listing_admin(
+  p_listing_id uuid
+) returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not exists (select 1 from admins where user_id = auth.uid()) then
+    raise exception 'Accès administrateur requis';
+  end if;
+
+  delete from boosts where listing_id = p_listing_id;
+  delete from listings where id = p_listing_id;
+
+  if not found then
+    raise exception 'Annonce introuvable';
+  end if;
+end;
+$$;
+
+grant execute on function public.delete_listing_admin(uuid) to authenticated;
+
 -- ============================================================
 -- FONCTIONS POUR STATISTIQUES DE VISITES
 -- ============================================================

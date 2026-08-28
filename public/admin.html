@@ -814,12 +814,11 @@ async function refuseListing(listingId){
 async function removeListingAdmin(listingId){
   if(!confirm("Confirmer le retrait définitif de cette annonce ?")) return;
   try{
-    const { error } = await supabaseClient
-      .from('listings')
-      .update({ available: false })
-      .eq('id', listingId);
+    const { error } = await supabaseClient.rpc('delete_listing_admin', {
+      p_listing_id: listingId
+    });
     if(error) throw error;
-    loadDashboard();
+    await loadDashboard();
   }catch(err){
     alert("Erreur : " + err.message);
   }
