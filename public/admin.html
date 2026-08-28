@@ -829,7 +829,7 @@ async function refuseListing(listingId){
   }
 }
 
-/* ===== RETIRER UNE ANNONCE (ADMIN) ===== */
+/* ===== RETIRER UNE ANNONCE (ADMIN) - KOREK ===== */
 async function removeListingAdmin(listingId){
   console.log('🔍 Tentative retrait ID:', listingId);
   if(!listingId){
@@ -837,14 +837,9 @@ async function removeListingAdmin(listingId){
     return;
   }
   
-  // Verifye si anons lan deja retire
-  const listing = listings.find(l => l.id === listingId);
-  if(listing && listing.available === false){
-    alert("⚠️ Cette annonce est déjà siprimée !");
-    return;
-  }
-  
+  // Pa bezwen verifye si deja retire - retire verifikasyon an
   if(!confirm("⚠️ Confirmer le retrait définitif de cette annonce ?")) return;
+  
   try{
     console.log('📤 Envoi requête...');
     const { error } = await supabaseClient
@@ -860,12 +855,13 @@ async function removeListingAdmin(listingId){
     }
     console.log('✅ Retrait réussi !');
     alert("✅ Annonce siprimée avec succès !");
-    loadDashboard();
+    loadDashboard(); // Rafrechi paj la
   }catch(err){
     console.error('❌ Erreur retrait:', err);
     alert("❌ Erreur : " + err.message);
   }
 }
+ 
 
 async function activateBoost(boostId){
   if(!confirm("Confirmer l'activation de ce boost ? Le paiement a bien été reçu ?")) return;
