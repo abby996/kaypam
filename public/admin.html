@@ -113,6 +113,7 @@
   .status-badge.pending{background:rgba(242,177,52,0.18);color:#7a5300;}
   .status-badge.validated{background:rgba(30,143,111,0.15);color:#0f5c47;}
   .status-badge.refused{background:rgba(226,92,59,0.14);color:var(--coral-dark);}
+  .status-badge.supprime{background:rgba(226,92,59,0.2);color:var(--coral-dark);}
   .status-badge.active{background:rgba(30,143,111,0.15);color:#0f5c47;}
   .status-badge.expired{background:var(--bg-soft);color:var(--ink-soft);}
   .status-badge.waiting{background:rgba(242,177,52,0.18);color:#7a5300;}
@@ -126,6 +127,8 @@
   .admin-btn-activate:hover{background:#e0a02c;}
   .admin-btn-danger{background:var(--coral-dark);color:#fff;}
   .admin-btn-danger:hover{background:#a03a2e;}
+  .admin-btn-supprime{background:var(--bg-soft);color:var(--ink-soft);cursor:not-allowed;}
+  .admin-btn-supprime:hover{background:var(--bg-soft);}
   .admin-btn-view{background:var(--navy);color:#fff;}
   .admin-btn-view:hover{background:#0f1a2e;}
   .admin-btn-sm{padding:2px 8px;font-size:10px;}
@@ -392,18 +395,23 @@ function formatPrice(price, currency){
     : `$${Number(price).toLocaleString('en-US')}`;
 }
 
-function getStatusBadge(status){
-  const map = {
-    'en_attente_verification': 'pending',
-    'valide': 'validated',
-    'refuse': 'refused'
-  };
-  const labels = {
-    'en_attente_verification': 'En attente',
-    'valide': 'Validée',
-    'refuse': 'Refusée'
-  };
-  return `<span class="status-badge ${map[status] || ''}">${labels[status] || status}</span>`;
+function getStatusBadge(status, available){
+  let badge = '';
+  
+  if(status === 'en_attente_verification'){
+    badge = `<span class="status-badge pending">En attente</span>`;
+  } else if(status === 'valide'){
+    badge = `<span class="status-badge validated">✅ Validée</span>`;
+  } else if(status === 'refuse'){
+    badge = `<span class="status-badge refused">❌ Refusée</span>`;
+  }
+  
+  // Si anons lan retire (available = false)
+  if(available === false){
+    badge += ` <span class="status-badge supprime">🗑️ Siprime</span>`;
+  }
+  
+  return badge;
 }
 
 function getBoostStatusBadge(status){
@@ -673,7 +681,7 @@ async function loadMonthlyYearlyStats(){
   }
 }
 
-/* ===== 9. RENDU DES ANNONCES AVEC PREVIEW FOTO ===== */
+/* ===== 9. RENDU DES ANNONCES AVEC PREVIEW FOTO ET BADGE SUPPRIME ===== */
 function renderListings(listings){
   const tbody = document.getElementById('listings-body');
   
@@ -687,6 +695,10 @@ function renderListings(listings){
     const photos = media.filter(m => m.media_type === 'photo');
     const videos = media.filter(m => m.media_type === 'video');
     
+    // Detekte si anons lan retire (available = false)
+    const isRemoved = l.available === false;
+    const rowClass = isRemoved ? 'style="opacity:0.6;background:var(--bg-soft);"' : '';
+    
     // Preview premye foto
     let previewHtml = '';
     if(photos.length > 0){
@@ -696,7 +708,7 @@ function renderListings(listings){
     const mediaCount = `📷 ${photos.length} | 🎬 ${videos.length}`;
     
     return `
-    <tr>
+    <tr ${rowClass}>
       <td>
         <div style="display:flex;align-items:center;gap:10px;">
           ${previewHtml}
@@ -708,7 +720,7 @@ function renderListings(listings){
       </td>
       <td>${escapeHtml(l.city)}</td>
       <td>${formatPrice(l.price, l.currency)}</td>
-      <td>${getStatusBadge(l.status)}</td>
+      <td>${getStatusBadge(l.status, l.available)}</td>
       <td style="font-size:12px;text-align:center;">
         ${mediaCount}
         ${(photos.length > 0 || videos.length > 0) ? `<br><button class="admin-btn admin-btn-view admin-btn-sm" onclick="viewMedia('${l.id}')">👁️ Voir</button>` : ''}
@@ -721,10 +733,12 @@ function renderListings(listings){
           ` : `
             <span style="font-size:10px;color:var(--ink-soft);display:block;text-align:center;">
               ${l.status === 'valide' ? '✅ Validée' : '❌ Refusée'}
-              ${l.status === 'valide' && !l.available ? '<br>(retirée)' : ''}
+              ${isRemoved ? '🗑️ Siprime' : ''}
             </span>
           `}
-          <button class="admin-btn admin-btn-danger admin-btn-sm" onclick="removeListingAdmin('${l.id}')">🗑️ Retirer</button>
+          <button class="admin-btn ${isRemoved ? 'admin-btn-supprime' : 'admin-btn-danger'} admin-btn-sm" onclick="removeListingAdmin('${l.id}')" ${isRemoved ? 'disabled' : ''}>
+            ${isRemoved ? '🔒 Siprime' : '🗑️ Retirer'}
+          </button>
         </div>
       </td>
     </tr>
@@ -790,7 +804,7 @@ async function validateListing(listingId){
       .from('listings')
       .update({ 
         status: 'valide', 
-        available: true,        // ← AJOUTE SA
+        available: true,
         reviewed_at: new Date().toISOString() 
       })
       .eq('id', listingId);
@@ -800,6 +814,7 @@ async function validateListing(listingId){
     alert("Erreur : " + err.message);
   }
 }
+
 async function refuseListing(listingId){
   if(!confirm("Confirmer le refus de cette annonce ?")) return;
   try{
@@ -813,6 +828,7 @@ async function refuseListing(listingId){
     alert("Erreur : " + err.message);
   }
 }
+
 /* ===== RETIRER UNE ANNONCE (ADMIN) ===== */
 async function removeListingAdmin(listingId){
   console.log('🔍 Tentative retrait ID:', listingId);
@@ -820,6 +836,14 @@ async function removeListingAdmin(listingId){
     alert("❌ ID annonce manquant !");
     return;
   }
+  
+  // Verifye si anons lan deja retire
+  const listing = listings.find(l => l.id === listingId);
+  if(listing && listing.available === false){
+    alert("⚠️ Cette annonce est déjà siprimée !");
+    return;
+  }
+  
   if(!confirm("⚠️ Confirmer le retrait définitif de cette annonce ?")) return;
   try{
     console.log('📤 Envoi requête...');
@@ -835,13 +859,14 @@ async function removeListingAdmin(listingId){
       throw error;
     }
     console.log('✅ Retrait réussi !');
-    alert("✅ Annonce retirée avec succès !");
+    alert("✅ Annonce siprimée avec succès !");
     loadDashboard();
   }catch(err){
     console.error('❌ Erreur retrait:', err);
     alert("❌ Erreur : " + err.message);
   }
 }
+
 async function activateBoost(boostId){
   if(!confirm("Confirmer l'activation de ce boost ? Le paiement a bien été reçu ?")) return;
   try{
@@ -975,6 +1000,7 @@ checkExistingSession();
       'Valider': 'Validate',
       'Refuser': 'Reject',
       'Retirer': 'Remove',
+      'Siprime': 'Removed',
       'Voir': 'View',
       'Activer': 'Activate'
     },
@@ -1014,6 +1040,7 @@ checkExistingSession();
       'Valider': 'Valide',
       'Refuser': 'Refize',
       'Retirer': 'Retire',
+      'Siprime': 'Siprime',
       'Voir': 'Wè',
       'Activer': 'Aktive'
     }

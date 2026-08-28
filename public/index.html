@@ -936,7 +936,7 @@ function locationLabel(l){
   return l.city;
 }
 
-/* ===== FONKSYON MAP REAL LISTING AVEC VERIFIKASYON BOOST (KOREK) ===== */
+/* ===== FONKSYON MAP REAL LISTING (KOREK - PA GEN neighborhood nan select) ===== */
 function mapRealListing(raw){
   const media = raw.listing_media || [];
   const photos = media.filter(m => m.media_type === 'photo').map(m => m.url);
@@ -955,9 +955,8 @@ function mapRealListing(raw){
   return {
     id: raw.id,
     title: raw.title || `${raw.type} à ${raw.transaction === 'Vente' ? 'vendre' : 'louer'}`,
-    // KORIGE: city = raw.city (vil la), neighborhood = raw.zone (zòn) ou raw.commune (komin) ou raw.city
     city: raw.city || raw.commune || 'Haïti',
-    neighborhood: raw.zone || raw.commune || raw.neighborhood || raw.city,
+    neighborhood: raw.zone || raw.commune || raw.city,
     type: raw.type,
     transaction: raw.transaction,
     price: raw.price,
@@ -977,13 +976,14 @@ function mapRealListing(raw){
   };
 }
 
+/* ===== CHARGEMENT ANNONCES - PA GEN neighborhood nan select ===== */
 async function loadRealListings(){
   if(!supabaseClient) return [];
   try{
     const { data, error } = await supabaseClient
       .from('listings')
       .select(`
-        id,title,city,commune,zone,neighborhood,transaction,type,price,currency,period,description,status,available,
+        id,title,city,commune,zone,transaction,type,price,currency,period,description,status,available,
         owners(name,phone,whatsapp),
         listing_media(media_type,url),
         boosts(status,ends_at)
@@ -1006,7 +1006,7 @@ async function loadBoostedListings(){
     const { data, error } = await supabaseClient
       .from('listings')
       .select(`
-        id,title,city,commune,zone,neighborhood,transaction,type,price,currency,period,description,status,available,
+        id,title,city,commune,zone,transaction,type,price,currency,period,description,status,available,
         owners(name,phone,whatsapp),
         listing_media(media_type,url),
         boosts(status,ends_at)
