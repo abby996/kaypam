@@ -914,7 +914,7 @@ function houseSVG(i, size){
   </svg>`;
 }
 
-let state = { transaction:"", city:"", quartier:"", type:"", budget:"" };
+let state = { transaction:"", city:"", commune:"", quartier:"", type:"", budget:"" };
 let locState = { departement:null, arrondissement:null, commune:null, quartier:null };
 let listings = [];
 
@@ -928,15 +928,16 @@ function fmtPrice(l){
   return l.currency === "$" ? `$${l.price.toLocaleString('en-US')}` : `$${l.price.toLocaleString('en-US')}${l.currency.replace('$','')}`;
 }
 
+/* ===== LOCATION LABEL (KOREK) ===== */
 function locationLabel(l){
-  // Afiche zòn, komin, vil nan lòd presizyon
-  if (l.neighborhood && l.neighborhood !== l.city) {
-    return `${l.neighborhood}, ${l.city}`;
-  }
-  return l.city;
+  let parts = [];
+  if (l.zone) parts.push(l.zone);
+  if (l.commune && l.commune !== l.city) parts.push(l.commune);
+  if (l.city) parts.push(l.city);
+  return parts.join(', ') || l.city || 'Haïti';
 }
 
-/* ===== FONKSYON MAP REAL LISTING (KOREK - PA GEN neighborhood nan select) ===== */
+/* ===== MAP REAL LISTING (KOREK) ===== */
 function mapRealListing(raw){
   const media = raw.listing_media || [];
   const photos = media.filter(m => m.media_type === 'photo').map(m => m.url);
@@ -955,8 +956,10 @@ function mapRealListing(raw){
   return {
     id: raw.id,
     title: raw.title || `${raw.type} à ${raw.transaction === 'Vente' ? 'vendre' : 'louer'}`,
-    city: raw.city || raw.commune || 'Haïti',
-    neighborhood: raw.zone || raw.commune || raw.city,
+    city: raw.city || 'Haïti',
+    commune: raw.commune || '',
+    zone: raw.zone || '',
+    neighborhood: [raw.zone, raw.commune, raw.city].filter(Boolean).join(', ') || raw.city || 'Haïti',
     type: raw.type,
     transaction: raw.transaction,
     price: raw.price,
@@ -976,7 +979,7 @@ function mapRealListing(raw){
   };
 }
 
-/* ===== CHARGEMENT ANNONCES - PA GEN neighborhood nan select ===== */
+/* ===== CHARGEMENT ANNONCES ===== */
 async function loadRealListings(){
   if(!supabaseClient) return [];
   try{
@@ -1060,6 +1063,7 @@ function setTransactionFilter(txn){
   document.getElementById('f-transaction').value = state.transaction;
   renderChips();
   renderListings();
+  renderBoosted();
 }
 
 /* ===== Navigation géographique ===== */
@@ -1130,6 +1134,7 @@ function selectCommune(i){
   locState.commune = commune;
   locState.quartier = null;
   state.city = commune;
+  state.commune = commune;
   state.quartier = "";
   const citySelect = document.getElementById('f-city');
   if(citySelect) {
@@ -1137,6 +1142,7 @@ function selectCommune(i){
   }
   renderLocationNav();
   renderListings();
+  renderBoosted();
 }
 function selectQuartier(i){
   const quartier = quartiersData[locState.commune][i];
@@ -1144,33 +1150,35 @@ function selectQuartier(i){
   state.quartier = quartier;
   renderLocationNav();
   renderListings();
+  renderBoosted();
 }
 function backToDepartement(){
   locState.arrondissement = null; locState.commune = null; locState.quartier = null;
-  state.city = ""; state.quartier = "";
-  renderLocationNav(); renderListings();
+  state.city = ""; state.commune = ""; state.quartier = "";
+  renderLocationNav(); renderListings(); renderBoosted();
 }
 function backToArrondissement(){
   locState.commune = null; locState.quartier = null;
-  state.city = ""; state.quartier = "";
-  renderLocationNav(); renderListings();
+  state.city = ""; state.commune = ""; state.quartier = "";
+  renderLocationNav(); renderListings(); renderBoosted();
 }
 function backToCommune(){
   locState.quartier = null;
   state.quartier = "";
-  renderLocationNav(); renderListings();
+  renderLocationNav(); renderListings(); renderBoosted();
 }
 function resetLocation(){
   locState = { departement:null, arrondissement:null, commune:null, quartier:null };
-  state.city = ""; state.quartier = "";
+  state.city = ""; state.commune = ""; state.quartier = "";
   const citySelect = document.getElementById('f-city');
   if(citySelect) citySelect.value = "";
-  renderLocationNav(); renderListings();
+  renderLocationNav(); renderListings(); renderBoosted();
 }
 
 function applySearchPanel(){
   state.transaction = document.getElementById('f-transaction').value;
   state.city = document.getElementById('f-city').value;
+  state.commune = "";
   state.quartier = "";
   state.type = document.getElementById('f-type').value;
   state.budget = document.getElementById('f-budget').value;
@@ -1178,6 +1186,7 @@ function applySearchPanel(){
   renderChips();
   renderLocationNav();
   renderListings();
+  renderBoosted();
   document.getElementById('listings').scrollIntoView({behavior:'smooth'});
 }
 
@@ -1197,7 +1206,7 @@ function syncLocStateToCity(commune){
   locState = { departement:null, arrondissement:null, commune:null, quartier:null };
 }
 
-/* ===== FONKSYON POU KONSTRUI KAT LA AK ENDIKATEUR ===== */
+/* ===== FONKSYON POU KONSTRUI KAT LA ===== */
 function buildCardHtml(l, i, isBoosted){
   const specs = [];
   if(l.beds !== null && l.beds !== undefined) specs.push(`${l.beds} ${t('spec_beds')}`);
@@ -1247,18 +1256,20 @@ function buildCardHtml(l, i, isBoosted){
     </div>`;
 }
 
+/* ===== RENDER LISTINGS (KOREK) ===== */
 function renderListings(){
   const grid = document.getElementById('listings-grid');
   let filtered = listings.filter(l => {
     if(state.transaction && l.transaction !== state.transaction) return false;
     if(state.city && l.city !== state.city) return false;
-    if(state.quartier && l.neighborhood !== state.quartier) return false;
+    if(state.commune && l.commune !== state.commune) return false;
+    if(state.quartier && l.zone !== state.quartier && l.neighborhood !== state.quartier) return false;
     if(state.type && l.type !== state.type) return false;
     if(state.budget && l.price > Number(state.budget)) return false;
     return true;
   });
 
-  document.getElementById('stat-count').textContent = listings.length;
+  document.getElementById('stat-count').textContent = filtered.length;
 
   if(filtered.length === 0){
     grid.innerHTML = listings.length === 0
@@ -1270,7 +1281,7 @@ function renderListings(){
   grid.innerHTML = filtered.map((l) => buildCardHtml(l, listings.indexOf(l), false)).join('');
 }
 
-/* ===== Annonces boostées ===== */
+/* ===== RENDER BOOSTED (KOREK) ===== */
 let boostedPool = [];
 let boostIndex = 0;
 let boostTimer = null;
@@ -1288,31 +1299,68 @@ function circularSlice(arr, start, count){
 }
 
 function hasActiveFilter(){
-  return !!(state.transaction || state.city || state.quartier || state.type || state.budget);
+  return !!(state.transaction || state.city || state.commune || state.quartier || state.type || state.budget);
 }
 
 function renderBoosted(){
   const section = document.getElementById('boosted-section');
   const grid = document.getElementById('boosted-grid');
   
-  const activeBoosted = boostedPool.filter(l => l.hasActiveBoost === true);
+  // Sèlman anons ki gen boost AKTIF
+  let activeBoosted = boostedPool.filter(l => l.hasActiveBoost === true);
   
-  if(activeBoosted.length === 0 || hasActiveFilter()){
+  // Aplike menm filtre yo
+  let filteredBoosted = activeBoosted.filter(l => {
+    if(state.transaction && l.transaction !== state.transaction) return false;
+    if(state.city && l.city !== state.city) return false;
+    if(state.commune && l.commune !== state.commune) return false;
+    if(state.quartier && l.zone !== state.quartier && l.neighborhood !== state.quartier) return false;
+    if(state.type && l.type !== state.type) return false;
+    if(state.budget && l.price > Number(state.budget)) return false;
+    return true;
+  });
+  
+  if(filteredBoosted.length === 0){
     section.classList.remove('show');
     return;
   }
+  
   section.classList.add('show');
-  const batch = circularSlice(activeBoosted, boostIndex, BOOST_BATCH_SIZE);
+  const batch = circularSlice(filteredBoosted, boostIndex, BOOST_BATCH_SIZE);
   grid.innerHTML = batch.map((l, k) => buildCardHtml(l, k, true)).join('');
 }
 
 function startBoostRotation(){
   if(boostTimer) clearInterval(boostTimer);
-  const activeBoosted = boostedPool.filter(l => l.hasActiveBoost === true);
-  if(activeBoosted.length <= BOOST_BATCH_SIZE) return;
+  
+  let activeBoosted = boostedPool.filter(l => l.hasActiveBoost === true);
+  let filtered = activeBoosted.filter(l => {
+    if(state.transaction && l.transaction !== state.transaction) return false;
+    if(state.city && l.city !== state.city) return false;
+    if(state.commune && l.commune !== state.commune) return false;
+    if(state.quartier && l.zone !== state.quartier && l.neighborhood !== state.quartier) return false;
+    if(state.type && l.type !== state.type) return false;
+    if(state.budget && l.price > Number(state.budget)) return false;
+    return true;
+  });
+  
+  if(filtered.length <= BOOST_BATCH_SIZE) return;
+  
   boostTimer = setInterval(() => {
-    boostIndex = (boostIndex + BOOST_BATCH_SIZE) % activeBoosted.length;
-    renderBoosted();
+    let currentFiltered = activeBoosted.filter(l => {
+      if(state.transaction && l.transaction !== state.transaction) return false;
+      if(state.city && l.city !== state.city) return false;
+      if(state.commune && l.commune !== state.commune) return false;
+      if(state.quartier && l.zone !== state.quartier && l.neighborhood !== state.quartier) return false;
+      if(state.type && l.type !== state.type) return false;
+      if(state.budget && l.price > Number(state.budget)) return false;
+      return true;
+    });
+    
+    if(currentFiltered.length > 0){
+      boostIndex = (boostIndex + BOOST_BATCH_SIZE) % currentFiltered.length;
+      renderBoosted();
+    }
   }, BOOST_ROTATION_MS);
 }
 
