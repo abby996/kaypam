@@ -936,21 +936,18 @@ function locationLabel(l){
   return l.city;
 }
 
-/* ===== FONKSYON MAP REAL LISTING AVEC VERIFIKASYON BOOST ===== */
+/* ===== FONKSYON MAP REAL LISTING AVEC VERIFIKASYON BOOST (KOREK) ===== */
 function mapRealListing(raw){
   const media = raw.listing_media || [];
   const photos = media.filter(m => m.media_type === 'photo').map(m => m.url);
   
-  // Verifikasyon boost aktif
   const boosts = raw.boosts || [];
   const now = new Date();
   
-  // Chèche boost ki gen status 'actif' ak dat fini > dat jodi a
   const activeBoost = boosts.find(b => 
     b.status === 'actif' && new Date(b.ends_at) > now
   );
   
-  // Chèche boost ki fini (status 'actif' men ends_at < now, oswa status 'expire')
   const expiredBoost = boosts.find(b => 
     (b.status === 'actif' && new Date(b.ends_at) <= now) || b.status === 'expire'
   );
@@ -958,9 +955,9 @@ function mapRealListing(raw){
   return {
     id: raw.id,
     title: raw.title || `${raw.type} à ${raw.transaction === 'Vente' ? 'vendre' : 'louer'}`,
-    // KORIGE: Itilize commune kòm city, zone kòm neighborhood
-    city: raw.commune || raw.city,
-    neighborhood: raw.zone || raw.neighborhood || raw.commune || raw.city,
+    // KORIGE: city = raw.city (vil la), neighborhood = raw.zone (zòn) ou raw.commune (komin) ou raw.city
+    city: raw.city || raw.commune || 'Haïti',
+    neighborhood: raw.zone || raw.commune || raw.neighborhood || raw.city,
     type: raw.type,
     transaction: raw.transaction,
     price: raw.price,
@@ -973,7 +970,6 @@ function mapRealListing(raw){
     phone: raw.owners ? (raw.owners.whatsapp || raw.owners.phone) : '',
     photoUrl: photos[0] || null,
     isReal: true,
-    // Estati boost la
     hasActiveBoost: !!activeBoost,
     hasExpiredBoost: !!expiredBoost,
     boostEndsAt: activeBoost ? activeBoost.ends_at : (expiredBoost ? expiredBoost.ends_at : null),
@@ -996,6 +992,7 @@ async function loadRealListings(){
       .eq('available', true)
       .order('created_at', { ascending:false });
     if(error) throw error;
+    console.log('📊 Anons chaje:', data?.length || 0);
     return (data || []).map(mapRealListing);
   }catch(err){
     console.error('Erreur de chargement des annonces réelles', err);
@@ -1019,7 +1016,6 @@ async function loadBoostedListings(){
       .order('created_at', { ascending:false });
     if(error) throw error;
     
-    // Sèlman anons ki gen boost AKTIF (pokko fini)
     const boosted = (data || []).filter(item => {
       const boosts = item.boosts || [];
       return boosts.some(b => 
@@ -1043,7 +1039,6 @@ function populateCitySelect(){
   });
   const cities = [...allCommunes].sort();
   const sel = document.getElementById('f-city');
-  // Vide select la anvan pou evite doub
   sel.innerHTML = '<option value="" data-i18n="search_city_all">Toutes les villes</option>';
   cities.forEach(c => {
     const opt = document.createElement('option');
@@ -1214,13 +1209,11 @@ function buildCardHtml(l, i, isBoosted){
     ? `<img src="${l.photoUrl}" alt="${l.title}">`
     : houseSVG(i, 88);
   
-  // Badge boost la (parèt anwo a dwat)
   let boostBadge = '';
   if (l.hasActiveBoost) {
     boostBadge = `<span class="card-badge badge-boost">${t('badge_vedette')}</span>`;
   }
   
-  // Endikatè estati boost la (anba a)
   let boostIndicator = '';
   if (l.hasActiveBoost && l.boostEndsAt) {
     const endDate = new Date(l.boostEndsAt).toLocaleDateString(
@@ -1234,7 +1227,6 @@ function buildCardHtml(l, i, isBoosted){
     boostIndicator = `<span class="boost-indicator expired">${t('boost_expired').replace('{date}', endDate)}</span>`;
   }
   
-  // Badge tranzaksyon an (anwo a goch)
   const transactionBadge = `<span class="card-badge ${l.transaction==='Vente'?'badge-vente':'badge-location'}">${l.transaction === 'Vente' ? t('badge_sale') : t('badge_rent')}</span>`;
   
   return `
@@ -1303,7 +1295,6 @@ function renderBoosted(){
   const section = document.getElementById('boosted-section');
   const grid = document.getElementById('boosted-grid');
   
-  // Sèlman anons ki gen boost AKTIF (pokko fini)
   const activeBoosted = boostedPool.filter(l => l.hasActiveBoost === true);
   
   if(activeBoosted.length === 0 || hasActiveFilter()){
@@ -1363,11 +1354,11 @@ async function init(){
   applyStaticTranslations();
   renderLangMenu();
   
-  // Chaje tout anons
   const real = await loadRealListings();
+  console.log('✅ Anons reyèl:', real);
   real.forEach(r => listings.push(r));
+  console.log('✅ Total anons:', listings.length);
   
-  // Chaje anons booste
   boostedPool = await loadBoostedListings();
   boostIndex = 0;
   
@@ -1379,7 +1370,8 @@ async function init(){
   startBoostRotation();
 }
 init();
-/* ===== CHARGER STATISTIQUES VISITES RÉELLES ===== */
+
+/* ===== CHARGER STATISTIQUES VISITES ===== */
 async function loadVisitsStats(){
   try{
     const now = new Date();
@@ -1389,7 +1381,6 @@ async function loadVisitsStats(){
     const monthAgo = new Date(today);
     monthAgo.setDate(monthAgo.getDate() - 30);
     
-    // Vizit jodi a
     const { count: todayCount, error: todayError } = await supabaseClient
       .from('visits')
       .select('*', { count: 'exact', head: true })
@@ -1397,7 +1388,6 @@ async function loadVisitsStats(){
       
     if(todayError) throw todayError;
     
-    // Vizit semèn sa a
     const { count: weekCount, error: weekError } = await supabaseClient
       .from('visits')
       .select('*', { count: 'exact', head: true })
@@ -1405,7 +1395,6 @@ async function loadVisitsStats(){
       
     if(weekError) throw weekError;
     
-    // Vizit mwa sa a
     const { count: monthCount, error: monthError } = await supabaseClient
       .from('visits')
       .select('*', { count: 'exact', head: true })
@@ -1413,7 +1402,6 @@ async function loadVisitsStats(){
       
     if(monthError) throw monthError;
     
-    // Vizitè inik jodi a
     const { data: uniqueData, error: uniqueError } = await supabaseClient
       .from('visits')
       .select('visitor_id')
@@ -1421,10 +1409,8 @@ async function loadVisitsStats(){
       
     if(uniqueError) throw uniqueError;
     
-    // Konte vizitè inik (ID diferan)
     const uniqueVisitors = new Set(uniqueData.map(v => v.visitor_id)).size;
     
-    // Mete a jou afichaj la
     document.getElementById('visits-today').textContent = todayCount || 0;
     document.getElementById('visits-week').textContent = weekCount || 0;
     document.getElementById('visits-month').textContent = monthCount || 0;
@@ -1438,7 +1424,6 @@ async function loadVisitsStats(){
     document.getElementById('visitors-today').textContent = '—';
   }
 }
-
 
 </script>
 
