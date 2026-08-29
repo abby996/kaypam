@@ -307,9 +307,7 @@
   .boost-indicator.active{
     color:var(--green);background:rgba(30,143,111,0.12);
   }
-  .boost-indicator.expired{
-    color:var(--ink-soft);background:var(--bg-soft);
-  }
+  /* boost-indicator.expired retire — pa montre boost ekspire nan paj piblik la */
   .card-cta{
     border:none;background:var(--bg-soft);color:var(--ink);
     border-radius:9px;padding:10px;font-size:13.5px;font-weight:600;
@@ -375,12 +373,21 @@
     display:flex;align-items:center;justify-content:center;z-index:5;
   }
   .modal-wide .publish{border:none;border-radius:0;padding:30px 30px 32px;grid-template-columns:1fr;gap:24px;}
-  .modal-art{height:170px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+  .modal-art{
+    height:170px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    overflow:hidden;
+    background:#f0f0f0;
+  }
   .modal-art img{width:100%;height:100%;object-fit:cover;}
   .modal-close{
     position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.85);
     border:none;border-radius:50%;width:34px;height:34px;font-size:18px;
     display:flex;align-items:center;justify-content:center;
+    z-index:10;
   }
   .modal-body{padding:24px 26px 28px;}
   .modal-city{font-family:var(--font-mono);font-size:12.5px;color:var(--ink-soft);margin-bottom:6px;}
@@ -396,6 +403,71 @@
   }
   .btn-whatsapp{background:var(--green);color:#fff;}
   .btn-close-secondary{background:var(--bg-soft);color:var(--ink);}
+
+  /* ---------- MODAL MEDIA GALERI ---------- */
+  .modal-media-wrapper{
+    width:100%;
+    height:100%;
+    position:relative;
+    overflow:hidden;
+  }
+  .modal-media-slider{
+    width:100%;
+    height:100%;
+    position:relative;
+  }
+  .modal-media-item{
+    display:none;
+    width:100%;
+    height:100%;
+    align-items:center;
+    justify-content:center;
+    background:#f0f0f0;
+  }
+  .modal-media-item.active{
+    display:flex;
+  }
+  .modal-media-item img,
+  .modal-media-item video{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    max-height:300px;
+  }
+  .modal-media-controls{
+    position:absolute;
+    bottom:10px;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    align-items:center;
+    gap:16px;
+    background:rgba(0,0,0,0.6);
+    padding:6px 14px;
+    border-radius:999px;
+    color:#fff;
+    font-size:13px;
+    z-index:10;
+  }
+  .modal-media-controls button{
+    background:none;
+    border:none;
+    color:#fff;
+    font-size:22px;
+    cursor:pointer;
+    padding:0 4px;
+    line-height:1;
+    transition:color .15s;
+  }
+  .modal-media-controls button:hover{
+    color:var(--gold);
+  }
+  .modal-media-controls .modal-media-counter{
+    font-family:var(--font-mono);
+    font-size:12px;
+    min-width:40px;
+    text-align:center;
+  }
 
   #boosted-section{display:none;padding-bottom:0;padding-top:32px;}
   #boosted-section.show{display:block;}
@@ -665,13 +737,14 @@ const translations = {
     loc_all_zones:"Toutes les zones", loc_back:"← Retour", loc_empty_note:"Aucun quartier détaillé pour {commune} pour le moment — toutes les annonces de la commune sont affichées ci-dessous.",
     badge_sale:"À vendre", badge_rent:"À louer", badge_vedette:"⭐ Vedette",
     boost_active:"⭐ Boost actif jusqu'au {date}",
-    boost_expired:"⏳ Boost expiré le {date}",
+    /* boost_expired retire — pa montre nan paj piblik la */
     spec_beds:"ch.", spec_baths:"sdb", spec_beds_full:"Chambres", spec_baths_full:"Salles de bain", spec_area_full:"m²",
     btn_view_details:"Voir les détails",
     empty_none_title:"Aucune annonce publiée pour le moment", empty_none_sub:"Les premières annonces vérifiées apparaîtront ici très bientôt.",
     empty_match_title:"Aucune annonce ne correspond", empty_match_sub:"Essayez d'élargir votre recherche ou de modifier vos filtres.",
     modal_specs_fallback:"Détails supplémentaires à confirmer avec le propriétaire.",
     modal_whatsapp:"Contacter via WhatsApp", modal_close:"Fermer",
+    modal_video_not_supported:"Votre navigateur ne supporte pas la lecture de vidéos.",
     whatsapp_interest_msg:"Bonjour, je suis intéressé(e) par : {title} à {city}",
     how_eyebrow:"Le parcours", how_sub:"Trois étapes, aucun intermédiaire obligatoire.",
     step1_num:"01 — Cherchez", step1_title:"Filtrez selon vos besoins", step1_desc:"Ville, budget, type de bien : trouvez en quelques clics les annonces qui correspondent à votre recherche, partout en Haïti.",
@@ -699,13 +772,14 @@ const translations = {
     loc_all_zones:"All zones", loc_back:"← Back", loc_empty_note:"No detailed neighborhoods for {commune} yet — all listings in this commune are shown below.",
     badge_sale:"For sale", badge_rent:"For rent", badge_vedette:"⭐ Featured",
     boost_active:"⭐ Active boost until {date}",
-    boost_expired:"⏳ Boost expired on {date}",
+    /* boost_expired retire — pa montre nan paj piblik la */
     spec_beds:"bed", spec_baths:"bath", spec_beds_full:"Bedrooms", spec_baths_full:"Bathrooms", spec_area_full:"m²",
     btn_view_details:"View details",
     empty_none_title:"No listings published yet", empty_none_sub:"The first verified listings will appear here very soon.",
     empty_match_title:"No listings match", empty_match_sub:"Try widening your search or adjusting your filters.",
     modal_specs_fallback:"Additional details to confirm with the owner.",
     modal_whatsapp:"Contact via WhatsApp", modal_close:"Close",
+    modal_video_not_supported:"Your browser does not support video playback.",
     whatsapp_interest_msg:"Hello, I'm interested in: {title} in {city}",
     how_eyebrow:"The process", how_sub:"Three steps, no mandatory middleman.",
     step1_num:"01 — Search", step1_title:"Filter by your needs", step1_desc:"City, budget, property type: find listings matching your search in a few clicks, anywhere in Haiti.",
@@ -733,13 +807,14 @@ const translations = {
     loc_all_zones:"Tout zòn yo", loc_back:"← Retounen", loc_empty_note:"Pa gen katye detaye pou {commune} kounye a — tout anons komin nan afiche anba a.",
     badge_sale:"Pou vann", badge_rent:"Pou lwe", badge_vedette:"⭐ Vedèt",
     boost_active:"⭐ Boost aktif jiskaske {date}",
-    boost_expired:"⏳ Boost ekspire le {date}",
+    /* boost_expired retire — pa montre nan paj piblik la */
     spec_beds:"ch.", spec_baths:"sdb", spec_beds_full:"Chanm", spec_baths_full:"Twalèt", spec_area_full:"m²",
     btn_view_details:"Wè detay yo",
     empty_none_title:"Pa gen anons pibliye kounye a", empty_none_sub:"Premye anons verifye yo ap parèt isit la byento.",
     empty_match_title:"Pa gen anons ki matche", empty_match_sub:"Eseye elaji rechèch ou oswa chanje filtè yo.",
     modal_specs_fallback:"Lòt detay pou konfime dirèkteman ak pwopriyetè a.",
     modal_whatsapp:"Kontakte sou WhatsApp", modal_close:"Fèmen",
+    modal_video_not_supported:"Navigatè w pa sipòte lekti videyo.",
     whatsapp_interest_msg:"Bonjou, mwen enterese nan : {title} nan {city}",
     how_eyebrow:"Pwosesis la", how_sub:"Twa etap, pa gen entèmedyè obligatwa.",
     step1_num:"01 — Chèche", step1_title:"Filtre selon bezwen ou", step1_desc:"Vil, bidjè, kalite byen : jwenn nan kèk klik anons ki matche ak rechèch ou, toupatou an Ayiti.",
@@ -914,9 +989,15 @@ function houseSVG(i, size){
   </svg>`;
 }
 
-let state = { transaction:"", city:"", commune:"", quartier:"", type:"", budget:"" };
+let state = { transaction:"", departement:"", city:"", commune:"", quartier:"", type:"", budget:"" };
 let locState = { departement:null, arrondissement:null, commune:null, quartier:null };
 let listings = [];
+let boostedPool = [];
+let boostIndex = 0;
+const BOOST_BATCH_SIZE = 6;
+const BOOST_ROTATION_MS = 8000;
+let boostTimer = null;
+let modalMediaIndex = 0;
 
 function fmtPrice(l){
   if(l.isReal){
@@ -928,7 +1009,6 @@ function fmtPrice(l){
   return l.currency === "$" ? `$${l.price.toLocaleString('en-US')}` : `$${l.price.toLocaleString('en-US')}${l.currency.replace('$','')}`;
 }
 
-/* ===== LOCATION LABEL (KOREK) ===== */
 function locationLabel(l){
   let parts = [];
   if (l.zone) parts.push(l.zone);
@@ -937,10 +1017,10 @@ function locationLabel(l){
   return parts.join(', ') || l.city || 'Haïti';
 }
 
-/* ===== MAP REAL LISTING (KOREK) ===== */
 function mapRealListing(raw){
   const media = raw.listing_media || [];
   const photos = media.filter(m => m.media_type === 'photo').map(m => m.url);
+  const videos = media.filter(m => m.media_type === 'video');
   
   const boosts = raw.boosts || [];
   const now = new Date();
@@ -971,6 +1051,9 @@ function mapRealListing(raw){
     desc: raw.description || '',
     phone: raw.owners ? (raw.owners.whatsapp || raw.owners.phone) : '',
     photoUrl: photos[0] || null,
+    media: media,
+    photos: photos,
+    videos: videos,
     isReal: true,
     hasActiveBoost: !!activeBoost,
     hasExpiredBoost: !!expiredBoost,
@@ -979,7 +1062,6 @@ function mapRealListing(raw){
   };
 }
 
-/* ===== CHARGEMENT ANNONCES ===== */
 async function loadRealListings(){
   if(!supabaseClient) return [];
   try{
@@ -988,7 +1070,7 @@ async function loadRealListings(){
       .select(`
         id,title,city,commune,zone,transaction,type,price,currency,period,description,status,available,
         owners(name,phone,whatsapp),
-        listing_media(media_type,url),
+        listing_media(media_type,url,thumbnail,mime_type),
         boosts(status,ends_at)
       `)
       .eq('status', 'valide')
@@ -1011,7 +1093,7 @@ async function loadBoostedListings(){
       .select(`
         id,title,city,commune,zone,transaction,type,price,currency,period,description,status,available,
         owners(name,phone,whatsapp),
-        listing_media(media_type,url),
+        listing_media(media_type,url,thumbnail,mime_type),
         boosts(status,ends_at)
       `)
       .eq('status', 'valide')
@@ -1066,7 +1148,6 @@ function setTransactionFilter(txn){
   renderBoosted();
 }
 
-/* ===== Navigation géographique ===== */
 function renderLocationNav(){
   const crumb = document.getElementById('loc-breadcrumb');
   const row = document.getElementById('loc-chip-row');
@@ -1120,22 +1201,35 @@ function goBackOneLevel(){
 function selectDepartement(i){
   const dept = Object.keys(geoData)[i];
   locState = { departement: dept, arrondissement:null, commune:null, quartier:null };
+  state.departement = dept;
+  state.city = "";
+  state.commune = "";
+  state.quartier = "";
   renderLocationNav();
+  renderListings();
+  renderBoosted();
 }
+
 function selectArrondissement(i){
   const arr = Object.keys(geoData[locState.departement])[i];
   locState.arrondissement = arr;
   locState.commune = null;
   locState.quartier = null;
+  state.city = arr;
+  state.commune = "";
+  state.quartier = "";
   renderLocationNav();
+  renderListings();
+  renderBoosted();
 }
+
 function selectCommune(i){
   const commune = geoData[locState.departement][locState.arrondissement][i];
   locState.commune = commune;
   locState.quartier = null;
-  state.city = commune;
   state.commune = commune;
   state.quartier = "";
+  state.city = commune;
   const citySelect = document.getElementById('f-city');
   if(citySelect) {
     citySelect.value = [...citySelect.options].some(o => o.value === commune) ? commune : "";
@@ -1144,6 +1238,7 @@ function selectCommune(i){
   renderListings();
   renderBoosted();
 }
+
 function selectQuartier(i){
   const quartier = quartiersData[locState.commune][i];
   locState.quartier = quartier;
@@ -1152,21 +1247,25 @@ function selectQuartier(i){
   renderListings();
   renderBoosted();
 }
+
 function backToDepartement(){
   locState.arrondissement = null; locState.commune = null; locState.quartier = null;
   state.city = ""; state.commune = ""; state.quartier = "";
   renderLocationNav(); renderListings(); renderBoosted();
 }
+
 function backToArrondissement(){
   locState.commune = null; locState.quartier = null;
   state.city = ""; state.commune = ""; state.quartier = "";
   renderLocationNav(); renderListings(); renderBoosted();
 }
+
 function backToCommune(){
   locState.quartier = null;
   state.quartier = "";
   renderLocationNav(); renderListings(); renderBoosted();
 }
+
 function resetLocation(){
   locState = { departement:null, arrondissement:null, commune:null, quartier:null };
   state.city = ""; state.commune = ""; state.quartier = "";
@@ -1206,7 +1305,7 @@ function syncLocStateToCity(commune){
   locState = { departement:null, arrondissement:null, commune:null, quartier:null };
 }
 
-/* ===== FONKSYON POU KONSTRUI KAT LA ===== */
+/* ===== buildCardHtml — RETIRE BOOST EKSPIRE ===== */
 function buildCardHtml(l, i, isBoosted){
   const specs = [];
   if(l.beds !== null && l.beds !== undefined) specs.push(`${l.beds} ${t('spec_beds')}`);
@@ -1224,17 +1323,14 @@ function buildCardHtml(l, i, isBoosted){
   }
   
   let boostIndicator = '';
+  // SEULEMENT si boost la AKTIF — pa montre boost ekspire
   if (l.hasActiveBoost && l.boostEndsAt) {
     const endDate = new Date(l.boostEndsAt).toLocaleDateString(
       currentLang === 'en' ? 'en-US' : currentLang === 'ht' ? 'ht' : 'fr-FR'
     );
     boostIndicator = `<span class="boost-indicator active">${t('boost_active').replace('{date}', endDate)}</span>`;
-  } else if (l.hasExpiredBoost && l.boostEndsAt) {
-    const endDate = new Date(l.boostEndsAt).toLocaleDateString(
-      currentLang === 'en' ? 'en-US' : currentLang === 'ht' ? 'ht' : 'fr-FR'
-    );
-    boostIndicator = `<span class="boost-indicator expired">${t('boost_expired').replace('{date}', endDate)}</span>`;
   }
+  // boost_expired retire — pa montre nan paj piblik la
   
   const transactionBadge = `<span class="card-badge ${l.transaction==='Vente'?'badge-vente':'badge-location'}">${l.transaction === 'Vente' ? t('badge_sale') : t('badge_rent')}</span>`;
   
@@ -1256,11 +1352,20 @@ function buildCardHtml(l, i, isBoosted){
     </div>`;
 }
 
-/* ===== RENDER LISTINGS (KOREK) ===== */
+function circularSlice(arr, start, size) {
+  if (arr.length === 0) return [];
+  const result = [];
+  for (let i = 0; i < size && i < arr.length; i++) {
+    result.push(arr[(start + i) % arr.length]);
+  }
+  return result;
+}
+
 function renderListings(){
   const grid = document.getElementById('listings-grid');
   let filtered = listings.filter(l => {
     if(state.transaction && l.transaction !== state.transaction) return false;
+    if(state.departement && l.departement !== state.departement) return false;
     if(state.city && l.city !== state.city) return false;
     if(state.commune && l.commune !== state.commune) return false;
     if(state.quartier && l.zone !== state.quartier && l.neighborhood !== state.quartier) return false;
@@ -1281,27 +1386,7 @@ function renderListings(){
   grid.innerHTML = filtered.map((l) => buildCardHtml(l, listings.indexOf(l), false)).join('');
 }
 
-/* ===== RENDER BOOSTED (KOREK) ===== */
-let boostedPool = [];
-let boostIndex = 0;
-let boostTimer = null;
-const BOOST_BATCH_SIZE = 10;
-const BOOST_ROTATION_MS = 45000;
-
-function circularSlice(arr, start, count){
-  if(arr.length === 0) return [];
-  if(arr.length <= count) return arr.slice();
-  const out = [];
-  for(let k=0;k<count;k++){
-    out.push(arr[(start + k) % arr.length]);
-  }
-  return out;
-}
-
-function hasActiveFilter(){
-  return !!(state.transaction || state.city || state.commune || state.quartier || state.type || state.budget);
-}
-
+/* ===== renderBoosted — SEULEMENT ANONS AVEC BOOST AKTIF ===== */
 function renderBoosted(){
   const section = document.getElementById('boosted-section');
   const grid = document.getElementById('boosted-grid');
@@ -1309,9 +1394,9 @@ function renderBoosted(){
   // Sèlman anons ki gen boost AKTIF
   let activeBoosted = boostedPool.filter(l => l.hasActiveBoost === true);
   
-  // Aplike menm filtre yo
   let filteredBoosted = activeBoosted.filter(l => {
     if(state.transaction && l.transaction !== state.transaction) return false;
+    if(state.departement && l.departement !== state.departement) return false;
     if(state.city && l.city !== state.city) return false;
     if(state.commune && l.commune !== state.commune) return false;
     if(state.quartier && l.zone !== state.quartier && l.neighborhood !== state.quartier) return false;
@@ -1369,33 +1454,125 @@ function openModal(id){
   if(!l) return;
   const i = listings.indexOf(l);
   const p = palette[i % palette.length];
+  
+  const allMedia = l.media || [];
+  const photos = allMedia.filter(m => m.media_type === 'photo');
+  const videos = allMedia.filter(m => m.media_type === 'video');
+  
+  let mediaHtml = '';
+  
+  if(photos.length > 0 || videos.length > 0){
+    let items = [];
+    
+    photos.forEach((p, idx) => {
+      items.push(`<div class="modal-media-item ${idx === 0 ? 'active' : ''}">
+        <img src="${p.url}" alt="Photo ${idx + 1}" loading="lazy">
+      </div>`);
+    });
+    
+    videos.forEach((v, idx) => {
+      const isFirst = (photos.length === 0 && idx === 0);
+      items.push(`<div class="modal-media-item ${isFirst ? 'active' : ''}">
+        <video controls preload="metadata" poster="${v.thumbnail || ''}">
+          <source src="${v.url}" type="${v.mime_type || 'video/mp4'}">
+          ${t('modal_video_not_supported')}
+        </video>
+      </div>`);
+    });
+    
+    let controlsHtml = '';
+    if(items.length > 1){
+      controlsHtml = `
+        <div class="modal-media-controls">
+          <button class="modal-media-prev" onclick="changeModalMedia(-1)" aria-label="Précédent">‹</button>
+          <span class="modal-media-counter">1 / ${items.length}</span>
+          <button class="modal-media-next" onclick="changeModalMedia(1)" aria-label="Suivant">›</button>
+        </div>
+      `;
+    }
+    
+    mediaHtml = `
+      <div class="modal-media-wrapper" data-total="${items.length}">
+        <div class="modal-media-slider" id="modal-media-slider">
+          ${items.join('')}
+        </div>
+        ${controlsHtml}
+      </div>
+    `;
+  } else {
+    mediaHtml = houseSVG(i, 110);
+  }
+  
   document.getElementById('modal-art').style.background = p.facade + '1A';
-  const modalArtInner = (l.isReal && l.photoUrl)
-    ? `<img src="${l.photoUrl}" alt="${l.title}">`
-    : houseSVG(i, 110);
-  document.getElementById('modal-art').innerHTML = `<button class="modal-close" onclick="closeModal()" aria-label="${t('modal_close')}">✕</button>` + modalArtInner;
+  document.getElementById('modal-art').innerHTML = `
+    <button class="modal-close" onclick="closeModal()" aria-label="${t('modal_close')}">✕</button>
+    ${mediaHtml}
+  `;
+  
+  modalMediaIndex = 0;
+  updateModalCounter();
+  
   document.getElementById('modal-city').textContent = locationLabel(l);
   document.getElementById('modal-title').textContent = l.title;
   document.getElementById('modal-price').textContent = fmtPrice(l);
+  
   const specs = [];
   if(l.beds !== null && l.beds !== undefined) specs.push(`<div><b>${l.beds}</b>${t('spec_beds_full')}</div>`);
   if(l.baths !== null && l.baths !== undefined) specs.push(`<div><b>${l.baths}</b>${t('spec_baths_full')}</div>`);
   if(l.area !== null && l.area !== undefined) specs.push(`<div><b>${l.area}</b>${t('spec_area_full')}</div>`);
   document.getElementById('modal-specs').innerHTML = specs.join('') || `<div style="color:var(--ink-soft);">${t('modal_specs_fallback')}</div>`;
   document.getElementById('modal-desc').textContent = l.desc;
+  
   const phoneDigits = l.phone ? l.phone.replace(/\D/g,'') : '50900000000';
   const waMsg = t('whatsapp_interest_msg').replace('{title}', l.title).replace('{city}', l.city);
   document.getElementById('modal-whatsapp').href = `https://wa.me/${phoneDigits}?text=${encodeURIComponent(waMsg)}`;
   document.getElementById('modal-overlay').classList.add('open');
 }
+
+function changeModalMedia(direction){
+  const slider = document.getElementById('modal-media-slider');
+  if(!slider) return;
+  
+  const items = slider.querySelectorAll('.modal-media-item');
+  const total = items.length;
+  if(total <= 1) return;
+  
+  items.forEach(el => el.classList.remove('active'));
+  
+  modalMediaIndex = (modalMediaIndex + direction + total) % total;
+  
+  items[modalMediaIndex].classList.add('active');
+  
+  updateModalCounter();
+}
+
+function updateModalCounter(){
+  const counter = document.querySelector('.modal-media-counter');
+  if(!counter) return;
+  
+  const slider = document.getElementById('modal-media-slider');
+  if(!slider) return;
+  
+  const total = slider.querySelectorAll('.modal-media-item').length;
+  counter.textContent = `${modalMediaIndex + 1} / ${total}`;
+}
+
 function closeModal(){
   document.getElementById('modal-overlay').classList.remove('open');
 }
+
 document.getElementById('modal-overlay').addEventListener('click', (e) => {
   if(e.target.id === 'modal-overlay') closeModal();
 });
+
 document.addEventListener('keydown', (e) => {
   if(e.key === 'Escape') closeModal();
+  if(e.key === 'ArrowLeft' && document.getElementById('modal-overlay').classList.contains('open')) {
+    changeModalMedia(-1);
+  }
+  if(e.key === 'ArrowRight' && document.getElementById('modal-overlay').classList.contains('open')) {
+    changeModalMedia(1);
+  }
 });
 
 async function init(){
@@ -1419,7 +1596,6 @@ async function init(){
 }
 init();
 
-/* ===== CHARGER STATISTIQUES VISITES ===== */
 async function loadVisitsStats(){
   try{
     const now = new Date();

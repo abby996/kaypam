@@ -73,7 +73,9 @@ create table if not exists listings (
     check (status in ('en_attente_verification','valide','refuse')),
   available boolean not null default true,
   created_at timestamptz not null default now(),
-  reviewed_at timestamptz
+  reviewed_at timestamptz,
+  image_url text,
+  images text[]
 );
 
 -- Ajoute les nouvelles colonnes si la table existait déjà
@@ -81,6 +83,8 @@ alter table listings add column if not exists available boolean not null default
 alter table listings add column if not exists commune text;
 alter table listings add column if not exists zone text;
 alter table listings add column if not exists departement text;
+alter table listings add column if not exists image_url text;
+alter table listings add column if not exists images text[];
 
 -- Endèks pou rechèch rapid
 create index if not exists idx_listings_available on listings(available);
@@ -96,18 +100,17 @@ create table if not exists listing_media (
   listing_id uuid not null references listings(id) on delete cascade,
   media_type text not null check (media_type in ('photo','video')),
   url text not null,
+  thumbnail text,
+  mime_type text,
   created_at timestamptz not null default now()
 );
+
+alter table listing_media add column if not exists thumbnail text;
+alter table listing_media add column if not exists mime_type text;
 
 create index if not exists idx_listing_media_listing_id on listing_media(listing_id);
 
 -- ---------- TABLE ADMINS ----------
--- Distingue "l'équipe KayPam qui vérifie les annonces" de "n'importe quel
--- propriétaire connecté". Sans cette table, un propriétaire connecté serait
--- traité comme "authenticated" au même titre qu'un admin, et verrait TOUTES
--- les annonces (y compris en attente) et tous les propriétaires — une faille
--- de sécurité importante. Un utilisateur ne peut PAS s'ajouter lui-même ici :
--- seul vous, depuis le Table Editor ou le SQL Editor de Supabase, le pouvez.
 create table if not exists admins (
   user_id uuid primary key references auth.users(id) on delete cascade,
   created_at timestamptz not null default now()
@@ -117,11 +120,8 @@ alter table admins enable row level security;
 drop policy if exists "admins_self_select" on admins;
 create policy "admins_self_select" on admins
   for select to authenticated using (user_id = auth.uid());
--- Aucune policy insert/update/delete : seul le SQL Editor (avec vos propres
--- droits de propriétaire de projet) peut modifier cette table.
 
--- ---------- TABLE VISITS (STATISTIQUES DE VISITES) ----------
--- Table pour enregistrer toutes les visites du site
+-- ---------- TABLE VISITS ----------
 create table if not exists visits (
   id uuid primary key default gen_random_uuid(),
   visitor_id text,
@@ -131,28 +131,29 @@ create table if not exists visits (
   visited_at timestamptz default now()
 );
 
--- Endèks pour les visites
 create index if not exists idx_visits_visited_at on visits(visited_at);
 create index if not exists idx_visits_visitor_id on visits(visitor_id);
 create index if not exists idx_visits_page on visits(page);
 
--- ---------- SÉCURITÉ (Row Level Security) ----------
+-- ---------- TABLE VISITS_SUMMARY ----------
+create table if not exists visits_summary (
+  id uuid primary key default gen_random_uuid(),
+  date date not null unique,
+  total_visits int not null default 0,
+  unique_visitors int not null default 0,
+  created_at timestamptz default now()
+);
 
+create index if not exists idx_visits_summary_date on visits_summary(date);
+
+-- ---------- SÉCURITÉ ----------
 alter table owners enable row level security;
 alter table listings enable row level security;
 alter table listing_media enable row level security;
 alter table visits enable row level security;
+alter table visits_summary enable row level security;
 
--- OWNERS : personne ne lit cette table directement, même pas un propriétaire
--- connecté qui consulte ses propres infos (il passe par des fonctions dédiées
--- ci-dessous), SAUF l'équipe admin (table admins) pour l'appel de courtoisie.
--- Exception volontaire et étroite : le nom/téléphone d'un propriétaire
--- redevient visible publiquement UNIQUEMENT s'il a au moins une annonce
--- validée et disponible — c'est ce qui permet le bouton WhatsApp sur les
--- fiches d'annonces publiques, sans exposer les propriétaires dont aucune
--- annonce n'est encore (ou plus) publique.
-drop policy if exists "owners_public_select" on owners;
-drop policy if exists "owners_public_insert" on owners;
+-- OWNERS
 drop policy if exists "owners_admin_select" on owners;
 drop policy if exists "owners_public_select_for_live_listings" on owners;
 create policy "owners_admin_select" on owners
@@ -165,32 +166,32 @@ create policy "owners_public_select_for_live_listings" on owners
     where l.owner_id = owners.id and l.status = 'valide' and l.available = true
   ));
 
--- LISTINGS : le public ne voit QUE les annonces validées et disponibles.
--- L'équipe admin (présente dans la table admins) voit tout.
--- La création d'annonce passe uniquement par create_listing() ci-dessous.
+-- LISTINGS
 drop policy if exists "listings_public_select_validated" on listings;
 drop policy if exists "listings_admin_select_all" on listings;
 drop policy if exists "listings_admin_update" on listings;
+drop policy if exists "listings_public_read" on listings;
+
+create policy "listings_public_read" on listings
+  for select to anon, authenticated using (true);
+
 create policy "listings_public_select_validated" on listings
   for select to anon, authenticated using (status = 'valide' and available = true);
+
 create policy "listings_admin_select_all" on listings
   for select to authenticated
   using (exists (select 1 from admins a where a.user_id = auth.uid()));
+
 create policy "listings_admin_update" on listings
   for update to authenticated
   using (exists (select 1 from admins a where a.user_id = auth.uid()))
   with check (exists (select 1 from admins a where a.user_id = auth.uid()));
 
--- LISTING_MEDIA : lecture publique (nécessaire pour afficher les photos),
--- écriture réservée aux propriétaires connectés (ils ajoutent leurs photos/
--- vidéos juste après avoir créé leur annonce, dans la même session).
+-- LISTING_MEDIA
 drop policy if exists "media_public_select" on listing_media;
 drop policy if exists "media_public_insert" on listing_media;
 create policy "media_public_select" on listing_media
   for select to anon, authenticated using (true);
--- Un propriétaire connecté ne peut attacher une photo/vidéo qu'à une annonce
--- qui lui appartient réellement (vérifié via owners.auth_user_id) — empêche
--- un compte de "vandaliser" l'annonce d'un autre propriétaire.
 create policy "media_public_insert" on listing_media
   for insert to authenticated
   with check (
@@ -202,7 +203,7 @@ create policy "media_public_insert" on listing_media
     )
   );
 
--- VISITS : tout le monde peut insérer (pour le tracking), seul l'admin peut lire
+-- VISITS
 drop policy if exists "visits_insert" on visits;
 drop policy if exists "visits_admin_select" on visits;
 create policy "visits_insert" on visits
@@ -212,28 +213,16 @@ create policy "visits_admin_select" on visits
   for select to authenticated
   using (exists (select 1 from admins a where a.user_id = auth.uid()));
 
--- ---------- FONCTIONS DE BASE ----------
+-- VISITS_SUMMARY
+drop policy if exists "visits_summary_admin_select" on visits_summary;
+create policy "visits_summary_admin_select" on visits_summary
+  for select to authenticated
+  using (exists (select 1 from admins a where a.user_id = auth.uid()));
 
--- Crée le profil propriétaire lié au compte qui vient de s'inscrire
--- (auth.uid()). Le username est déjà garanti unique par Supabase Auth
--- (l'inscription utilise un email synthétique "username@kaypam.local" —
--- si le username existe déjà, l'inscription elle-même échoue avant d'arriver
--- ici). L'index unique sur owners.username est une deuxième sécurité.
+-- ---------- FONCTIONS ----------
 
--- Efase tout vèsyon ki egziste
-drop function if exists public.link_owner_account();
-drop function if exists public.link_owner_account(text);
-drop function if exists public.link_owner_account(text, text);
-drop function if exists public.link_owner_account(text, text, text);
-drop function if exists public.link_owner_account(text, text, text, text);
-drop function if exists public.link_owner_account(text, text, text, text, text);
-drop function if exists public.link_owner_account(uuid);
-drop function if exists public.link_owner_account(uuid, text);
-drop function if exists public.link_owner_account(uuid, text, text);
+-- link_owner_account
 drop function if exists public.link_owner_account(uuid, text, text, text);
-drop function if exists public.link_owner_account(uuid, text, text, text, text);
-
--- Rekreye fonksyon an ak 4 paramèt
 create or replace function public.link_owner_account(
   p_username text,
   p_name text,
@@ -261,10 +250,7 @@ $$;
 
 grant execute on function public.link_owner_account(text, text, text, text) to authenticated;
 
--- Retourne le profil propriétaire lié au compte actuellement connecté
--- (ou aucune ligne si l'inscription n'a jamais été finalisée), y compris
--- l'ID court lisible (ex. KP-00001) qui distingue deux propriétaires
--- portant le même nom.
+-- get_my_owner_profile
 drop function if exists public.get_my_owner_profile();
 create or replace function public.get_my_owner_profile()
 returns table(id uuid, username text, name text, phone text, whatsapp text, account_code text)
@@ -279,14 +265,8 @@ $$;
 
 grant execute on function public.get_my_owner_profile to authenticated;
 
--- Crée une annonce en statut "en_attente_verification" pour le propriétaire
--- actuellement connecté. L'owner_id n'est JAMAIS fourni par le client : il
--- est déduit du compte connecté (auth.uid()), ce qui empêche quiconque
--- d'attribuer une annonce à un autre propriétaire.
--- Cette fonction prend désormais en charge les champs commune, zone et departement.
-drop function if exists public.create_listing(uuid, text, text, text, text, numeric, text, text, text);
-drop function if exists public.create_listing(text, text, text, text, numeric, text, text, text);
-drop function if exists public.create_listing(text, text, text, text, text, text, numeric, text, text, text);
+-- create_listing
+drop function if exists public.create_listing(text, text, text, text, text, text, text, numeric, text, text, text);
 create or replace function public.create_listing(
   p_title text,
   p_city text,
@@ -323,8 +303,7 @@ $$;
 
 grant execute on function public.create_listing to authenticated;
 
--- Retourne des compteurs globaux (propriétaires / annonces) sans exposer le détail
--- des annonces en attente à un visiteur non connecté.
+-- kaypam_stats
 create or replace function public.kaypam_stats()
 returns json
 language sql
@@ -339,22 +318,7 @@ $$;
 
 grant execute on function public.kaypam_stats to anon, authenticated;
 
--- ============================================================
--- STOCKAGE — à exécuter APRÈS avoir créé le bucket "listing-media"
--- dans l'onglet "Storage" de Supabase (cochez "Public bucket").
--- ============================================================
-
-drop policy if exists "media_bucket_public_read" on storage.objects;
-drop policy if exists "media_bucket_public_upload" on storage.objects;
-create policy "media_bucket_public_read" on storage.objects
-  for select to anon, authenticated using (bucket_id = 'listing-media');
-
-create policy "media_bucket_public_upload" on storage.objects
-  for insert to authenticated with check (bucket_id = 'listing-media');
-
--- ============================================================
--- SYSTÈME DE BOOST (mise en avant payante des annonces)
--- ============================================================
+-- ---------- SYSTÈME BOOST ----------
 
 create table if not exists boost_plans (
   id uuid primary key default gen_random_uuid(),
@@ -388,7 +352,6 @@ create index if not exists idx_boosts_ends_at on boosts(ends_at);
 alter table boost_plans enable row level security;
 alter table boosts enable row level security;
 
--- BOOST_PLANS : lecture publique des formules actives ; l'admin gère tout
 drop policy if exists "boost_plans_public_select" on boost_plans;
 drop policy if exists "boost_plans_admin_write" on boost_plans;
 create policy "boost_plans_public_select" on boost_plans
@@ -398,9 +361,6 @@ create policy "boost_plans_admin_write" on boost_plans
   using (exists (select 1 from admins a where a.user_id = auth.uid()))
   with check (exists (select 1 from admins a where a.user_id = auth.uid()));
 
--- BOOSTS : le public ne voit QUE les boosts réellement actifs ET dans leur
--- fenêtre de temps en cours. C'est cette règle, à elle seule, qui fait que
--- les boosts expirés disparaissent automatiquement du roulement.
 drop policy if exists "boosts_public_select_active" on boosts;
 drop policy if exists "boosts_admin_select_all" on boosts;
 drop policy if exists "boosts_admin_update" on boosts;
@@ -415,9 +375,8 @@ create policy "boosts_admin_update" on boosts
   using (exists (select 1 from admins a where a.user_id = auth.uid()))
   with check (exists (select 1 from admins a where a.user_id = auth.uid()));
 
--- Le propriétaire connecté demande à booster une de SES annonces déjà
--- validée (vérifié via auth.uid(), pas via un numéro fourni par le client).
-drop function if exists public.request_boost(uuid, text, uuid, text);
+-- request_boost
+drop function if exists public.request_boost(uuid, uuid, text);
 create or replace function public.request_boost(
   p_listing_id uuid,
   p_plan_id uuid,
@@ -467,7 +426,7 @@ $$;
 
 grant execute on function public.request_boost to authenticated;
 
--- L'admin confirme un paiement MonCash reçu et active le boost pour sa durée.
+-- activate_boost
 create or replace function public.activate_boost(p_boost_id uuid)
 returns void
 language plpgsql
@@ -492,13 +451,7 @@ $$;
 
 grant execute on function public.activate_boost to authenticated;
 
--- Retourne TOUTES les annonces du propriétaire connecté (auth.uid()), quel
--- que soit leur statut (en attente, validée, refusée), leur disponibilité,
--- et le statut de boost le plus récent de chacune. Le front-end décide
--- comment afficher chaque statut (le boost/retrait ne s'applique qu'aux
--- annonces validées).
--- Cette fonction retourne désormais également commune, zone et departement.
-drop function if exists public.get_owner_boosts(text);
+-- get_owner_boosts
 drop function if exists public.get_owner_boosts();
 create or replace function public.get_owner_boosts()
 returns table(
@@ -541,10 +494,8 @@ $$;
 
 grant execute on function public.get_owner_boosts to authenticated;
 
--- Permet au propriétaire connecté de retirer sa propre annonce du site
--- public (bien loué/vendu) ou de la remettre disponible, sans repasser par
--- une validation admin. Désactive aussi tout boost actif au moment du retrait.
-drop function if exists public.set_listing_availability(uuid, text, boolean);
+-- set_listing_availability
+drop function if exists public.set_listing_availability(uuid, boolean);
 create or replace function public.set_listing_availability(
   p_listing_id uuid,
   p_available boolean
@@ -580,9 +531,7 @@ $$;
 
 grant execute on function public.set_listing_availability to authenticated;
 
--- Supprime définitivement une annonce depuis l'espace admin.
--- La vérification est faite dans la fonction pour que l'opération reste
--- protégée même si elle est appelée en dehors de l'interface web.
+-- delete_listing_admin
 drop function if exists public.delete_listing_admin(uuid);
 create or replace function public.delete_listing_admin(
   p_listing_id uuid
@@ -607,11 +556,8 @@ $$;
 
 grant execute on function public.delete_listing_admin(uuid) to authenticated;
 
--- ============================================================
--- FONCTIONS POUR STATISTIQUES DE VISITES
--- ============================================================
+-- ---------- FONCTIONS VISITES ----------
 
--- Fonction pour obtenir le nombre de visites sur une période
 create or replace function public.get_visits_count(
   p_start_date timestamptz,
   p_end_date timestamptz default now()
@@ -627,7 +573,6 @@ $$;
 
 grant execute on function public.get_visits_count to authenticated;
 
--- Fonction pour obtenir le nombre de visiteurs uniques sur une période
 create or replace function public.get_unique_visitors(
   p_start_date timestamptz,
   p_end_date timestamptz default now()
@@ -643,7 +588,6 @@ $$;
 
 grant execute on function public.get_visits_count to authenticated;
 
--- Fonction pour obtenir les statistiques complètes de visites (aujourd'hui, semaine, mois)
 create or replace function public.get_visits_stats()
 returns json
 language plpgsql
@@ -675,11 +619,8 @@ $$;
 
 grant execute on function public.get_visits_stats to authenticated;
 
--- ============================================================
--- FONCTION POUR RECHERCHER LES VILLES PAR DÉPARTEMENT
--- ============================================================
+-- ---------- FONCTIONS RECHERCHE ----------
 
--- Fonction pour obtenir les villes d'un département
 create or replace function public.get_cities_by_departement(p_departement text)
 returns table(city text)
 language sql
@@ -696,7 +637,6 @@ $$;
 
 grant execute on function public.get_cities_by_departement to anon, authenticated;
 
--- Fonction pour obtenir les communes d'une ville
 create or replace function public.get_communes_by_city(p_city text)
 returns table(commune text)
 language sql
@@ -713,7 +653,6 @@ $$;
 
 grant execute on function public.get_communes_by_city to anon, authenticated;
 
--- Fonction pour obtenir les zones d'une commune
 create or replace function public.get_zones_by_commune(p_commune text)
 returns table(zone text)
 language sql
@@ -730,11 +669,8 @@ $$;
 
 grant execute on function public.get_zones_by_commune to anon, authenticated;
 
--- ============================================================
--- FONCTION POUR RECHERCHER LES ANNONCES AVEC FILTRES
--- ============================================================
+-- ---------- FONCTION RECHERCHE AVANCÉE ----------
 
--- Fonction de recherche avancée avec pagination
 create or replace function public.search_listings(
   p_departement text default null,
   p_city text default null,
@@ -818,23 +754,8 @@ $$;
 
 grant execute on function public.search_listings to anon, authenticated;
 
--- ============================================================
--- TAB VISITS_SUMMARY POUR STATISTIQUES MENSUELLES/ANNUELLES
--- ============================================================
+-- ---------- FONCTIONS VISITS_SUMMARY ----------
 
--- Tab pou anrejistre rezime chak jou
-create table if not exists visits_summary (
-  id uuid primary key default gen_random_uuid(),
-  date date not null unique,
-  total_visits int not null default 0,
-  unique_visitors int not null default 0,
-  created_at timestamptz default now()
-);
-
--- Endèks
-create index if not exists idx_visits_summary_date on visits_summary(date);
-
--- Fonksyon pou ajoute rezime vizit chak jou
 create or replace function public.add_daily_visits_summary()
 returns void
 language plpgsql
@@ -846,29 +767,23 @@ declare
   v_total int;
   v_unique int;
 begin
-  -- Jwenn dènye dat ki gen rezime
   select max(date) into v_date from visits_summary;
   
-  -- Si pa gen rezime, kòmanse depi 30 jou avan
   if v_date is null then
     v_date := date_trunc('day', now()) - interval '30 days';
   else
     v_date := v_date + interval '1 day';
   end if;
   
-  -- Pou chak jou ki poko gen rezime
   while v_date <= date_trunc('day', now())::date loop
-    -- Konte vizit pou jou sa a
     select count(*) into v_total
     from visits
     where date_trunc('day', visited_at) = v_date;
     
-    -- Konte vizitè inik pou jou sa a
     select count(distinct visitor_id) into v_unique
     from visits
     where date_trunc('day', visited_at) = v_date;
     
-    -- Enrejistre rezime a
     insert into visits_summary (date, total_visits, unique_visitors)
     values (v_date, v_total, v_unique)
     on conflict (date) do update
@@ -883,7 +798,6 @@ $$;
 
 grant execute on function public.add_daily_visits_summary to authenticated;
 
--- Fonksyon pou jwenn rezime vizit pa peryòd
 create or replace function public.get_visits_summary(
   p_start_date date,
   p_end_date date
@@ -909,7 +823,6 @@ $$;
 
 grant execute on function public.get_visits_summary to authenticated;
 
--- Fonksyon pou rezime pa jou
 create or replace function public.get_visits_daily(
   p_start_date date,
   p_end_date date
@@ -934,7 +847,6 @@ $$;
 
 grant execute on function public.get_visits_daily to authenticated;
 
--- Rezime mwa a (mwa aktyèl la)
 create or replace function public.get_current_month_summary()
 returns table(
   month text,
@@ -956,7 +868,6 @@ $$;
 
 grant execute on function public.get_current_month_summary to authenticated;
 
--- Rezime ane a (ane aktyèl la)
 create or replace function public.get_current_year_summary()
 returns table(
   year text,
@@ -978,75 +889,11 @@ $$;
 
 grant execute on function public.get_current_year_summary to authenticated;
 
--- ============================================================
--- PRIVILÈGES DE BASE — obligatoires en plus de RLS
--- ============================================================
--- Sans ces GRANT, PostgreSQL refuse l'accès à une table AVANT même de
--- vérifier les règles RLS ("permission denied for table ..."). RLS reste
--- la vraie barrière de sécurité : ces GRANT ouvrent seulement la porte
--- d'entrée générale ; RLS décide ensuite, ligne par ligne, ce que chaque
--- rôle (anon / authenticated) a le droit de voir ou modifier.
-grant usage on schema public to anon, authenticated;
-grant all on all tables in schema public to anon, authenticated;
-grant all on all sequences in schema public to anon, authenticated;
-grant insert on visits to anon, authenticated;
-grant select on visits to authenticated;
-alter default privileges in schema public grant all on tables to anon, authenticated;
-alter default privileges in schema public grant all on sequences to anon, authenticated;
+-- ---------- STORAGE POLICIES ----------
 
--- ============================================================
--- ÉTAPE FINALE OBLIGATOIRE — ajoutez votre compte admin existant
--- ============================================================
--- Admin email: zionmaket@gmail.com
-insert into admins (user_id)
-select id from auth.users where email = 'zionmaket@gmail.com'
-on conflict (user_id) do nothing;
-
--- ============================================================
--- VERIFICATION FINALE
--- ============================================================
-
--- Verifye policies pou listing_media
-select 
-  schemaname, 
-  tablename, 
-  policyname, 
-  permissive, 
-  roles, 
-  cmd, 
-  qual, 
-  with_check
-from pg_policies 
-where tablename = 'listing_media';
-
--- Verifye fonksyon link_owner_account
-select 
-  proname as function_name,
-  pg_get_function_identity_arguments(oid) as arguments
-from pg_proc 
-where proname = 'link_owner_account' 
-  and pronamespace = 'public'::regnamespace;
-
--- Verifye fonksyon create_listing
-select 
-  proname as function_name,
-  pg_get_function_identity_arguments(oid) as arguments
-from pg_proc 
-where proname = 'create_listing' 
-  and pronamespace = 'public'::regnamespace;
-
-
-
-
-  -- ============================================================
--- KOREKSYON POLICIES STORAGE
--- ============================================================
-
--- Efase ansyen policies yo
 drop policy if exists "media_bucket_public_read" on storage.objects;
 drop policy if exists "media_bucket_public_upload" on storage.objects;
 
--- Rekreye policies ak bon non bucket la
 create policy "media_bucket_public_read" on storage.objects
   for select to anon, authenticated 
   using (bucket_id = 'listing-media');
@@ -1055,28 +902,8 @@ create policy "media_bucket_public_upload" on storage.objects
   for insert to authenticated 
   with check (bucket_id = 'listing-media');
 
+-- ---------- TRIGGER ----------
 
-  -- 1. Ajoute kolòn imaj yo anndan tab listings la
-ALTER TABLE public.listings 
-ADD COLUMN IF NOT EXISTS image_url text,
-ADD COLUMN IF NOT EXISTS images text[];
-
--- 2. Asire w RLS Policy pèmèt tout moun li anons yo
-DROP POLICY IF EXISTS "listings_public_read" ON public.listings;
-CREATE POLICY "listings_public_read" ON public.listings
-  FOR SELECT TO anon, authenticated USING (true);
-
-
-  -- Mete tout anons valide yo disponib
-update listings 
-set available = true 
-where status = 'valide';
-
--- Verifye
-select id, title, status, available from listings where status = 'valide';
-
-
--- Trigger pou mete available = true lè status vin 'valide'
 create or replace function set_available_on_validate()
 returns trigger as $$
 begin
@@ -1092,3 +919,44 @@ create trigger trigger_set_available_on_validate
 before update on listings
 for each row
 execute function set_available_on_validate();
+
+-- ---------- PRIVILÈGES ----------
+
+grant usage on schema public to anon, authenticated;
+grant all on all tables in schema public to anon, authenticated;
+grant all on all sequences in schema public to anon, authenticated;
+grant insert on visits to anon, authenticated;
+grant select on visits to authenticated;
+alter default privileges in schema public grant all on tables to anon, authenticated;
+alter default privileges in schema public grant all on sequences to anon, authenticated;
+
+-- ---------- ADMIN ----------
+insert into admins (user_id)
+select id from auth.users where email = 'zionmaket@gmail.com'
+on conflict (user_id) do nothing;
+
+-- ---------- VERIFICATION ----------
+update listings 
+set available = true 
+where status = 'valide';
+
+-- Verifye policies
+select 
+  schemaname, 
+  tablename, 
+  policyname, 
+  permissive, 
+  roles, 
+  cmd, 
+  qual, 
+  with_check
+from pg_policies 
+where tablename in ('listings', 'listing_media', 'boosts');
+
+-- Verifye fonksyon yo
+select 
+  proname as function_name,
+  pg_get_function_identity_arguments(oid) as arguments
+from pg_proc 
+where proname in ('link_owner_account', 'create_listing', 'search_listings')
+  and pronamespace = 'public'::regnamespace;
