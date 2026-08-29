@@ -243,7 +243,11 @@
     </ul>
   </div>
 
- 
+  <div class="stats-bar" id="stats-bar">
+    <div class="stat"><b id="stat-owners">—</b><span>Propriétaires inscrits</span></div>
+    <div class="stat"><b id="stat-listings">—</b><span>Annonces soumises</span></div>
+  </div>
+
   <!-- Porte de connexion / inscription -->
   <div class="auth-card" id="auth-card">
     <div class="auth-tabs">
@@ -293,25 +297,24 @@
         </div>
       </div>
       <div class="auth-form-row">
-        <div class="field-group"></div>
         <div class="field-group">
           <label for="re-whatsapp">Numéro WhatsApp</label>
           <input type="tel" id="re-whatsapp" placeholder="+509 0000 0000" autocomplete="tel" required>
         </div>
       </div>
-      <div class="auth-hint">Le numéro WhatsApp est celui qui apparaîtra sur le bouton « Contacter via WhatsApp » de vos annonces. Il peut être identique ou différent de votre téléphone.</div>
+      <div class="auth-hint">Le numéro WhatsApp est celui qui apparaîtra sur le bouton « Contacter via WhatsApp » de vos annonces.</div>
       <div class="form-error" id="register-error"></div>
       <button type="submit" class="auth-submit" id="register-submit">Créer mon compte</button>
     </form>
   </div>
 
-  <!-- Barre de compte connecté (affichée une fois connecté) -->
+  <!-- Barre de compte connecté -->
   <div class="account-bar" id="account-bar">
     <span>Connecté en tant que <b id="account-username"></b> · ID <b id="account-code"></b> (<span id="account-phone"></span>)</span>
     <a href="javascript:void(0)" class="logout-link" onclick="logout()">Se déconnecter</a>
   </div>
 
-  <!-- Formulaire de publication (affiché une fois connecté) -->
+  <!-- Formulaire de publication -->
   <div class="form-card" id="form-card">
     <h2>Formulaire de publication</h2>
     <div class="verif-note">
@@ -320,26 +323,16 @@
     </div>
 
     <form class="pform" id="publish-form" novalidate>
-      <!-- LIGNE 1: Département et Ville -->
+      <!-- LIGNE 1: Département et Ville (Arrondissement) -->
       <div class="pform-row">
         <div class="field-group">
           <label for="p-departement">Département</label>
           <select id="p-departement" required>
             <option value="">Choisir un département</option>
-            <option value="Artibonite">Artibonite</option>
-            <option value="Centre">Centre</option>
-            <option value="Grand'Anse">Grand'Anse</option>
-            <option value="Nippes">Nippes</option>
-            <option value="Nord">Nord</option>
-            <option value="Nord-Est">Nord-Est</option>
-            <option value="Nord-Ouest">Nord-Ouest</option>
-            <option value="Ouest">Ouest</option>
-            <option value="Sud">Sud</option>
-            <option value="Sud-Est">Sud-Est</option>
           </select>
         </div>
         <div class="field-group">
-          <label for="p-ville">Ville</label>
+          <label for="p-ville">Ville (Arrondissement)</label>
           <select id="p-ville" required>
             <option value="">Choisir une ville</option>
           </select>
@@ -457,7 +450,7 @@
         <button type="submit" id="submit-btn">Soumettre l'annonce pour vérification</button>
         <div class="pform-success" id="pform-success">
           <div class="pform-success-title">✅ Annonce envoyée avec succès !</div>
-          Merci ! Votre annonce a bien été reçue avec ses photos et vidéos. Notre équipe la vérifiera et la publiera sous 24h. Vous pouvez publier une autre annonce dès maintenant grâce au formulaire ci-dessus, réinitialisé pour vous.
+          Merci ! Votre annonce a bien été reçue avec ses photos et vidéos. Notre équipe la vérifiera et la publiera sous 24h.
           <div class="pform-success-footer">Mèsi ! Annons ou a anrejistre. Ekip KayPam nan ap verifye enfòmasyon yo ak foto yo pou sekirite platfòm lan. L ap parèt an liy nan mwens pase 24 èdtan.</div>
         </div>
       </div>
@@ -479,169 +472,124 @@ const supabaseClient = (SUPABASE_URL.startsWith('http') && SUPABASE_ANON_KEY.len
   : null;
 const EMAIL_DOMAIN = '@kaypam.local';
 
-/* ===== DONNÉES GÉOGRAPHIQUES ===== */
+/* ===== DONNÉES GÉOGRAPHIQUES (menm ak index.html) ===== */
 const geoData = {
-  // Département de l'Ouest
-  'Ouest': {
-    'villes': ['Port-au-Prince', 'Léogâne', 'Croix-des-Bouquets', 'Arcahaie', 'La Gonâve'],
-    'communes': {
-      'Port-au-Prince': ['Port-au-Prince', 'Carrefour', 'Delmas', 'Pétion-Ville', 'Kenscoff', 'Cité Soleil', 'Gressier', 'Tabarre'],
-      'Léogâne': ['Léogâne', 'Petit-Goâve', 'Grand-Goâve'],
-      'Croix-des-Bouquets': ['Croix-des-Bouquets', 'Ganthier', 'Thomazeau', 'Cornillon', 'Fonds-Verrettes'],
-      'Arcahaie': ['Arcahaie', 'Cabaret'],
-      'La Gonâve': ['Anse-à-Galets', 'Pointe-à-Raquette']
-    },
-    'zones': {
-      'Port-au-Prince': ['Turgeau', 'Pacot', 'Bois Verna', 'Canapé-Vert', 'Debussy', 'Martissant', 'Carrefour-Feuilles', 'Fontamara', 'Fort-National', 'Nazon', 'Lalue'],
-      'Pétion-Ville': ['Juvénat', 'Morne Calvaire', 'Laboule', 'Thomassin', 'Péguy-Ville', 'Vivy Mitchell', 'Belleville', 'Montagne Noire', 'Pèlerin 1', 'Pèlerin 2', 'Pèlerin 3', 'Pèlerin 4', 'Pèlerin 5', 'Meyotte', 'Puits-Blain', 'Jalousie', 'Belvil', 'Vivy Michel', 'Diègue', 'Duplan', 'Girardo', 'Doco', 'Cargo', 'Fermathe', 'Frères', 'Peggyvil', 'Morne Hercule', 'Nerrette', 'Berthé', 'Bois Monquette'],
-      'Delmas': ['Bas Delmas', 'Delmas', 'Haut Delmas', 'Cité Militaire', 'Siloe', 'Nazon', 'Christ-Roi', 'Simon Pelé', 'Maïs Gâté', 'Zone Aéroport'],
-      'Carrefour': ['Thor', 'Mon repos', 'Carrefour', 'Diquini', 'Waney', 'Cote Plage', 'Mahotière', 'Bizoton', 'Arcachon', 'Brochette', 'Mariani', 'Fontamara', 'Rivière Froide', 'Lamentin'],
-      'Léogâne': ['Grand-Rue', 'Dampus', 'Léogâne', 'Dufort', 'Trouin', 'Ca-Ira', 'Petite-Rivière', 'Gressier', 'Cormier', 'Chatuley', 'Orangers', 'Dessources']
-    }
+  "Artibonite": {
+    "Dessalines": ["Dessalines","Desdunes","Grande-Saline","Petite-Rivière-de-l'Artibonite"],
+    "Gonaïves": ["Les Gonaïves","Ennery","L'Estère"],
+    "Gros-Morne": ["Gros-Morne","Anse-Rouge","Terre-Neuve"],
+    "Marmelade": ["Marmelade","Saint-Michel-de-l'Attalaye"],
+    "Saint-Marc": ["Saint-Marc","La Chapelle","Liancourt","Montrouis","Verrettes"]
   },
-  // Département du Sud-Est
-  'Sud-Est': {
-    'villes': ['Jacmel', 'Bainet', 'Belle-Anse'],
-    'communes': {
-      'Jacmel': ['Jacmel', 'Marigot', 'Cayes-Jacmel', 'La Vallée-de-Jacmel'],
-      'Bainet': ['Bainet', 'Côtes-de-Fer'],
-      'Belle-Anse': ['Belle-Anse', 'Grand-Gosier', 'Thiotte', 'Anse-à-Pitres']
-    },
-    'zones': {
-      'Jacmel': ['Bel-Air', 'Bréman', 'Couchant', "L'Acul", 'Raymond-les-Bains', 'Meyer', 'Maniègue', 'Mapou']
-    }
+  "Centre": {
+    "Cerca-la-Source": ["Cerca-la-Source","Thomassique"],
+    "Hinche": ["Hinche","Cerca-Carvajal","Maïssade","Thomonde"],
+    "Lascahobas": ["Lascahobas","Baptiste","Belladère","Savanette"],
+    "Mirebalais": ["Mirebalais","Boucan-Carré","Saut-d'Eau"]
   },
-  // Département du Nord
-  'Nord': {
-    'villes': ['Cap-Haïtien', 'Acul-du-Nord', 'Grande-Rivière-du-Nord', 'Saint-Raphaël', 'Borgne', 'Limbé', 'Plaisance'],
-    'communes': {
-      'Cap-Haïtien': ['Cap-Haïtien', 'Quartier-Morin', 'Limonade'],
-      'Acul-du-Nord': ['Acul-du-Nord', 'Plaine-du-Nord', 'Milot'],
-      'Grande-Rivière-du-Nord': ['Grande-Rivière-du-Nord', 'Bahon'],
-      'Saint-Raphaël': ['Saint-Raphaël', 'Dondon', 'Ranquitte', 'Pignon', 'La Victoire'],
-      'Borgne': ['Borgne', 'Port-Margot'],
-      'Limbé': ['Limbé', 'Bas-Limbé'],
-      'Plaisance': ['Plaisance', 'Pilate']
-    },
-    'zones': {
-      'Cap-Haïtien': ['Carénage', 'Bande du Nord', 'Vertières', 'Lory', 'Madeline', 'Petite-Anse', 'Haut-du-Cap', 'Fort Saint-Michel', 'Champion']
-    }
+  "Grand'Anse": {
+    "Anse-d'Hainault": ["Anse-d'Hainault","Dame-Marie","Les Irois"],
+    "Corail": ["Corail","Beaumont","Pestel","Roseaux"],
+    "Jérémie": ["Jérémie","Abricots","Bonbon","Chambellan","Marfranc","Moron"]
   },
-  // Département du Nord-Est
-  'Nord-Est': {
-    'villes': ['Fort-Liberté', 'Ouanaminthe', 'Trou-du-Nord', 'Vallières'],
-    'communes': {
-      'Fort-Liberté': ['Fort-Liberté', 'Ferrier', 'Perches'],
-      'Ouanaminthe': ['Ouanaminthe', 'Capotille', 'Mont-Organisé'],
-      'Trou-du-Nord': ['Trou-du-Nord', 'Sainte-Suzanne', 'Terrier-Rouge', 'Caracol', 'Grand-Bassin'],
-      'Vallières': ['Vallières', 'Carice', 'Mombin-Crochu']
-    },
-    'zones': {
-      'Fort-Liberté': ['Bayaha', 'Derac', 'Drière', 'Marion', 'Dumas'],
-      'Ouanaminthe': ['Dajabon', 'Gens-de-Nantes', 'Haut-Maribahoux', 'Acul-des-Pins', 'Carisse', 'Gayot', 'Capotille']
-    }
+  "Nippes": {
+    "Anse-à-Veau": ["Anse-à-Veau","Arnaud","L'Asile","Petit-Trou-de-Nippes","Plaisance-du-Sud"],
+    "Baradères": ["Baradères","Grand-Boucan"],
+    "Miragoâne": ["Miragoâne","Fonds-des-Nègres","Paillant","Petite-Rivière-de-Nippes"]
   },
-  // Département de l'Artibonite
-  'Artibonite': {
-    'villes': ['Gonaïves', 'Gros-Morne', 'Saint-Marc', 'Dessalines', 'Marmelade'],
-    'communes': {
-      'Gonaïves': ['Gonaïves', 'Ennery', "L'Estère"],
-      'Gros-Morne': ['Gros-Morne', 'Terre-Neuve', 'Anse-Rouge'],
-      'Saint-Marc': ['Saint-Marc', 'Verrettes', 'La Chapelle'],
-      'Dessalines': ['Dessalines', "Petite-Rivière-de-l'Artibonite", 'Grande-Saline', 'Desdunes'],
-      'Marmelade': ['Marmelade', "Saint-Michel-de-l'Attalaye"]
-    },
-    'zones': {
-      'Saint-Marc': ['Portail Guêpe', 'Pivert', 'Nissage Saget', 'Nan Poés', 'Freycineau', 'Deperos', 'Bois-Marchand', 'Gobinet', 'Robinet'],
-      'Gonaïves': ['Raboteau', 'Descahos', 'Jubilée', 'K-Soleil', 'Bigot', 'Bienac', 'Assifa', 'Pont-Gaudin', 'Mangnan', 'Passe-Reine']
-    }
+  "Nord": {
+    "Acul-du-Nord": ["Acul-du-Nord","Milot","Plaine-du-Nord"],
+    "Borgne": ["Borgne","Port-Margot"],
+    "Cap-Haïtien": ["Cap-Haïtien","Limonade","Quartier-Morin"],
+    "Grande-Rivière-du-Nord": ["Grande-Rivière-du-Nord","Bahon"],
+    "Limbé": ["Limbé","Bas-Limbé"],
+    "Plaisance": ["Plaisance","Pilate"],
+    "Saint-Raphaël": ["Saint-Raphaël","Dondon","La Victoire","Pignon","Ranquitte"]
   },
-  // Département du Centre
-  'Centre': {
-    'villes': ['Hinche', 'Mirebalais', 'Lascahobas', 'Cerca-la-Source'],
-    'communes': {
-      'Hinche': ['Hinche', 'Maïssade', 'Thomonde', 'Cerca-Carvajal'],
-      'Mirebalais': ['Mirebalais', "Saut-d'Eau", 'Boucan-Carré'],
-      'Lascahobas': ['Lascahobas', 'Belladère', 'Savanette'],
-      'Cerca-la-Source': ['Cerca-la-Source', 'Thomassique']
-    },
-    'zones': {
-      'Hinche': ['Marmont', 'Cherival', 'Juanaria', 'Mapou', 'La Hoye', 'Siloe', 'Pandiassou', 'Los Palis'],
-      'Lascahobas': ['Petit-Fond', 'Juampas', 'Do-Rival', 'Lalomas', 'Savanette', 'Bois-Bleu'],
-      'Belladère': ['Renthe-Mathe', 'Croix-Fer', 'Roy-Sec', 'Los Pozo', 'Rospandre']
-    }
+  "Nord-Est": {
+    "Fort-Liberté": ["Fort-Liberté","Ferrier","Perches"],
+    "Ouanaminthe": ["Ouanaminthe","Capotille","Mont-Organisé"],
+    "Trou-du-Nord": ["Trou-du-Nord","Caracol","Grand-Bassin","Sainte-Suzanne","Terrier-Rouge"],
+    "Vallières": ["Vallières","Carice","Mombin-Crochu"]
   },
-  // Département du Sud
-  'Sud': {
-    'villes': ['Cayes', 'Port-Salut', 'Aquin', 'Côteaux', 'Chardonnières'],
-    'communes': {
-      'Cayes': ['Les Cayes', 'Torbeck', 'Chantal', 'Camp-Perrin', 'Maniche', "Île-à-Vache"],
-      'Port-Salut': ['Port-Salut', 'Saint-Jean-du-Sud', 'Arniquet'],
-      'Aquin': ['Aquin', 'Saint-Louis-du-Sud', 'Cavaillon'],
-      'Côteaux': ['Côteaux', 'Port-à-Piment', 'Roche-à-Bateau'],
-      'Chardonnières': ['Chardonnières', 'Les Anglais', 'Tiburon']
-    },
-    'zones': {
-      'Les Cayes': ['La Savane', 'Gelée', 'Bourdet', 'Gabarre', 'Liautaud', 'Charpentier', 'Vernat', 'Derrière-Fort', 'Fonfrède']
-    }
+  "Nord-Ouest": {
+    "Môle-Saint-Nicolas": ["Môle-Saint-Nicolas","Baie-de-Henne","Bombardopolis","Jean-Rabel"],
+    "Port-de-Paix": ["Port-de-Paix","Bassin-Bleu","Chansolme","La Tortue","La Pointe-des-Palmistes"],
+    "Saint-Louis-du-Nord": ["Saint-Louis-du-Nord","Anse-à-Foleur"]
   },
-  // Département de la Grand'Anse
-  'Grand\'Anse': {
-    'villes': ['Jérémie', 'Anse-d\'Hainault', 'Corail'],
-    'communes': {
-      'Jérémie': ['Jérémie', 'Abricots', 'Bonbon', 'Moron', 'Chambellan', 'Marfranc'],
-      'Anse-d\'Hainault': ['Anse-d\'Hainault', 'Dame-Marie', 'Les Irois'],
-      'Corail': ['Corail', 'Roseaux', 'Beaumont', 'Pestel', 'Île de Cayemites']
-    },
-    'zones': {
-      'Jérémie': ['Bordes', 'Sainte-Hélène', 'Caracolie', 'Rochasse', 'Nan Lundi', 'Makandal', 'La Pointe', 'Desormeaux']
-    }
+  "Ouest": {
+    "Arcahaie": ["Arcahaie","Cabaret"],
+    "Croix-des-Bouquets": ["Croix-des-Bouquets","Cornillon","Fonds-Verrettes","Ganthier","Thomazeau"],
+    "La Gonâve": ["Anse-à-Galets","Pointe-à-Raquette"],
+    "Léogâne": ["Léogâne","Grand-Goâve","Petit-Goâve"],
+    "Port-au-Prince": ["Port-au-Prince","Carrefour","Cité Soleil","Delmas","Gressier","Kenscoff","Pétion-Ville","Tabarre"]
   },
-  // Département du Nord-Ouest
-  'Nord-Ouest': {
-    'villes': ['Port-de-Paix', 'Saint-Louis-du-Nord', 'Môle-Saint-Nicolas'],
-    'communes': {
-      'Port-de-Paix': ['Port-de-Paix', 'La Tortue', 'Bassin-Bleu', 'Chansolme', 'La Pointe'],
-      'Saint-Louis-du-Nord': ['Saint-Louis-du-Nord', 'Anse-à-Foleur'],
-      'Môle-Saint-Nicolas': ['Môle-Saint-Nicolas', 'Baie-de-Henne', 'Bombardopolis', 'Jean-Rabel']
-    },
-    'zones': {
-      'Port-de-Paix': ['La Corne', 'Haut-de-Saint-Louis', 'Carenage', 'Nan Paul', 'Fond-de-Poussière', 'Baudin', 'Trois-Rivières', 'Chansolme']
-    }
+  "Sud": {
+    "Aquin": ["Aquin","Cavaillon","Fond-des-Blancs","Saint-Louis-du-Sud"],
+    "Cayes": ["Les Cayes","Camp-Perrin","Chantal","Île-à-Vache","Maniche","Torbeck"],
+    "Chardonnières": ["Chardonnières","Les Anglais","Tiburon"],
+    "Côteaux": ["Côteaux","Port-à-Piment","Roche-à-Bateaux"],
+    "Port-Salut": ["Port-Salut","Arniquet","Saint-Jean-du-Sud"]
   },
-  // Département des Nippes
-  'Nippes': {
-    'villes': ['Miragoâne', 'Anse-à-Veau', 'Baradères'],
-    'communes': {
-      'Miragoâne': ['Miragoâne', 'Petite-Rivière-de-Nippes', 'Fonds-des-Nègres', 'Paillant'],
-      'Anse-à-Veau': ['Anse-à-Veau', 'Petit-Trou-de-Nippes', "L'Asile", 'Arnaud', 'Plaisance-du-Sud'],
-      'Baradères': ['Baradères', 'Grand-Boucan']
-    },
-    'zones': {
-      'Miragoâne': ['Port-Sainte-Hélène', 'Chalon', 'Saint-Michel-du-Sud', 'Berquin', 'Chardonnères', 'Belle-Rivière', 'Carrefour Moussignac']
-    }
+  "Sud-Est": {
+    "Bainet": ["Bainet","Côtes-de-Fer"],
+    "Belle-Anse": ["Belle-Anse","Anse-à-Pitres","Grand-Gosier","Thiotte"],
+    "Jacmel": ["Jacmel","Cayes-Jacmel","La Vallée-de-Jacmel","Marigot"]
   }
 };
 
+/* ===== QUARTIERS / ZONES (menm ak index.html) ===== */
+const quartiersData = {
+  "Pétion-Ville": ["Jalousie","Pétion-Ville","Laboule","Thomassin","Meyotte","Belvil","Vivy Michel","Diègue","Duplan","Girardo","Doco","Cargo","Fermathe","Puits-Blain","Frères","Peggyvil","Morne Hercule","Nerrette","Morne Calvaire","Juvénat","Berthé","Bois Monquette","Pelerin 1","Pelerin 2","Pelerin 3","Pelerin 4","Pelerin 5"],
+  "Delmas": ["Delmas","Jacket","Siloé","Gérald Bataille","Mais Gâté","Clercine","Saint-Martin","Aéroport","Catalpa"],
+  "Port-au-Prince": ["Pacot","Turgeau","Christ-Roi","Bois-Verna","Lalue","Canapé-Vert","Debussy","Martissant","Carrefour-Feuilles","Fontamara","Bolosse","Fort-National","Solino","Bel-Air","La Saline"],
+  "Carrefour": ["Thor","Mon repos","Carrefour","Diquini","Waney","Cote Plage","Mahotière","Bizoton","Arcachon","Brochette","Mariani","Fontamara","Rivière Froide","Lamentin"],
+  "Léogâne": ["Grand-Rue","Dampus","Léogâne","Dufort","Trouin","Ca-Ira","Petite-Rivière","Gressier","Cormier","Chatuley","Orangers","Dessources"],
+  "Cap-Haïtien": ["Carénage","Bande du Nord","Vertières","Lory","Madeline","Petite-Anse","Haut-du-Cap","Fort Saint-Michel","Champion"],
+  "Les Cayes": ["La Savane","Gelée","Bourdet","Gabarre","Liautaud","Charpentier","Vernat","Derrière-Fort","Fonfrède"],
+  "Jacmel": ["Bel-Air","Bréman","Couchant","L'Acul","Raymond-les-Bains","Meyer","Maniègue","Mapou"],
+  "Saint-Marc": ["Portail Guêpe","Pivert","Nissage Saget","Nan Poés","Freycineau","Deperos","Bois-Marchand","Gobinet","Robinet"],
+  "Gonaïves": ["Raboteau","Descahos","Jubilée","K-Soleil","Bigot","Bienac","Assifa","Pont-Gaudin","Mangnan","Passe-Reine"],
+  "Hinche": ["Marmont","Cherival","Juanaria","Mapou","La Hoye","Siloe","Pandiassou","Los Palis"],
+  "Lascahobas": ["Petit-Fond","Juampas","Do-Rival","Lalomas","Savanette","Bois-Bleu"],
+  "Belladère": ["Renthe-Mathe","Croix-Fer","Roy-Sec","Los Pozo","Rospandre"],
+  "Fort-Liberté": ["Bayaha","Derac","Drière","Marion","Dumas"],
+  "Ouanaminthe": ["Dajabon","Gens-de-Nantes","Haut-Maribahoux","Acul-des-Pins","Carisse","Gayot","Capotille"],
+  "Jérémie": ["Bordes","Sainte-Hélène","Caracolie","Rochasse","Nan Lundi","Makandal","La Pointe","Desormeaux"],
+  "Miragoâne": ["Port-Sainte-Hélène","Chalon","Saint-Michel-du-Sud","Berquin","Chardonnères","Belle-Rivière","Carrefour Moussignac"],
+  "Port-de-Paix": ["La Corne","Haut-de-Saint-Louis","Carenage","Nan Paul","Fond-de-Poussière","Baudin","Trois-Rivières","Chansolme"]
+};
+
 /* ===== Fonctions de mise à jour des selects ===== */
+function populateDepartements() {
+  const select = document.getElementById('p-departement');
+  select.innerHTML = '<option value="">Choisir un département</option>';
+  Object.keys(geoData).forEach(dept => {
+    const opt = document.createElement('option');
+    opt.value = dept;
+    opt.textContent = dept;
+    select.appendChild(opt);
+  });
+}
+
 function updateVilles() {
   const dept = document.getElementById('p-departement').value;
   const villeSelect = document.getElementById('p-ville');
   const communeSelect = document.getElementById('p-commune');
   const zoneSelect = document.getElementById('p-zone');
   
-  // Reset selects dépendants
   villeSelect.innerHTML = '<option value="">Choisir une ville</option>';
   communeSelect.innerHTML = '<option value="">Choisir une commune</option>';
   zoneSelect.innerHTML = '<option value="">Choisir une zone (optionnel)</option>';
   
   if (!dept || !geoData[dept]) return;
   
-  const villes = geoData[dept].villes || [];
-  villes.forEach(v => {
+  // Les "villes" = arrondissements dans geoData (menm ak index.html)
+  const arrondissements = Object.keys(geoData[dept]);
+  arrondissements.forEach(arr => {
     const opt = document.createElement('option');
-    opt.value = v;
-    opt.textContent = v;
+    opt.value = arr;
+    opt.textContent = arr;
     villeSelect.appendChild(opt);
   });
 }
@@ -652,13 +600,12 @@ function updateCommunes() {
   const communeSelect = document.getElementById('p-commune');
   const zoneSelect = document.getElementById('p-zone');
   
-  // Reset selects dépendants
   communeSelect.innerHTML = '<option value="">Choisir une commune</option>';
   zoneSelect.innerHTML = '<option value="">Choisir une zone (optionnel)</option>';
   
   if (!dept || !ville || !geoData[dept]) return;
   
-  const communes = geoData[dept].communes[ville] || [];
+  const communes = geoData[dept][ville] || [];
   communes.forEach(c => {
     const opt = document.createElement('option');
     opt.value = c;
@@ -668,16 +615,14 @@ function updateCommunes() {
 }
 
 function updateZones() {
-  const dept = document.getElementById('p-departement').value;
   const commune = document.getElementById('p-commune').value;
   const zoneSelect = document.getElementById('p-zone');
   
-  // Reset select
   zoneSelect.innerHTML = '<option value="">Choisir une zone (optionnel)</option>';
   
-  if (!dept || !commune || !geoData[dept]) return;
+  if (!commune || !quartiersData[commune]) return;
   
-  const zones = geoData[dept].zones[commune] || [];
+  const zones = quartiersData[commune] || [];
   zones.forEach(z => {
     const opt = document.createElement('option');
     opt.value = z;
@@ -686,7 +631,7 @@ function updateZones() {
   });
 }
 
-// Écouteurs d'événements
+// Écouteurs d'événements pour les selects cascadants
 document.getElementById('p-departement').addEventListener('change', function() {
   updateVilles();
 });
@@ -697,6 +642,21 @@ document.getElementById('p-ville').addEventListener('change', function() {
 
 document.getElementById('p-commune').addEventListener('change', function() {
   updateZones();
+});
+
+// Interaction entre select zone et custom zone
+document.getElementById('p-zone-custom').addEventListener('input', function() {
+  const zoneSelect = document.getElementById('p-zone');
+  if (this.value.trim() !== '') {
+    zoneSelect.value = '';
+  }
+});
+
+document.getElementById('p-zone').addEventListener('change', function() {
+  const customInput = document.getElementById('p-zone-custom');
+  if (this.value !== '') {
+    customInput.value = '';
+  }
 });
 
 /* ===== AUTHENTIFICATION ===== */
@@ -1084,7 +1044,12 @@ document.getElementById('publish-form').addEventListener('submit', async functio
       const { error: upErr } = await supabaseClient.storage.from('listing-media').upload(path, file);
       if(upErr) throw upErr;
       const { data: urlData } = supabaseClient.storage.from('listing-media').getPublicUrl(path);
-      const { error: mediaErr } = await supabaseClient.from('listing_media').insert({ listing_id: listingId, media_type: 'photo', url: urlData.publicUrl });
+      const { error: mediaErr } = await supabaseClient.from('listing_media').insert({ 
+        listing_id: listingId, 
+        media_type: 'photo', 
+        url: urlData.publicUrl,
+        mime_type: file.type || 'image/jpeg'
+      });
       if(mediaErr) throw mediaErr;
     }
 
@@ -1096,7 +1061,12 @@ document.getElementById('publish-form').addEventListener('submit', async functio
         const { error: upErr } = await supabaseClient.storage.from('listing-media').upload(path, file);
         if(upErr) throw upErr;
         const { data: urlData } = supabaseClient.storage.from('listing-media').getPublicUrl(path);
-        const { error: mediaErr } = await supabaseClient.from('listing_media').insert({ listing_id: listingId, media_type: 'video', url: urlData.publicUrl });
+        const { error: mediaErr } = await supabaseClient.from('listing_media').insert({ 
+          listing_id: listingId, 
+          media_type: 'video', 
+          url: urlData.publicUrl,
+          mime_type: file.type || 'video/mp4'
+        });
         if(mediaErr) throw mediaErr;
       }
     }
@@ -1119,12 +1089,61 @@ document.getElementById('publish-form').addEventListener('submit', async functio
   }
 });
 
+// Initialisation
+populateDepartements();
 renderPhotoPreview();
 renderVideoPreview();
 loadStats();
 checkExistingSession();
+
+/* ===== TRACKING DES VISITES ===== */
+function getVisitorId() {
+  let id = localStorage.getItem('kaypam_visitor_id');
+  if (!id) {
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substr(2, 6);
+    id = 'v_' + timestamp + '_' + random;
+    try {
+      localStorage.setItem('kaypam_visitor_id', id);
+    } catch(e) {
+      id = 'tmp_' + Date.now().toString(36);
+    }
+  }
+  return id;
+}
+
+async function trackVisit() {
+  if (!supabaseClient) return;
+  try {
+    const visitorId = getVisitorId();
+    const page = window.location.pathname.split('/').pop() || 'publier.html';
+    
+    const { error } = await supabaseClient
+      .from('visits')
+      .insert({
+        visitor_id: visitorId,
+        page: page,
+        referrer: document.referrer || null,
+        user_agent: navigator.userAgent,
+        visited_at: new Date().toISOString()
+      });
+    
+    if (error) {
+      console.error('❌ Erreur tracking:', error);
+    } else {
+      console.log('✅ Visite enregistrée:', page);
+    }
+  } catch(err) {
+    console.error('❌ Erreur tracking:', err);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(trackVisit, 500);
+});
 </script>
 
+<!-- ===== TRADUCTION ===== -->
 <script>
 (function(){
   var lang = localStorage.getItem('kaypam_lang') || 'fr';
@@ -1154,6 +1173,7 @@ checkExistingSession();
       'Se déconnecter': 'Log out',
       'Formulaire de publication': 'Publishing form',
       'Département': 'Department',
+      'Ville (Arrondissement)': 'City (Arrondissement)',
       'Ville': 'City',
       'Commune': 'Municipality',
       'Zone / Quartier': 'Zone / Neighborhood',
@@ -1183,13 +1203,15 @@ checkExistingSession();
       'Aucune vidéo sélectionnée': 'No videos selected',
       'Soumettre l\'annonce pour vérification': 'Submit listing for verification',
       '✅ Annonce envoyée avec succès !': '✅ Listing sent successfully!',
-      'Merci ! Votre annonce a bien été reçue avec ses photos et vidéos. Notre équipe la vérifiera et la publiera sous 24h. Vous pouvez publier une autre annonce dès maintenant grâce au formulaire ci-dessus, réinitialisé pour vous.': 'Thank you! Your listing has been received with its photos and videos. Our team will review it and publish it within 24h. You can publish another listing now using the form above, reset for you.',
+      'Merci ! Votre annonce a bien été reçue avec ses photos et vidéos. Notre équipe la vérifiera et la publiera sous 24h.': 'Thank you! Your listing has been received with its photos and videos. Our team will review it and publish it within 24h.',
       'Mèsi ! Annons ou a anrejistre. Ekip KayPam nan ap verifye enfòmasyon yo ak foto yo pou sekirite platfòm lan. L ap parèt an liy nan mwens pase 24 èdtan.': 'Thank you! Your listing is registered. The KayPam team will verify the information and photos for platform security. It will appear online in less than 24 hours.',
       '© 2026 KayPam. Toutes les annonces sont vérifiées avant publication.': '© 2026 KayPam. All listings are verified before publication.',
       'Choisir un département': 'Choose a department',
       'Choisir une ville': 'Choose a city',
       'Choisir une commune': 'Choose a municipality',
-      'Choisir une zone (optionnel)': 'Choose a zone (optional)'
+      'Choisir une zone (optionnel)': 'Choose a zone (optional)',
+      'Ou précisez une zone personnalisée': 'Or specify a custom zone',
+      'Vous pouvez taper le nom d\'une zone qui n\'est pas dans la liste ci-dessus.': 'You can type the name of a zone that is not in the list above.'
     },
     ht: {
       'Propriétaires et agents': 'Pwopriyetè ak ajan',
@@ -1215,6 +1237,7 @@ checkExistingSession();
       'Se déconnecter': 'Dekonekte',
       'Formulaire de publication': 'Fòmilè piblikasyon',
       'Département': 'Depatman',
+      'Ville (Arrondissement)': 'Vil (Awondisman)',
       'Ville': 'Vil',
       'Commune': 'Komin',
       'Zone / Quartier': 'Zòn / Katye',
@@ -1244,13 +1267,15 @@ checkExistingSession();
       'Aucune vidéo sélectionnée': 'Pa gen videyo chwazi',
       'Soumettre l\'annonce pour vérification': 'Soumèt anons pou verifikasyon',
       '✅ Annonce envoyée avec succès !': '✅ Anons voye avèk siksè!',
-      'Merci ! Votre annonce a bien été reçue avec ses photos et vidéos. Notre équipe la vérifiera et la publiera sous 24h. Vous pouvez publier une autre annonce dès maintenant grâce au formulaire ci-dessus, réinitialisé pour vous.': 'Mèsi! Anons ou te resevwa byen ak foto ak videyo li yo. Ekip nou an ap verifye l epi pibliye l nan mwens pase 24è. Ou ka pibliye yon lòt anons kounye a gras a fòmilè ki anwo a, ki reset pou ou.',
+      'Merci ! Votre annonce a bien été reçue avec ses photos et vidéos. Notre équipe la vérifiera et la publiera sous 24h.': 'Mèsi! Anons ou te resevwa byen ak foto ak videyo li yo. Ekip nou an ap verifye l epi pibliye l nan mwens pase 24è.',
       'Mèsi ! Annons ou a anrejistre. Ekip KayPam nan ap verifye enfòmasyon yo ak foto yo pou sekirite platfòm lan. L ap parèt an liy nan mwens pase 24 èdtan.': 'Mèsi! Anons ou anrejistre. Ekip KayPam nan ap verifye enfòmasyon yo ak foto yo pou sekirite platfòm lan. L ap parèt an liy nan mwens pase 24 èdtan.',
       '© 2026 KayPam. Toutes les annonces sont vérifiées avant publication.': '© 2026 KayPam. Tout anons yo verifye anvan piblikasyon.',
       'Choisir un département': 'Chwazi yon depatman',
       'Choisir une ville': 'Chwazi yon vil',
       'Choisir une commune': 'Chwazi yon komin',
-      'Choisir une zone (optionnel)': 'Chwazi yon zòn (opsyonèl)'
+      'Choisir une zone (optionnel)': 'Chwazi yon zòn (opsyonèl)',
+      'Ou précisez une zone personnalisée': 'Oswa presize yon zòn pèsonalize',
+      'Vous pouvez taper le nom d\'une zone qui n\'est pas dans la liste ci-dessus.': 'Ou ka tape non yon zòn ki pa nan lis anwo a.'
     }
   };
   var map = maps[lang] || maps.fr;
@@ -1282,61 +1307,7 @@ checkExistingSession();
   document.documentElement.lang = lang;
   document.querySelectorAll('a, button, label, p, span, h1, h2, h3, h4, li, option, legend, input, textarea, select').forEach(updateElement);
 })();
-
-/* ===== TRACKING DES VISITES - VERSION STABLE ===== */
-
-// Fonksyon pou jwenn ID vizitè a (ki rete menm)
-function getVisitorId() {
-  let id = localStorage.getItem('kaypam_visitor_id');
-  if (!id) {
-    const timestamp = Date.now().toString(36);
-    const random = Math.random().toString(36).substr(2, 6);
-    id = 'v_' + timestamp + '_' + random;
-    try {
-      localStorage.setItem('kaypam_visitor_id', id);
-    } catch(e) {
-      id = 'tmp_' + Date.now().toString(36);
-    }
-  }
-  return id;
-}
-
-// Fonksyon pou anrejistre vizit la
-async function trackVisit() {
-  if (!supabaseClient) return;
-  try {
-    const visitorId = getVisitorId();
-    const page = window.location.pathname.split('/').pop() || 'index.html';
-    
-    const { error } = await supabaseClient
-      .from('visits')
-      .insert({
-        visitor_id: visitorId,
-        page: page,
-        referrer: document.referrer || null,
-        user_agent: navigator.userAgent,
-        visited_at: new Date().toISOString()
-      });
-    
-    if (error) {
-      console.error('❌ Erreur tracking:', error);
-    } else {
-      console.log('✅ Visite enregistrée:', page, '| ID:', visitorId);
-    }
-  } catch(err) {
-    console.error('❌ Erreur tracking:', err);
-  }
-}
-
-// Lè paj la fin chaje, anrejistre vizit la
-document.addEventListener('DOMContentLoaded', function() {
-  setTimeout(trackVisit, 500);
-});
-
-/* ===== DONNÉES GÉOGRAPHIQUES ===== */
-// ... tout done yo ...
-
-// ... restan kòd la ...
 </script>
+
 </body>
-</html> 
+</html>
