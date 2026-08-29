@@ -1222,14 +1222,14 @@ function selectArrondissement(i){
   renderListings();
   renderBoosted();
 }
-
 function selectCommune(i){
   const commune = geoData[locState.departement][locState.arrondissement][i];
   locState.commune = commune;
   locState.quartier = null;
   state.commune = commune;
   state.quartier = "";
-  state.city = commune;
+  // state.city = commune;  
+  // Kenbe city a menm (Arrondissement)
   const citySelect = document.getElementById('f-city');
   if(citySelect) {
     citySelect.value = [...citySelect.options].some(o => o.value === commune) ? commune : "";
