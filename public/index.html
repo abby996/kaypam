@@ -53,7 +53,6 @@
 
   :focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
 
-  /* ---------- HEADER ---------- */
   header{
     position:sticky;top:0;z-index:40;
     background:rgba(242,245,241,0.92);
@@ -119,7 +118,6 @@
     width:22px;flex-shrink:0;
   }
 
-  /* ---------- HERO ---------- */
   .hero{
     position:relative;overflow:hidden;
     background:var(--navy);
@@ -156,7 +154,6 @@
   .hero-stat b{display:block;font-size:24px;color:var(--gold);font-weight:700;}
   .hero-stat span{font-size:12px;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:.06em;}
 
-  /* search panel */
   .search-panel{
     background:rgba(255,255,255,0.95);
     -webkit-backdrop-filter:blur(12px);
@@ -196,14 +193,6 @@
   .search-btn:hover{background:var(--coral-dark);}
   .search-btn:active{transform:scale(0.98);}
 
-  /* ---------- STATS STRIP under hero ---------- */
-  .stats-strip{
-    background:var(--bg-soft);
-    padding:56px 0 28px;
-    border-bottom:1px solid var(--border);
-  }
-
-  /* ---------- SECTION HEADERS ---------- */
   section{padding:72px 0;}
   .section-head{
     display:flex;justify-content:space-between;align-items:flex-end;
@@ -212,7 +201,6 @@
   .section-head h2{font-size:clamp(24px,3vw,32px);}
   .section-head p{color:var(--ink-soft);max-width:48ch;margin:0;}
 
-  /* ---------- FILTER CHIPS ---------- */
   .chip-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px;}
   .loc-nav{margin:-14px 0 28px;}
   .loc-breadcrumb{
@@ -249,7 +237,6 @@
   .chip:hover{border-color:var(--coral);color:var(--coral-dark);}
   .chip.active{background:var(--navy);color:#fff;border-color:var(--navy);}
 
-  /* ---------- LISTINGS GRID ---------- */
   .grid{
     display:grid;
     grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
@@ -307,7 +294,6 @@
   .boost-indicator.active{
     color:var(--green);background:rgba(30,143,111,0.12);
   }
-  /* boost-indicator.expired retire — pa montre boost ekspire nan paj piblik la */
   .card-cta{
     border:none;background:var(--bg-soft);color:var(--ink);
     border-radius:9px;padding:10px;font-size:13.5px;font-weight:600;
@@ -321,7 +307,6 @@
   .empty-state strong{display:block;color:var(--ink);font-size:18px;margin-bottom:6px;}
   .empty-state .icon-big{font-size:48px;margin-bottom:16px;display:block;}
 
-  /* ---------- HOW IT WORKS ---------- */
   .how{background:var(--navy);color:#fff;}
   .how .section-head p{color:rgba(255,255,255,0.65);}
   .how .eyebrow{color:var(--gold);}
@@ -340,7 +325,6 @@
   .step h3{color:#fff;font-size:18px;}
   .step p{color:rgba(255,255,255,0.65);font-size:14.5px;margin:0;}
 
-  /* ---------- FOOTER ---------- */
   footer{background:var(--navy);color:rgba(255,255,255,0.7);padding:48px 0 28px;}
   .footer-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:32px;margin-bottom:36px;}
   .footer-logo{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
@@ -355,7 +339,6 @@
     font-size:12.5px;color:rgba(255,255,255,0.5);
   }
 
-  /* ---------- MODAL ---------- */
   .modal-overlay{
     position:fixed;inset:0;background:rgba(22,36,59,0.55);
     display:none;align-items:center;justify-content:center;
@@ -366,13 +349,6 @@
     background:#fff;border-radius:18px;max-width:560px;width:100%;
     max-height:88vh;overflow-y:auto;position:relative;
   }
-  .modal-wide{max-width:780px;}
-  .modal-wide .modal-close{
-    position:absolute;top:18px;right:18px;background:var(--bg-soft);
-    border:none;border-radius:50%;width:34px;height:34px;font-size:18px;
-    display:flex;align-items:center;justify-content:center;z-index:5;
-  }
-  .modal-wide .publish{border:none;border-radius:0;padding:30px 30px 32px;grid-template-columns:1fr;gap:24px;}
   .modal-art{
     height:170px;
     display:flex;
@@ -404,7 +380,6 @@
   .btn-whatsapp{background:var(--green);color:#fff;}
   .btn-close-secondary{background:var(--bg-soft);color:var(--ink);}
 
-  /* ---------- MODAL MEDIA GALERI ---------- */
   .modal-media-wrapper{
     width:100%;
     height:100%;
@@ -482,7 +457,6 @@
     .hero h1{max-width:none;}
     .search-panel{margin-bottom:0;margin-top:32px;}
     .steps{grid-template-columns:1fr;}
-    .publish{grid-template-columns:1fr;padding:28px;}
     .footer-grid{grid-template-columns:1fr 1fr;}
     .nav-links{display:none;}
   }
@@ -493,7 +467,7 @@
     .lang-dropdown-trigger{padding:6px 9px;font-size:11px;}
   }
   @media (max-width:520px){
-    .field-row,.pform-row{grid-template-columns:1fr;}
+    .field-row{grid-template-columns:1fr;}
     .footer-grid{grid-template-columns:1fr;}
   }
   @media (prefers-reduced-motion:reduce){
@@ -737,7 +711,6 @@ const translations = {
     loc_all_zones:"Toutes les zones", loc_back:"← Retour", loc_empty_note:"Aucun quartier détaillé pour {commune} pour le moment — toutes les annonces de la commune sont affichées ci-dessous.",
     badge_sale:"À vendre", badge_rent:"À louer", badge_vedette:"⭐ Vedette",
     boost_active:"⭐ Boost actif jusqu'au {date}",
-    /* boost_expired retire — pa montre nan paj piblik la */
     spec_beds:"ch.", spec_baths:"sdb", spec_beds_full:"Chambres", spec_baths_full:"Salles de bain", spec_area_full:"m²",
     btn_view_details:"Voir les détails",
     empty_none_title:"Aucune annonce publiée pour le moment", empty_none_sub:"Les premières annonces vérifiées apparaîtront ici très bientôt.",
@@ -772,7 +745,6 @@ const translations = {
     loc_all_zones:"All zones", loc_back:"← Back", loc_empty_note:"No detailed neighborhoods for {commune} yet — all listings in this commune are shown below.",
     badge_sale:"For sale", badge_rent:"For rent", badge_vedette:"⭐ Featured",
     boost_active:"⭐ Active boost until {date}",
-    /* boost_expired retire — pa montre nan paj piblik la */
     spec_beds:"bed", spec_baths:"bath", spec_beds_full:"Bedrooms", spec_baths_full:"Bathrooms", spec_area_full:"m²",
     btn_view_details:"View details",
     empty_none_title:"No listings published yet", empty_none_sub:"The first verified listings will appear here very soon.",
@@ -807,7 +779,6 @@ const translations = {
     loc_all_zones:"Tout zòn yo", loc_back:"← Retounen", loc_empty_note:"Pa gen katye detaye pou {commune} kounye a — tout anons komin nan afiche anba a.",
     badge_sale:"Pou vann", badge_rent:"Pou lwe", badge_vedette:"⭐ Vedèt",
     boost_active:"⭐ Boost aktif jiskaske {date}",
-    /* boost_expired retire — pa montre nan paj piblik la */
     spec_beds:"ch.", spec_baths:"sdb", spec_beds_full:"Chanm", spec_baths_full:"Twalèt", spec_area_full:"m²",
     btn_view_details:"Wè detay yo",
     empty_none_title:"Pa gen anons pibliye kounye a", empty_none_sub:"Premye anons verifye yo ap parèt isit la byento.",
@@ -989,7 +960,17 @@ function houseSVG(i, size){
   </svg>`;
 }
 
-let state = { transaction:"", departement:"", city:"", commune:"", quartier:"", type:"", budget:"" };
+/* ===== STATE OBJEK KOREK ===== */
+let state = { 
+  transaction: "", 
+  departement: "", 
+  city: "", 
+  commune: "", 
+  quartier: "", 
+  type: "", 
+  budget: ""                   
+};
+
 let locState = { departement:null, arrondissement:null, commune:null, quartier:null };
 let listings = [];
 let boostedPool = [];
@@ -1116,18 +1097,19 @@ async function loadBoostedListings(){
 }
 
 function populateCitySelect(){
-  const allCommunes = new Set();
-  Object.values(geoData).forEach(dept => {
-    Object.values(dept).forEach(communes => {
-      communes.forEach(c => allCommunes.add(c));
+  const allCities = new Set();
+  Object.keys(geoData).forEach(dept => {
+    Object.keys(geoData[dept]).forEach(city => {
+      allCities.add(city);
     });
   });
-  const cities = [...allCommunes].sort();
+  const cities = [...allCities].sort();
   const sel = document.getElementById('f-city');
   sel.innerHTML = '<option value="" data-i18n="search_city_all">Toutes les villes</option>';
   cities.forEach(c => {
     const opt = document.createElement('option');
-    opt.value = c; opt.textContent = c;
+    opt.value = c;
+    opt.textContent = c;
     sel.appendChild(opt);
   });
 }
@@ -1191,11 +1173,21 @@ function renderLocationNav(){
   row.innerHTML = backBtn + chips;
 }
 
+/* ===== FONKSYON NAVIGASYON KOREK AK RENDER ===== */
+
 function goBackOneLevel(){
-  if(locState.quartier){ backToCommune(); }
-  else if(locState.commune){ backToArrondissement(); }
-  else if(locState.arrondissement){ backToDepartement(); }
-  else if(locState.departement){ resetLocation(); }
+  if(locState.quartier){ 
+    backToCommune(); 
+  } else if(locState.commune){ 
+    backToArrondissement(); 
+  } else if(locState.arrondissement){ 
+    backToDepartement(); 
+  } else if(locState.departement){ 
+    resetLocation(); 
+  }
+  // FORCE re-render apre chak retou
+  renderListings();
+  renderBoosted();
 }
 
 function selectDepartement(i){
@@ -1222,18 +1214,15 @@ function selectArrondissement(i){
   renderListings();
   renderBoosted();
 }
+
 function selectCommune(i){
   const commune = geoData[locState.departement][locState.arrondissement][i];
   locState.commune = commune;
   locState.quartier = null;
   state.commune = commune;
   state.quartier = "";
-  // state.city = commune;  
-  // Kenbe city a menm (Arrondissement)
-  const citySelect = document.getElementById('f-city');
-  if(citySelect) {
-    citySelect.value = [...citySelect.options].some(o => o.value === commune) ? commune : "";
-  }
+  // NE PAS modifier state.city — garder l'arrondissement
+  // state.city = commune;  // <-- SUPPRIMÉ
   renderLocationNav();
   renderListings();
   renderBoosted();
@@ -1249,29 +1238,45 @@ function selectQuartier(i){
 }
 
 function backToDepartement(){
-  locState.arrondissement = null; locState.commune = null; locState.quartier = null;
-  state.city = ""; state.commune = ""; state.quartier = "";
-  renderLocationNav(); renderListings(); renderBoosted();
+  locState.arrondissement = null; 
+  locState.commune = null; 
+  locState.quartier = null;
+  state.commune = ""; 
+  state.quartier = "";
+  renderLocationNav();
+  renderListings();
+  renderBoosted();
 }
 
 function backToArrondissement(){
-  locState.commune = null; locState.quartier = null;
-  state.city = ""; state.commune = ""; state.quartier = "";
-  renderLocationNav(); renderListings(); renderBoosted();
+  locState.commune = null; 
+  locState.quartier = null;
+  state.commune = ""; 
+  state.quartier = "";
+  renderLocationNav();
+  renderListings();
+  renderBoosted();
 }
 
 function backToCommune(){
   locState.quartier = null;
   state.quartier = "";
-  renderLocationNav(); renderListings(); renderBoosted();
+  renderLocationNav();
+  renderListings();
+  renderBoosted();
 }
 
 function resetLocation(){
   locState = { departement:null, arrondissement:null, commune:null, quartier:null };
-  state.city = ""; state.commune = ""; state.quartier = "";
+  state.departement = "";
+  state.city = ""; 
+  state.commune = ""; 
+  state.quartier = "";
   const citySelect = document.getElementById('f-city');
   if(citySelect) citySelect.value = "";
-  renderLocationNav(); renderListings(); renderBoosted();
+  renderLocationNav();
+  renderListings();
+  renderBoosted();
 }
 
 function applySearchPanel(){
@@ -1289,23 +1294,21 @@ function applySearchPanel(){
   document.getElementById('listings').scrollIntoView({behavior:'smooth'});
 }
 
-function syncLocStateToCity(commune){
-  if(!commune){
+function syncLocStateToCity(city){
+  if(!city){
     locState = { departement:null, arrondissement:null, commune:null, quartier:null };
     return;
   }
   for(const dept in geoData){
-    for(const arr in geoData[dept]){
-      if(geoData[dept][arr].includes(commune)){
-        locState = { departement:dept, arrondissement:arr, commune:commune, quartier:null };
-        return;
-      }
+    if(geoData[dept][city]){
+      locState = { departement:dept, arrondissement:city, commune:null, quartier:null };
+      return;
     }
   }
   locState = { departement:null, arrondissement:null, commune:null, quartier:null };
 }
 
-/* ===== buildCardHtml — RETIRE BOOST EKSPIRE ===== */
+/* ===== buildCardHtml ===== */
 function buildCardHtml(l, i, isBoosted){
   const specs = [];
   if(l.beds !== null && l.beds !== undefined) specs.push(`${l.beds} ${t('spec_beds')}`);
@@ -1323,14 +1326,12 @@ function buildCardHtml(l, i, isBoosted){
   }
   
   let boostIndicator = '';
-  // SEULEMENT si boost la AKTIF — pa montre boost ekspire
   if (l.hasActiveBoost && l.boostEndsAt) {
     const endDate = new Date(l.boostEndsAt).toLocaleDateString(
       currentLang === 'en' ? 'en-US' : currentLang === 'ht' ? 'ht' : 'fr-FR'
     );
     boostIndicator = `<span class="boost-indicator active">${t('boost_active').replace('{date}', endDate)}</span>`;
   }
-  // boost_expired retire — pa montre nan paj piblik la
   
   const transactionBadge = `<span class="card-badge ${l.transaction==='Vente'?'badge-vente':'badge-location'}">${l.transaction === 'Vente' ? t('badge_sale') : t('badge_rent')}</span>`;
   
@@ -1361,16 +1362,37 @@ function circularSlice(arr, start, size) {
   return result;
 }
 
+/* ===== RENDER LISTINGS KOREK ===== */
 function renderListings(){
   const grid = document.getElementById('listings-grid');
   let filtered = listings.filter(l => {
+    // Filtre pa transaction
     if(state.transaction && l.transaction !== state.transaction) return false;
+    
+    // Filtre pa département
     if(state.departement && l.departement !== state.departement) return false;
-    if(state.city && l.city !== state.city) return false;
+    
+    // Filtre pa ville (city) — Si city a yon valè
+    if(state.city && l.city !== state.city) {
+      // Si commune a matche, on accepte (cas où on est dans la commune)
+      // Sinon on filtre
+      if(!state.commune || l.commune !== state.commune) {
+        return false;
+      }
+    }
+    
+    // Filtre pa commune
     if(state.commune && l.commune !== state.commune) return false;
+    
+    // Filtre pa zone/quartier
     if(state.quartier && l.zone !== state.quartier && l.neighborhood !== state.quartier) return false;
+    
+    // Filtre pa type
     if(state.type && l.type !== state.type) return false;
+    
+    // Filtre pa budget
     if(state.budget && l.price > Number(state.budget)) return false;
+    
     return true;
   });
 
@@ -1386,18 +1408,23 @@ function renderListings(){
   grid.innerHTML = filtered.map((l) => buildCardHtml(l, listings.indexOf(l), false)).join('');
 }
 
-/* ===== renderBoosted — SEULEMENT ANONS AVEC BOOST AKTIF ===== */
+/* ===== RENDER BOOSTED KOREK ===== */
 function renderBoosted(){
   const section = document.getElementById('boosted-section');
   const grid = document.getElementById('boosted-grid');
   
-  // Sèlman anons ki gen boost AKTIF
   let activeBoosted = boostedPool.filter(l => l.hasActiveBoost === true);
   
   let filteredBoosted = activeBoosted.filter(l => {
     if(state.transaction && l.transaction !== state.transaction) return false;
     if(state.departement && l.departement !== state.departement) return false;
-    if(state.city && l.city !== state.city) return false;
+    
+    if(state.city && l.city !== state.city) {
+      if(!state.commune || l.commune !== state.commune) {
+        return false;
+      }
+    }
+    
     if(state.commune && l.commune !== state.commune) return false;
     if(state.quartier && l.zone !== state.quartier && l.neighborhood !== state.quartier) return false;
     if(state.type && l.type !== state.type) return false;
@@ -1421,7 +1448,11 @@ function startBoostRotation(){
   let activeBoosted = boostedPool.filter(l => l.hasActiveBoost === true);
   let filtered = activeBoosted.filter(l => {
     if(state.transaction && l.transaction !== state.transaction) return false;
-    if(state.city && l.city !== state.city) return false;
+    if(state.city && l.city !== state.city) {
+      if(!state.commune || l.commune !== state.commune) {
+        return false;
+      }
+    }
     if(state.commune && l.commune !== state.commune) return false;
     if(state.quartier && l.zone !== state.quartier && l.neighborhood !== state.quartier) return false;
     if(state.type && l.type !== state.type) return false;
@@ -1434,7 +1465,11 @@ function startBoostRotation(){
   boostTimer = setInterval(() => {
     let currentFiltered = activeBoosted.filter(l => {
       if(state.transaction && l.transaction !== state.transaction) return false;
-      if(state.city && l.city !== state.city) return false;
+      if(state.city && l.city !== state.city) {
+        if(!state.commune || l.commune !== state.commune) {
+          return false;
+        }
+      }
       if(state.commune && l.commune !== state.commune) return false;
       if(state.quartier && l.zone !== state.quartier && l.neighborhood !== state.quartier) return false;
       if(state.type && l.type !== state.type) return false;
@@ -1449,6 +1484,7 @@ function startBoostRotation(){
   }, BOOST_ROTATION_MS);
 }
 
+/* ===== MODAL ===== */
 function openModal(id){
   const l = listings.find(x => String(x.id) === String(id));
   if(!l) return;
@@ -1575,6 +1611,7 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+/* ===== INIT ===== */
 async function init(){
   applyStaticTranslations();
   renderLangMenu();
@@ -1596,6 +1633,7 @@ async function init(){
 }
 init();
 
+/* ===== CHARGER STATISTIQUES VISITES ===== */
 async function loadVisitsStats(){
   try{
     const now = new Date();
@@ -1649,7 +1687,52 @@ async function loadVisitsStats(){
   }
 }
 
-</script>
+/* ===== TRACKING DES VISITES ===== */
+function getVisitorId() {
+  let id = localStorage.getItem('kaypam_visitor_id');
+  if (!id) {
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substr(2, 6);
+    id = 'v_' + timestamp + '_' + random;
+    try {
+      localStorage.setItem('kaypam_visitor_id', id);
+    } catch(e) {
+      id = 'tmp_' + Date.now().toString(36);
+    }
+  }
+  return id;
+}
 
+async function trackVisit() {
+  if (!supabaseClient) return;
+  try {
+    const visitorId = getVisitorId();
+    const page = window.location.pathname.split('/').pop() || 'index.html';
+    
+    const { error } = await supabaseClient
+      .from('visits')
+      .insert({
+        visitor_id: visitorId,
+        page: page,
+        referrer: document.referrer || null,
+        user_agent: navigator.userAgent,
+        visited_at: new Date().toISOString()
+      });
+    
+    if (error) {
+      console.error('❌ Erreur tracking:', error);
+    } else {
+      console.log('✅ Visite enregistrée:', page, '| ID:', visitorId);
+    }
+  } catch(err) {
+    console.error('❌ Erreur tracking:', err);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(trackVisit, 500);
+});
+
+</script>
 </body>
 </html>
