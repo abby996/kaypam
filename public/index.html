@@ -1221,8 +1221,8 @@ function selectCommune(i){
   locState.quartier = null;
   state.commune = commune;
   state.quartier = "";
-  // NE PAS modifier state.city — garder l'arrondissement
-  // state.city = commune;  // <-- SUPPRIMÉ
+  //  state.city — garder l'arrondissement
+   state.city = commune;  // Si vous voulez que state.city reflète l'arrondissement, laissez-le tel quel
   renderLocationNav();
   renderListings();
   renderBoosted();
