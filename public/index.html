@@ -1017,6 +1017,7 @@ function mapRealListing(raw){
   return {
     id: raw.id,
     title: raw.title || `${raw.type} à ${raw.transaction === 'Vente' ? 'vendre' : 'louer'}`,
+    departement: raw.departement,
     city: raw.city || 'Haïti',
     commune: raw.commune || '',
     zone: raw.zone || '',
@@ -1049,7 +1050,7 @@ async function loadRealListings(){
     const { data, error } = await supabaseClient
       .from('listings')
       .select(`
-        id,title,city,commune,zone,transaction,type,price,currency,period,description,status,available,
+        id,title,departement,city,commune,zone,transaction,type,price,currency,period,description,status,available,
         owners(name,phone,whatsapp),
         listing_media(media_type,url,thumbnail,mime_type),
         boosts(status,ends_at)
@@ -1072,7 +1073,7 @@ async function loadBoostedListings(){
     const { data, error } = await supabaseClient
       .from('listings')
       .select(`
-        id,title,city,commune,zone,transaction,type,price,currency,period,description,status,available,
+        id,title,departement,city,commune,zone,transaction,type,price,currency,period,description,status,available,
         owners(name,phone,whatsapp),
         listing_media(media_type,url,thumbnail,mime_type),
         boosts(status,ends_at)
@@ -1194,20 +1195,19 @@ function selectDepartement(i){
   const dept = Object.keys(geoData)[i];
   locState = { departement: dept, arrondissement:null, commune:null, quartier:null };
   state.departement = dept;
-  state.city = "";
+  state.city = "";        // <-- REMETE SA
   state.commune = "";
   state.quartier = "";
   renderLocationNav();
   renderListings();
   renderBoosted();
 }
-
 function selectArrondissement(i){
   const arr = Object.keys(geoData[locState.departement])[i];
   locState.arrondissement = arr;
   locState.commune = null;
   locState.quartier = null;
-  state.city = arr;
+  state.city = arr;   // <-- "Ville" = Arrondissement
   state.commune = "";
   state.quartier = "";
   renderLocationNav();
@@ -1221,8 +1221,7 @@ function selectCommune(i){
   locState.quartier = null;
   state.commune = commune;
   state.quartier = "";
-  //  state.city — garder l'arrondissement
-   state.city = commune;  // Si vous voulez que state.city reflète l'arrondissement, laissez-le tel quel
+  // PA modifye state.city — kenbe Arrondissement
   renderLocationNav();
   renderListings();
   renderBoosted();
@@ -1241,6 +1240,7 @@ function backToDepartement(){
   locState.arrondissement = null; 
   locState.commune = null; 
   locState.quartier = null;
+  state.city = ""; 
   state.commune = ""; 
   state.quartier = "";
   renderLocationNav();
