@@ -2,8 +2,24 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Mes annonces — KayPam</title>
+
+<!-- PWA Meta -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#16243B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="KayPam">
+
+<!-- Icons -->
+<link rel="apple-touch-icon" sizes="167x167" href="icons/167.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/launchericon-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/launchericon-512x512.png">
+<meta name="msapplication-TileColor" content="#16243B">
+<meta name="msapplication-TileImage" content="icons/Square150x150Logo.scale-200.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -14,9 +30,11 @@
     --green: #1E8F6F; --gold: #F2B134; --card-bg: #FFFFFF; --border: rgba(22,36,59,0.12);
     --font-display: 'Space Grotesk', sans-serif; --font-body: 'Inter', sans-serif; --font-mono: 'Space Mono', monospace;
     --radius: 14px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
   *{box-sizing:border-box;}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);line-height:1.55;-webkit-font-smoothing:antialiased;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);line-height:1.55;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;padding-bottom:var(--safe-bottom);}
   a{color:inherit;} button{font-family:var(--font-body);cursor:pointer;}
   h1,h2,h3{font-family:var(--font-display);margin:0 0 0.4em;font-weight:700;letter-spacing:-0.01em;}
   p{margin:0 0 1em;}
@@ -28,7 +46,14 @@
   .eyebrow::before{content:'';width:18px;height:2px;background:var(--coral);display:inline-block;}
   :focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
 
-  header{background:var(--navy);padding:18px 0;}
+  header{
+    background:var(--navy);
+    padding:18px 0;
+    padding-top:calc(18px + var(--safe-top));
+    position:sticky;
+    top:0;
+    z-index:40;
+  }
   .header-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
   .logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
   .logo-mark{width:32px;height:32px;flex-shrink:0;}
@@ -159,7 +184,7 @@
   .empty-state{text-align:center;padding:50px 20px;color:var(--ink-soft);}
   .empty-state strong{display:block;color:var(--ink);font-size:16px;margin-bottom:6px;}
 
-  footer{padding:26px 0 40px;text-align:center;font-size:12.5px;color:var(--ink-soft);}
+  footer{padding:26px 0 calc(40px + var(--safe-bottom));text-align:center;font-size:12.5px;color:var(--ink-soft);}
 
   @media (max-width:640px){
     .plans-row{grid-template-columns:1fr;}
@@ -549,6 +574,7 @@ async function afterAuthSuccess(){
     return;
   }
   document.getElementById('account-username').textContent = data[0].username;
+  document.getElementById('account-code').textContent = data[0].account_code || '';
   document.getElementById('auth-card').style.display = 'none';
   document.getElementById('account-bar').style.display = 'flex';
   await loadPlans();
@@ -774,8 +800,8 @@ async function restoreListing(idx){
 }
 
 checkExistingSession();
-</script>
-<script>
+
+/* ===== TRADUCTION DYNAMIQUE ===== */
 (function(){
   var lang = localStorage.getItem('kaypam_lang') || 'fr';
   var maps = {
@@ -849,32 +875,27 @@ checkExistingSession();
   document.querySelectorAll('a, button, label, p, span, h1, h2, h3, h4, li, option, legend, input, textarea, select').forEach(updateElement);
 })();
 
-/* ===== TRACKING DES VISITES - VERSION STABLE ===== */
-
-// Fonksyon pou jwenn ID vizitè a (ki rete menm)
+/* ===== TRACKING DES VISITES ===== */
 function getVisitorId() {
   let id = localStorage.getItem('kaypam_visitor_id');
   if (!id) {
-    // Kreye yon ID ki stab (baze sou tan + random)
     const timestamp = Date.now().toString(36);
     const random = Math.random().toString(36).substr(2, 6);
     id = 'v_' + timestamp + '_' + random;
     try {
       localStorage.setItem('kaypam_visitor_id', id);
     } catch(e) {
-      // Si localStorage pa disponib, itilize yon ID tanporè
       id = 'tmp_' + Date.now().toString(36);
     }
   }
   return id;
 }
 
-// Fonksyon pou anrejistre vizit la
 async function trackVisit() {
   if (!supabaseClient) return;
   try {
     const visitorId = getVisitorId();
-    const page = window.location.pathname.split('/').pop() || 'index.html';
+    const page = window.location.pathname.split('/').pop() || 'mes-annonces.html';
     
     const { error } = await supabaseClient
       .from('visits')
@@ -889,20 +910,20 @@ async function trackVisit() {
     if (error) {
       console.error('❌ Erreur tracking:', error);
     } else {
-      console.log('✅ Visite enregistrée:', page, '| ID:', visitorId);
+      console.log('✅ Visite enregistrée:', page);
     }
   } catch(err) {
     console.error('❌ Erreur tracking:', err);
   }
 }
 
-// Lè paj la fin chaje, anrejistre vizit la
 document.addEventListener('DOMContentLoaded', function() {
   setTimeout(trackVisit, 500);
 });
-
-
-
 </script>
+
+<!-- App Shell (PWA : Service Worker + Bannière) -->
+<script src="app-shell.js"></script>
+
 </body>
 </html>

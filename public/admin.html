@@ -2,570 +2,1721 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin — KayPam</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>KayPam — Trouvez votre toit en Haïti</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#16243B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="KayPam">
+<link rel="apple-touch-icon" href="icons/icon-192x192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg: #F2F5F1; --bg-soft: #E8EDE6; --ink: #16243B; --ink-soft: #4A5872;
-    --navy: #16243B; --coral: #E25C3B; --coral-dark: #C2473A;
-    --green: #1E8F6F; --gold: #F2B134; --card-bg: #FFFFFF; --border: rgba(22,36,59,0.12);
-    --font-display: 'Space Grotesk', sans-serif; --font-body: 'Inter', sans-serif; --font-mono: 'Space Mono', monospace;
+    --bg: #F2F5F1;
+    --bg-soft: #E8EDE6;
+    --ink: #16243B;
+    --ink-soft: #4A5872;
+    --navy: #16243B;
+    --coral: #E25C3B;
+    --coral-dark: #C2473A;
+    --green: #1E8F6F;
+    --gold: #F2B134;
+    --card-bg: #FFFFFF;
+    --border: rgba(22,36,59,0.12);
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'Space Mono', monospace;
     --radius: 14px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
   *{box-sizing:border-box;}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);line-height:1.55;-webkit-font-smoothing:antialiased;}
-  a{color:inherit;text-decoration:none;} button{font-family:var(--font-body);cursor:pointer;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    -webkit-tap-highlight-color:transparent;
+    overscroll-behavior-y:contain;
+    padding-bottom:var(--safe-bottom);
+  }
+  img,svg{display:block;max-width:100%;}
+  a{color:inherit;}
   h1,h2,h3{font-family:var(--font-display);margin:0 0 0.4em;font-weight:700;letter-spacing:-0.01em;}
   p{margin:0 0 1em;}
-  .wrap{max-width:1200px;margin:0 auto;padding:0 24px;}
+  button{font-family:var(--font-body);cursor:pointer;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px;}
   .eyebrow{
-    font-family:var(--font-mono);font-size:12px;letter-spacing:0.12em;text-transform:uppercase;
-    color:var(--coral-dark);display:flex;align-items:center;gap:8px;
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--coral-dark);
+    display:flex;align-items:center;gap:8px;
   }
   .eyebrow::before{content:'';width:18px;height:2px;background:var(--coral);display:inline-block;}
+
   :focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
 
   header{
     position:sticky;top:0;z-index:40;
-    background:rgba(22,36,59,0.95);
+    background:rgba(242,245,241,0.92);
     -webkit-backdrop-filter:blur(8px);
     backdrop-filter:blur(8px);
-    padding:18px 0;
+    border-bottom:1px solid var(--border);
+    padding-top:var(--safe-top);
   }
-  .header-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .nav{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 28px;max-width:1180px;margin:0 auto;
+    gap:16px;flex-wrap:nowrap;
+  }
   .logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
-  .logo-mark{width:32px;height:32px;flex-shrink:0;}
-  .logo-text{font-family:var(--font-display);font-weight:700;font-size:19px;color:#fff;}
-  .logo-text span{color:var(--gold);}
-  .back-link{
-    font-size:13.5px;font-weight:700;color:#fff;text-decoration:none;
+  .logo-mark{width:34px;height:34px;flex-shrink:0;}
+  .logo-text{font-family:var(--font-display);font-weight:700;font-size:21px;color:var(--ink);}
+  .logo-text span{color:var(--coral);}
+  .nav-links{display:flex;gap:28px;align-items:center;flex-wrap:wrap;}
+  .nav-links a{
+    text-decoration:none;font-size:14.5px;font-weight:500;color:var(--ink-soft);
+    transition:color .15s;
+  }
+  .nav-links a:hover{color:var(--coral-dark);}
+  .nav-cta{
+    background:var(--navy);color:#fff;border:none;border-radius:999px;
+    padding:10px 20px;font-size:14px;font-weight:600;text-decoration:none;
+    display:inline-block;transition:background .15s;
+  }
+  .nav-cta:hover{background:var(--coral-dark);}
+  .nav-cta-secondary{
+    background:none;color:var(--navy);border:1.5px solid var(--navy);border-radius:999px;
+    padding:9px 19px;font-size:14px;font-weight:600;text-decoration:none;
+    display:inline-block;transition:background .15s, color .15s;
+  }
+  .nav-cta-secondary:hover{background:var(--navy);color:#fff;}
+  .nav-ctas{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;flex-shrink:0;}
+  .lang-dropdown{position:relative;flex-shrink:0;}
+  .lang-dropdown-trigger{
     display:flex;align-items:center;gap:6px;
-    background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);
-    border-radius:999px;padding:9px 18px;transition:background .15s;
+    background:#fff;border:1.5px solid var(--border);border-radius:999px;
+    padding:8px 14px;font-size:13px;font-weight:700;color:var(--ink);
+    font-family:var(--font-mono);transition:border-color .15s, box-shadow .15s;
   }
-  .back-link:hover{background:var(--coral);border-color:var(--coral);}
-
-  .intro{padding:44px 0 8px;}
-  .intro h1{font-size:clamp(24px,3.2vw,32px);}
-  .intro p{color:var(--ink-soft);max-width:60ch;font-size:15px;}
-
-  .admin-login-box{
-    max-width:400px;margin:40px auto;background:var(--card-bg);
-    border:1px solid var(--border);border-radius:var(--radius);padding:32px;
+  .lang-dropdown-trigger:hover{border-color:var(--navy);}
+  .lang-dropdown.open .lang-dropdown-trigger{border-color:var(--navy);box-shadow:0 0 0 3px rgba(22,36,59,0.08);}
+  .lang-globe{font-size:13px;line-height:1;}
+  .lang-caret{font-size:10px;transition:transform .15s;color:var(--ink-soft);}
+  .lang-dropdown.open .lang-caret{transform:rotate(180deg);}
+  .lang-dropdown-menu{
+    display:none;flex-direction:column;position:absolute;top:calc(100% + 8px);right:0;
+    background:#fff;border:1px solid var(--border);border-radius:12px;
+    box-shadow:0 12px 28px rgba(22,36,59,0.16);overflow:hidden;min-width:150px;z-index:50;
   }
-  .admin-login-box h2{text-align:center;margin-bottom:24px;}
-  .admin-login-box .field{margin-bottom:16px;}
-  .admin-login-box label{display:block;font-size:12.5px;font-weight:600;color:var(--ink-soft);margin-bottom:5px;}
-  .admin-login-box input{
-    width:100%;border:1px solid var(--border);border-radius:9px;
-    padding:11px 12px;font-size:14.5px;font-family:var(--font-body);
-    background:var(--bg);color:var(--ink);
+  .lang-dropdown.open .lang-dropdown-menu{display:flex;}
+  .lang-option{
+    display:flex;align-items:center;gap:10px;padding:11px 16px;
+    background:none;border:none;text-align:left;font-size:13.5px;font-weight:600;color:var(--ink);
+    transition:background .12s;
   }
-  .admin-login-box .auth-submit{
-    width:100%;background:var(--coral);color:#fff;border:none;border-radius:9px;
-    padding:13px;font-weight:700;font-size:14.5px;margin-top:4px;
+  .lang-option:hover{background:var(--bg-soft);}
+  .lang-option.active{color:var(--coral-dark);background:rgba(226,92,59,0.06);}
+  .lang-option .lang-code{
+    font-family:var(--font-mono);font-size:11px;color:var(--ink-soft);
+    width:22px;flex-shrink:0;
   }
-  .admin-login-box .auth-submit:hover{background:var(--coral-dark);}
-  .admin-login-box .auth-submit:disabled{background:var(--border);color:var(--ink-soft);cursor:not-allowed;}
-  .form-error{
-    background:rgba(226,92,59,0.1);border:1px solid var(--coral);color:var(--coral-dark);
-    padding:10px 14px;border-radius:9px;font-size:13.5px;display:none;
+
+  .hero{
+    position:relative;overflow:hidden;
+    background:var(--navy);
+    color:#fff;
+    padding:72px 0 0;
   }
-  .form-error.show{display:block;}
-
-  #admin-dashboard{display:none;}
-  #admin-dashboard.show{display:block;}
-
-  .admin-banner{
-    background:rgba(226,92,59,0.08);border:1px solid var(--coral);border-radius:var(--radius);
-    padding:14px 20px;margin:0 0 24px;display:flex;justify-content:space-between;
-    align-items:center;flex-wrap:wrap;gap:12px;
+  .grille-bg{
+    position:absolute;inset:0;opacity:0.10;pointer-events:none;
   }
-  .admin-banner .admin-link{color:var(--coral-dark);font-weight:700;}
-  .logout-link{color:var(--coral-dark);font-weight:700;text-decoration:none;font-size:13px;}
-  .logout-link:hover{text-decoration:underline;}
-
-  .admin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:32px;}
-  .admin-card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:20px;}
-  .admin-card h3{font-size:14px;margin-bottom:12px;display:flex;align-items:center;gap:8px;color:var(--ink-soft);}
-  .admin-card .stat-number{font-family:var(--font-mono);font-size:28px;font-weight:700;color:var(--coral-dark);}
-  .admin-card .stat-label{font-size:12px;color:var(--ink-soft);display:block;margin-top:2px;}
-  .admin-card .stat-change{font-size:11px;font-weight:600;display:inline-block;padding:2px 8px;border-radius:999px;margin-top:4px;}
-  .stat-change.up{color:var(--green);background:rgba(30,143,111,0.12);}
-  .stat-change.down{color:var(--coral);background:rgba(226,92,59,0.12);}
-
-  .stats-visits{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:32px;}
-  .stats-visits .visit-card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;text-align:center;}
-  .stats-visits .visit-card .num{font-family:var(--font-mono);font-size:32px;font-weight:700;color:var(--navy);}
-  .stats-visits .visit-card .label{font-size:12px;color:var(--ink-soft);margin-top:4px;}
-  .stats-visits .visit-card .sub-label{font-size:11px;color:var(--ink-soft);margin-top:4px;}
-
-  .admin-table-wrap{overflow-x:auto;}
-  .admin-table{width:100%;border-collapse:collapse;font-size:13px;min-width:700px;}
-  .admin-table th{text-align:left;padding:8px 10px;background:var(--bg-soft);font-weight:600;color:var(--ink-soft);border-bottom:2px solid var(--border);}
-  .admin-table td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
-  .status-badge{
-    display:inline-block;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:700;text-transform:uppercase;
+  .hero-inner{
+    position:relative;z-index:2;
+    max-width:1180px;margin:0 auto;padding:0 28px;
+    display:grid;grid-template-columns:1.1fr 0.9fr;gap:48px;align-items:start;
   }
-  .status-badge.pending{background:rgba(242,177,52,0.18);color:#7a5300;}
-  .status-badge.validated{background:rgba(30,143,111,0.15);color:#0f5c47;}
-  .status-badge.refused{background:rgba(226,92,59,0.14);color:var(--coral-dark);}
-  .status-badge.supprime{background:rgba(226,92,59,0.2);color:var(--coral-dark);}
-  .status-badge.active{background:rgba(30,143,111,0.15);color:#0f5c47;}
-  .status-badge.expired{background:var(--bg-soft);color:var(--ink-soft);}
-  .status-badge.waiting{background:rgba(242,177,52,0.18);color:#7a5300;}
-
-  .admin-btn{padding:4px 10px;border:none;border-radius:6px;font-size:11px;font-weight:600;transition:background .15s;cursor:pointer;}
-  .admin-btn-validate{background:var(--green);color:#fff;}
-  .admin-btn-validate:hover{background:#155d45;}
-  .admin-btn-refuse{background:var(--coral);color:#fff;}
-  .admin-btn-refuse:hover{background:var(--coral-dark);}
-  .admin-btn-activate{background:var(--gold);color:#4A3300;}
-  .admin-btn-activate:hover{background:#e0a02c;}
-  .admin-btn-danger{background:var(--coral-dark);color:#fff;}
-  .admin-btn-danger:hover{background:#a03a2e;}
-  .admin-btn-supprime{background:var(--bg-soft);color:var(--ink-soft);cursor:not-allowed;}
-  .admin-btn-supprime:hover{background:var(--bg-soft);}
-  .admin-btn-view{background:var(--navy);color:#fff;}
-  .admin-btn-view:hover{background:#0f1a2e;}
-  .admin-btn-sm{padding:2px 8px;font-size:10px;}
-  .admin-btn-group{display:flex;gap:4px;flex-wrap:wrap;}
-
-  .empty-state{text-align:center;padding:40px 20px;color:var(--ink-soft);}
-  .empty-state strong{display:block;color:var(--ink);font-size:16px;margin-bottom:6px;}
-
-  .tab-nav{display:flex;gap:4px;margin-bottom:20px;background:var(--bg-soft);border-radius:10px;padding:4px;flex-wrap:wrap;}
-  .tab-nav button{
-    padding:8px 20px;border:none;border-radius:8px;font-weight:600;font-size:13px;
-    background:none;color:var(--ink-soft);transition:all .15s;cursor:pointer;
+  .hero h1{
+    font-size:clamp(34px,4.6vw,56px);
+    line-height:1.05;
+    color:#fff;
+    max-width:13ch;
   }
-  .tab-nav button.active{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(22,36,59,0.1);}
-  .tab-nav button:hover{color:var(--coral-dark);}
-  .tab-content{display:none;}
-  .tab-content.active{display:block;}
+  .hero h1 em{
+    font-style:normal;color:var(--gold);
+  }
+  .hero-sub{
+    color:rgba(255,255,255,0.78);
+    font-size:17px;
+    max-width:46ch;
+    margin-bottom:28px;
+  }
+  .hero-stats{
+    display:flex;gap:28px;margin-top:8px;flex-wrap:wrap;
+  }
+  .hero-stat{font-family:var(--font-mono);}
+  .hero-stat b{display:block;font-size:24px;color:var(--gold);font-weight:700;}
+  .hero-stat span{font-size:12px;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:.06em;}
 
-  footer{padding:26px 0 40px;text-align:center;font-size:12.5px;color:var(--ink-soft);}
+  .search-panel{
+    background:rgba(255,255,255,0.95);
+    -webkit-backdrop-filter:blur(12px);
+    backdrop-filter:blur(12px);
+    color:var(--ink);
+    border-radius:var(--radius);
+    padding:24px;
+    box-shadow:0 24px 60px rgba(0,0,0,0.35);
+    position:relative;
+    z-index:3;
+    margin-bottom:-40px;
+  }
+  .search-panel .panel-label{
+    font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:.1em;
+    color:var(--ink-soft);margin-bottom:14px;display:block;
+  }
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field label{font-size:12px;font-weight:600;color:var(--ink-soft);}
+  .field select, .field input{
+    border:1px solid var(--border);
+    border-radius:9px;
+    padding:11px 12px;
+    font-size:14.5px;
+    font-family:var(--font-body);
+    background:var(--bg);
+    color:var(--ink);
+  }
+  .field select:focus,.field input:focus{outline:2px solid var(--coral);outline-offset:0;}
+  .search-btn{
+    width:100%;margin-top:6px;
+    background:var(--coral);color:#fff;border:none;border-radius:9px;
+    padding:13px;font-size:15px;font-weight:600;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    transition:background .15s, transform .1s;
+  }
+  .search-btn:hover{background:var(--coral-dark);}
+  .search-btn:active{transform:scale(0.98);}
 
-  @media (max-width:900px){.admin-grid{grid-template-columns:1fr 1fr;}.stats-visits{grid-template-columns:1fr 1fr;}}
-  @media (max-width:640px){.admin-grid{grid-template-columns:1fr;}.stats-visits{grid-template-columns:1fr;}.admin-table{min-width:100%;font-size:12px;}}
-  @media (max-width:480px){.header-inner{flex-wrap:wrap;justify-content:center;}.admin-banner{flex-direction:column;text-align:center;}.tab-nav button{padding:6px 12px;font-size:12px;}}
+  section{padding:72px 0;}
+  .section-head{
+    display:flex;justify-content:space-between;align-items:flex-end;
+    gap:20px;margin-bottom:32px;flex-wrap:wrap;
+  }
+  .section-head h2{font-size:clamp(24px,3vw,32px);}
+  .section-head p{color:var(--ink-soft);max-width:48ch;margin:0;}
+
+  .chip-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px;}
+  .loc-nav{margin:-14px 0 28px;}
+  .loc-breadcrumb{
+    display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:14px;
+  }
+  .loc-crumb{
+    border:none;background:none;padding:4px 2px;
+    font-family:var(--font-mono);font-size:12.5px;font-weight:700;
+    color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;
+  }
+  .loc-crumb:hover{color:var(--coral-dark);}
+  .loc-crumb.active{color:var(--coral-dark);}
+  .loc-sep{color:var(--ink-soft);opacity:0.4;font-size:12px;}
+  .chip-row-sub .chip{
+    background:var(--bg-soft);border-color:transparent;
+  }
+  .chip-row-sub .chip:hover{background:#fff;border-color:var(--coral);}
+  .chip-back{
+    background:var(--navy) !important;color:#fff;font-weight:700;
+  }
+  .chip-back:hover{background:var(--coral-dark) !important;border-color:var(--coral-dark) !important;}
+  .loc-empty-note{
+    font-size:13.5px;color:var(--ink-soft);font-style:italic;
+  }
+  .chip{
+    border:1px solid var(--border);
+    background:#fff;
+    border-radius:999px;
+    padding:9px 16px;
+    font-size:13.5px;font-weight:600;
+    color:var(--ink-soft);
+    transition:all .15s;
+  }
+  .chip:hover{border-color:var(--coral);color:var(--coral-dark);}
+  .chip.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+    gap:22px;
+  }
+  .card{
+    background:var(--card-bg);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    overflow:hidden;
+    display:flex;flex-direction:column;
+    transition:transform .18s, box-shadow .18s;
+    text-align:left;
+  }
+  .card:hover{transform:translateY(-4px);box-shadow:0 16px 32px rgba(22,36,59,0.12);}
+  .card-art{
+    height:150px;
+    display:flex;align-items:center;justify-content:center;
+    position:relative;overflow:hidden;
+  }
+  .card-art img{width:100%;height:100%;object-fit:cover;}
+  .card-badge{
+    position:absolute;top:12px;left:12px;
+    font-family:var(--font-mono);font-size:11px;font-weight:700;
+    padding:4px 10px;border-radius:999px;
+    text-transform:uppercase;letter-spacing:.04em;
+  }
+  .badge-vente{background:var(--gold);color:#4A3300;}
+  .badge-location{background:var(--green);color:#fff;}
+  .badge-boost{
+    background:var(--gold);color:#4A3300;
+    position:absolute;top:12px;right:12px;left:auto;
+    font-family:var(--font-mono);font-size:11px;font-weight:700;
+    padding:4px 10px;border-radius:999px;
+    text-transform:uppercase;letter-spacing:.04em;
+  }
+  .card-body{padding:18px 18px 20px;display:flex;flex-direction:column;gap:8px;flex:1;}
+  .card-city{
+    font-family:var(--font-mono);font-size:12px;color:var(--ink-soft);
+    display:flex;align-items:center;gap:6px;
+  }
+  .card-title{font-size:17px;font-weight:700;font-family:var(--font-display);}
+  .card-price{
+    font-family:var(--font-mono);font-weight:700;font-size:18px;color:var(--coral-dark);
+    margin-top:auto;
+  }
+  .card-specs{
+    display:flex;gap:14px;font-size:12.5px;color:var(--ink-soft);
+    border-top:1px solid var(--border);padding-top:10px;margin-top:4px;
+  }
+  .boost-indicator{
+    display:inline-block;font-size:10px;font-weight:700;
+    padding:3px 10px;border-radius:999px;margin-top:4px;
+  }
+  .boost-indicator.active{
+    color:var(--green);background:rgba(30,143,111,0.12);
+  }
+  .card-cta{
+    border:none;background:var(--bg-soft);color:var(--ink);
+    border-radius:9px;padding:10px;font-size:13.5px;font-weight:600;
+    margin-top:10px;transition:background .15s;
+  }
+  .card-cta:hover{background:var(--navy);color:#fff;}
+  .empty-state{
+    text-align:center;padding:60px 20px;color:var(--ink-soft);
+    grid-column:1/-1;
+  }
+  .empty-state strong{display:block;color:var(--ink);font-size:18px;margin-bottom:6px;}
+  .empty-state .icon-big{font-size:48px;margin-bottom:16px;display:block;}
+
+  .how{background:var(--navy);color:#fff;}
+  .how .section-head p{color:rgba(255,255,255,0.65);}
+  .how .eyebrow{color:var(--gold);}
+  .how .eyebrow::before{background:var(--gold);}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+  .step{
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:var(--radius);
+    padding:26px;
+  }
+  .step-num{
+    font-family:var(--font-mono);font-size:13px;color:var(--gold);
+    margin-bottom:14px;
+  }
+  .step h3{color:#fff;font-size:18px;}
+  .step p{color:rgba(255,255,255,0.65);font-size:14.5px;margin:0;}
+
+  footer{background:var(--navy);color:rgba(255,255,255,0.7);padding:48px 0 calc(28px + var(--safe-bottom));}
+  .footer-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:32px;margin-bottom:36px;}
+  .footer-logo{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .footer-logo .logo-text{color:#fff;}
+  footer h4{color:#fff;font-size:13px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;font-family:var(--font-mono);font-weight:700;}
+  footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:9px;font-size:14px;}
+  footer ul a{text-decoration:none;color:rgba(255,255,255,0.7);transition:color .15s;}
+  footer ul a:hover{color:var(--gold);}
+  .footer-bottom{
+    border-top:1px solid rgba(255,255,255,0.12);padding-top:20px;
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;
+    font-size:12.5px;color:rgba(255,255,255,0.5);
+  }
+
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(22,36,59,0.55);
+    display:none;align-items:center;justify-content:center;
+    z-index:100;padding:20px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal{
+    background:#fff;border-radius:18px;max-width:560px;width:100%;
+    max-height:88vh;overflow-y:auto;position:relative;
+  }
+  .modal-art{
+    height:170px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    overflow:hidden;
+    background:#f0f0f0;
+  }
+  .modal-art img{width:100%;height:100%;object-fit:cover;}
+  .modal-close{
+    position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.85);
+    border:none;border-radius:50%;width:34px;height:34px;font-size:18px;
+    display:flex;align-items:center;justify-content:center;
+    z-index:10;
+  }
+  .modal-body{padding:24px 26px 28px;}
+  .modal-city{font-family:var(--font-mono);font-size:12.5px;color:var(--ink-soft);margin-bottom:6px;}
+  .modal-body h3{font-size:22px;margin-bottom:8px;}
+  .modal-price{font-family:var(--font-mono);font-size:20px;font-weight:700;color:var(--coral-dark);margin-bottom:14px;}
+  .modal-specs{display:flex;gap:18px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:14px 0;margin-bottom:16px;font-size:14px;}
+  .modal-specs div b{display:block;font-size:16px;}
+  .modal-desc{color:var(--ink-soft);font-size:14.5px;margin-bottom:20px;}
+  .modal-actions{display:flex;gap:10px;flex-wrap:wrap;}
+  .modal-actions a, .modal-actions button{
+    flex:1;min-width:160px;text-align:center;text-decoration:none;
+    border-radius:9px;padding:12px;font-weight:600;font-size:14px;border:none;
+  }
+  .btn-whatsapp{background:var(--green);color:#fff;}
+  .btn-close-secondary{background:var(--bg-soft);color:var(--ink);}
+
+  .modal-media-wrapper{
+    width:100%;
+    height:100%;
+    position:relative;
+    overflow:hidden;
+  }
+  .modal-media-slider{
+    width:100%;
+    height:100%;
+    position:relative;
+  }
+  .modal-media-item{
+    display:none;
+    width:100%;
+    height:100%;
+    align-items:center;
+    justify-content:center;
+    background:#f0f0f0;
+  }
+  .modal-media-item.active{
+    display:flex;
+  }
+  .modal-media-item img,
+  .modal-media-item video{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    max-height:300px;
+  }
+  .modal-media-controls{
+    position:absolute;
+    bottom:10px;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    align-items:center;
+    gap:16px;
+    background:rgba(0,0,0,0.6);
+    padding:6px 14px;
+    border-radius:999px;
+    color:#fff;
+    font-size:13px;
+    z-index:10;
+  }
+  .modal-media-controls button{
+    background:none;
+    border:none;
+    color:#fff;
+    font-size:22px;
+    cursor:pointer;
+    padding:0 4px;
+    line-height:1;
+    transition:color .15s;
+  }
+  .modal-media-controls button:hover{
+    color:var(--gold);
+  }
+  .modal-media-controls .modal-media-counter{
+    font-family:var(--font-mono);
+    font-size:12px;
+    min-width:40px;
+    text-align:center;
+  }
+
+  #boosted-section{display:none;padding-bottom:0;padding-top:32px;}
+  #boosted-section.show{display:block;}
+  #boosted-section .grid{margin-top:0;}
+
+  /* ---------- BANNIÈRE INSTALL PWA ---------- */
+  #install-banner{
+    display:none;
+    background:var(--navy);
+    color:#fff;
+    padding:14px 20px;
+    text-align:center;
+    position:fixed;
+    bottom:0;left:0;right:0;
+    z-index:999;
+    box-shadow:0 -4px 20px rgba(0,0,0,0.3);
+    padding-bottom:calc(14px + var(--safe-bottom));
+    animation:slideUp .4s ease;
+    cursor:pointer;
+  }
+  #install-banner.show{display:block;}
+  #install-banner:hover{background:#1a2c47;}
+  #install-banner .banner-text{
+    font-size:14px;
+    font-weight:600;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+  }
+  #install-banner .banner-icon{
+    font-size:20px;
+  }
+  @keyframes slideUp{
+    from{transform:translateY(100%);}
+    to{transform:translateY(0);}
+  }
+
+  /* ---------- OFFLINE INDICATOR ---------- */
+  #offline-banner{
+    display:none;
+    background:var(--coral-dark);
+    color:#fff;
+    padding:8px 16px;
+    text-align:center;
+    font-size:13px;
+    font-weight:600;
+    position:sticky;
+    top:0;
+    z-index:50;
+  }
+  #offline-banner.show{display:block;}
+
+  @media (max-width:1100px){
+    .nav-links{gap:16px;font-size:13.5px;}
+    .nav-links a{font-size:13.5px;}
+  }
+  @media (max-width:880px){
+    .hero-inner{grid-template-columns:1fr;}
+    .hero h1{max-width:none;}
+    .search-panel{margin-bottom:0;margin-top:32px;}
+    .steps{grid-template-columns:1fr;}
+    .footer-grid{grid-template-columns:1fr 1fr;}
+    .nav-links{display:none;}
+    .grid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));}
+  }
+  @media (max-width:480px){
+    .wrap{padding:0 18px;}
+    .nav{padding:12px 18px;}
+    .logo-text{font-size:17px;}
+    .nav-cta,.nav-cta-secondary{padding:7px 11px;font-size:11.5px;}
+    .nav-ctas{gap:6px;}
+    .lang-dropdown-trigger{padding:6px 9px;font-size:11px;}
+    .hero{padding:48px 0 0;}
+    section{padding:48px 0;}
+    .card-art{height:170px;}
+  }
+  @media (max-width:520px){
+    .field-row{grid-template-columns:1fr;}
+    .footer-grid{grid-template-columns:1fr;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important; scroll-behavior:auto !important; animation:none !important;}
+  }
 </style>
 </head>
 <body>
 
+<!-- Offline banner -->
+<div id="offline-banner">📶 Ou pa konekte — kèk fonksyonalite ka pa disponib</div>
+
 <header>
-  <div class="wrap header-inner">
-    <a href="index.html" class="logo">
+  <div class="nav">
+    <a href="#" class="logo">
       <svg class="logo-mark" viewBox="0 0 40 40" aria-hidden="true">
-        <rect width="40" height="40" rx="9" fill="#F2F5F1"/>
-        <path d="M20 8 L31 17 V32 H9 V17 Z" fill="#16243B"/>
+        <rect width="40" height="40" rx="9" fill="#16243B"/>
+        <path d="M20 8 L31 17 V32 H9 V17 Z" fill="#F2F5F1"/>
         <rect x="17" y="22" width="6" height="10" fill="#E25C3B"/>
         <rect x="13" y="11" width="14" height="3" fill="#F2B134"/>
       </svg>
       <span class="logo-text">Kay<span>Pam</span></span>
     </a>
-    <a href="index.html" class="back-link">← Retour au site</a>
+    <nav class="nav-links">
+      <a href="#listings" onclick="setTransactionFilter('Vente')" data-i18n="nav_buy">Acheter</a>
+      <a href="#listings" onclick="setTransactionFilter('Location')" data-i18n="nav_rent">Louer</a>
+      <a href="mes-annonces.html" data-i18n="nav_boost">Booster mes annonces</a>
+      <a href="#comment" data-i18n="nav_how">Comment ça marche</a>
+    </nav>
+    <div class="nav-ctas">
+      <div class="lang-dropdown" id="lang-dropdown">
+        <button class="lang-dropdown-trigger" onclick="toggleLangMenu()" aria-haspopup="true" aria-expanded="false">
+          <span class="lang-globe">🌐</span><span id="lang-current-label">FR</span><span class="lang-caret">▾</span>
+        </button>
+        <div class="lang-dropdown-menu" id="lang-dropdown-menu"></div>
+      </div>
+      <a href="mes-annonces.html" class="nav-cta-secondary" data-i18n="nav_login">Se connecter</a>
+      <a href="publier.html" class="nav-cta" data-i18n="nav_publish">Publier</a>
+    </div>
   </div>
 </header>
 
-<main class="wrap">
-  <div class="intro">
-    <span class="eyebrow">Administration</span>
-    <h1>Espace Admin KayPam</h1>
-    <p>Connectez-vous avec votre compte administrateur pour gérer les annonces, valider ou refuser les soumissions, activer les boosts, et suivre les statistiques du site.</p>
+<section class="hero">
+  <svg class="grille-bg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+      <pattern id="grille" width="40" height="40" patternUnits="userSpaceOnUse">
+        <path d="M20 0 L40 20 L20 40 L0 20 Z" fill="none" stroke="#F2F5F1" stroke-width="1"/>
+        <circle cx="20" cy="20" r="3" fill="none" stroke="#F2F5F1" stroke-width="1"/>
+      </pattern>
+    </defs>
+    <rect width="400" height="300" fill="url(#grille)"/>
+  </svg>
+  <div class="hero-inner">
+    <div>
+      <span class="eyebrow" data-i18n="hero_eyebrow">Annonces immobilières · Haïti</span>
+      <h1 data-i18n-html="hero_title">Chaque quartier<br>a sa maison<br><em>Trouvez la vôtre</em></h1>
+      <p class="hero-sub" data-i18n="hero_sub">KayPam rassemble des centaines de maisons, appartements et terrains à vendre ou à louer partout en Haïti — et vous met en contact direct avec le propriétaire ou l'agent, sans détour.</p>
+      <div class="hero-stats">
+        <div class="hero-stat"><b id="stat-count">0</b><span data-i18n="stat_active">Annonces actives</span></div>
+        <div class="hero-stat"><b>10</b><span data-i18n="stat_cities">Villes couvertes</span></div>
+        <div class="hero-stat"><b>0%</b><span data-i18n="stat_commission">Commission cachée</span></div>
+      </div>
+    </div>
+
+    <div class="search-panel">
+      <span class="panel-label" data-i18n="search_label">Recherche rapide</span>
+      <div class="field-row">
+        <div class="field">
+          <label for="f-city" data-i18n="search_city">Ville</label>
+          <select id="f-city">
+            <option value="" data-i18n="search_city_all">Toutes les villes</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-transaction" data-i18n="search_want">Je veux</label>
+          <select id="f-transaction">
+            <option value="" data-i18n="search_want_placeholder">Acheter ou louer</option>
+            <option value="Vente" data-i18n="nav_buy">Acheter</option>
+            <option value="Location" data-i18n="nav_rent">Louer</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="f-type" data-i18n="search_type">Type de bien</label>
+          <select id="f-type">
+            <option value="" data-i18n="search_type_all">Tous les types</option>
+            <option value="Maison" data-i18n="type_house">Maison</option>
+            <option value="Appartement" data-i18n="type_apartment">Appartement</option>
+            <option value="Terrain" data-i18n="type_land">Terrain</option>
+            <option value="Local commercial" data-i18n="type_commercial">Local commercial</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-budget" data-i18n="search_budget">Budget max (USD)</label>
+          <input type="number" id="f-budget" placeholder="Ex. 200000" min="0">
+        </div>
+      </div>
+      <button class="search-btn" onclick="applySearchPanel()">
+        <span data-i18n="search_btn">Rechercher des biens →</span>
+      </button>
+    </div>
   </div>
+</section>
 
-  <!-- Formulaire de connexion admin -->
-  <div class="admin-login-box" id="admin-login-box">
-    <h2>Connexion Admin</h2>
-    <form id="admin-login-form">
-      <div class="field">
-        <label for="admin-email">Email</label>
-        <input type="email" id="admin-email" placeholder="admin@kaypam.ht" required>
-      </div>
-      <div class="field">
-        <label for="admin-password">Mot de passe</label>
-        <input type="password" id="admin-password" placeholder="••••••••" required>
-      </div>
-      <div class="form-error" id="login-error"></div>
-      <button type="submit" class="auth-submit" id="login-submit">Se connecter</button>
-    </form>
-  </div>
+<main>
+  <section id="boosted-section" class="wrap">
+    <div class="grid" id="boosted-grid"></div>
+  </section>
 
-  <!-- Dashboard Admin -->
-  <div id="admin-dashboard">
-    <div class="admin-banner">
-      <span>👑 <b>Mode Admin</b> — Vous gérez toutes les annonces, boosts et utilisateurs.</span>
-      <a href="javascript:void(0)" class="logout-link" onclick="logout()">Se déconnecter</a>
-    </div>
-
-    <!-- Statistiques principales -->
-    <div class="admin-grid" id="stats-grid">
-      <div class="admin-card">
-        <h3>👥 Utilisateurs</h3>
-        <div class="stat-number" id="stat-users">0</div>
-        <span class="stat-label">Total des comptes</span>
-        <span class="stat-change up" id="stat-users-change">+0 cette semaine</span>
-      </div>
-      <div class="admin-card">
-        <h3>📋 En attente</h3>
-        <div class="stat-number" id="stat-pending">0</div>
-        <span class="stat-label">Annonces à vérifier</span>
-      </div>
-      <div class="admin-card">
-        <h3>✅ Validées</h3>
-        <div class="stat-number" id="stat-validated">0</div>
-        <span class="stat-label">Annonces publiées</span>
-      </div>
-      <div class="admin-card">
-        <h3>❌ Refusées</h3>
-        <div class="stat-number" id="stat-refused">0</div>
-        <span class="stat-label">Annonces rejetées</span>
-      </div>
-      <div class="admin-card">
-        <h3>⭐ Boosts actifs</h3>
-        <div class="stat-number" id="stat-boosts">0</div>
-        <span class="stat-label">Annonces en vedette</span>
-      </div>
-      <div class="admin-card">
-        <h3>📊 Total annonces</h3>
-        <div class="stat-number" id="stat-total">0</div>
-        <span class="stat-label">Toutes les annonces</span>
+  <section id="listings" class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow" data-i18n="listings_eyebrow">Annonces</span>
+        <h2 data-i18n="listings_title">Biens en vedette</h2>
+        <p data-i18n="listings_sub">Filtrez par transaction, puis explorez par département, arrondissement, commune ou quartier.</p>
       </div>
     </div>
 
-    <!-- Statistiques des visites -->
-    <div class="stats-visits" id="visits-stats">
-      <div class="visit-card">
-        <div class="num" id="visits-today">0</div>
-        <div class="label">📍 Visites aujourd'hui</div>
-        <div class="sub-label">👤 <span id="visitors-today">0</span> visiteurs uniques</div>
-      </div>
-      <div class="visit-card">
-        <div class="num" id="visits-week">0</div>
-        <div class="label">📅 Cette semaine</div>
-      </div>
-      <div class="visit-card">
-        <div class="num" id="visits-month">0</div>
-        <div class="label">📆 Ce mois</div>
-      </div>
+    <div class="chip-row" id="chip-row"></div>
+    <div class="loc-nav">
+      <div class="loc-breadcrumb" id="loc-breadcrumb"></div>
+      <div class="chip-row chip-row-sub" id="loc-chip-row"></div>
     </div>
+    <div class="grid" id="listings-grid"></div>
+  </section>
 
-    <!-- Statistiques mensuelles et annuelles -->
-    <div class="admin-grid" style="margin-bottom:32px;">
-      <div class="admin-card">
-        <h3>📅 Ce mois</h3>
-        <div class="stat-number" id="month-visits">0</div>
-        <span class="stat-label">Visites</span>
+  <section id="comment" class="how">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow" data-i18n="how_eyebrow">Le parcours</span>
+          <h2 style="color:#fff;" data-i18n="nav_how">Comment ça marche</h2>
+          <p data-i18n="how_sub">Trois étapes, aucun intermédiaire obligatoire.</p>
+        </div>
       </div>
-      <div class="admin-card">
-        <h3>👤 Ce mois (unique)</h3>
-        <div class="stat-number" id="month-unique">0</div>
-        <span class="stat-label">Visiteurs uniques</span>
-      </div>
-      <div class="admin-card">
-        <h3>📆 Cette année</h3>
-        <div class="stat-number" id="year-visits">0</div>
-        <span class="stat-label">Visites</span>
-      </div>
-      <div class="admin-card">
-        <h3>👤 Cette année (unique)</h3>
-        <div class="stat-number" id="year-unique">0</div>
-        <span class="stat-label">Visiteurs uniques</span>
-      </div>
-    </div>
-
-    <!-- Tabs Navigation -->
-    <div class="tab-nav">
-      <button class="active" data-tab="tab-listings">📄 Annonces</button>
-      <button data-tab="tab-boosts">⭐ Boosts</button>
-      <button data-tab="tab-users">👥 Utilisateurs</button>
-    </div>
-
-    <!-- Tab: Annonces -->
-    <div class="tab-content active" id="tab-listings">
-      <div class="admin-card" style="margin-bottom:32px;">
-        <h3>📄 Toutes les annonces</h3>
-        <div class="admin-table-wrap">
-          <table class="admin-table" id="listings-table">
-            <thead>
-              <tr>
-                <th>Titre</th>
-                <th>Ville</th>
-                <th>Prix</th>
-                <th>Statut</th>
-                <th>Médias</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="listings-body">
-              <tr><td colspan="6" class="empty-state"><strong>Chargement…</strong></td></tr>
-            </tbody>
-          </table>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num" data-i18n="step1_num">01 — Cherchez</div>
+          <h3 data-i18n="step1_title">Filtrez selon vos besoins</h3>
+          <p data-i18n="step1_desc">Ville, budget, type de bien : trouvez en quelques clics les annonces qui correspondent à votre recherche, partout en Haïti.</p>
+        </div>
+        <div class="step">
+          <div class="step-num" data-i18n="step2_num">02 — Contactez</div>
+          <h3 data-i18n="step2_title">Parlez directement au propriétaire</h3>
+          <p data-i18n="step2_desc">Chaque annonce vous met en relation directe avec le propriétaire ou l'agent, par WhatsApp ou téléphone.</p>
+        </div>
+        <div class="step">
+          <div class="step-num" data-i18n="step3_num">03 — Emménagez</div>
+          <h3 data-i18n="step3_title">Visitez, négociez, signez</h3>
+          <p data-i18n="step3_desc">Organisez votre visite et finalisez l'accord en toute transparence, sans commission cachée.</p>
         </div>
       </div>
     </div>
-
-    <!-- Tab: Boosts -->
-    <div class="tab-content" id="tab-boosts">
-      <div class="admin-card" style="margin-bottom:32px;">
-        <h3>⭐ Demandes de boost en attente</h3>
-        <div class="admin-table-wrap">
-          <table class="admin-table" id="boosts-table">
-            <thead>
-              <tr>
-                <th>Annonce</th>
-                <th>Formule</th>
-                <th>Référence</th>
-                <th>Statut</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="boosts-body">
-              <tr><td colspan="5" class="empty-state"><strong>Aucune demande en attente</strong></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tab: Utilisateurs -->
-    <div class="tab-content" id="tab-users">
-      <div class="admin-card" style="margin-bottom:32px;">
-        <h3>👥 Tous les utilisateurs</h3>
-        <div class="admin-table-wrap">
-          <table class="admin-table" id="users-table">
-            <thead>
-              <tr>
-                <th>Nom</th>
-                <th>Username</th>
-                <th>Téléphone</th>
-                <th>WhatsApp</th>
-                <th>Annonces</th>
-                <th>Inscrit le</th>
-              </tr>
-            </thead>
-            <tbody id="users-body">
-              <tr><td colspan="6" class="empty-state"><strong>Chargement…</strong></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
+  </section>
 </main>
 
 <footer>
-  © 2026 KayPam. Espace réservé à l'équipe de vérification.
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo">
+          <svg class="logo-mark" viewBox="0 0 40 40" aria-hidden="true">
+            <rect width="40" height="40" rx="9" fill="#E25C3B"/>
+            <path d="M20 8 L31 17 V32 H9 V17 Z" fill="#16243B"/>
+            <rect x="17" y="22" width="6" height="10" fill="#F2B134"/>
+          </svg>
+          <span class="logo-text">KayPam</span>
+        </div>
+        <p style="max-width:32ch;font-size:14px;" data-i18n="footer_desc">La plateforme qui connecte directement les Haïtiens aux maisons, appartements et terrains disponibles, partout au pays.</p>
+      </div>
+      <div>
+        <h4 data-i18n="footer_coverage">Couverture</h4>
+        <ul>
+          <li>Port-au-Prince</li>
+          <li>Pétion-Ville · Delmas · Tabarre</li>
+          <li>Cap-Haïtien · Jacmel</li>
+          <li>Les Cayes · Gonaïves · Léogâne</li>
+        </ul>
+      </div>
+      <div>
+        <h4 data-i18n="footer_contact">Contact</h4>
+        <ul>
+          <li>contact@kaypam.ht</li>
+          <li>WhatsApp : +509 4792 1790</li>
+          <li><a href="publier.html" data-i18n="footer_publish_link">Publier une annonce</a></li>
+          <li><a href="mes-annonces.html" data-i18n="nav_boost">Booster mes annonces</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span data-i18n="footer_copyright">© 2026 KayPam. Tous droits réservés.</span>
+      <span data-i18n="footer_tagline">Conçu pour faciliter la recherche immobilière en Haïti.</span>
+    </div>
+  </div>
 </footer>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-art" id="modal-art">
+      <button class="modal-close" id="modal-close" aria-label="Fermer">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-city" id="modal-city"></div>
+      <h3 id="modal-title"></h3>
+      <div class="modal-price" id="modal-price"></div>
+      <div class="modal-specs" id="modal-specs"></div>
+      <p class="modal-desc" id="modal-desc"></p>
+      <div class="modal-actions">
+        <a href="#" class="btn-whatsapp" id="modal-whatsapp" target="_blank" rel="noopener" data-i18n="modal_whatsapp">Contacter via WhatsApp</a>
+        <button class="btn-close-secondary" onclick="closeModal()" data-i18n="modal_close">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bannière d'installation PWA (sèlman) -->
+<div id="install-banner" onclick="triggerInstall()">
+  <div class="banner-text">
+    <span class="banner-icon">📱</span>
+    <span id="install-banner-text">Instale KayPam sou telefòn ou!</span>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* ============================================================
-   ADMIN.HTML - JAVASCRIPT COMPLET (KOREK)
-   ============================================================ */
-
-/* ===== 1. CONFIGURATION SUPABASE ===== */
+/* ===== Configuration Supabase ===== */
 const SUPABASE_URL = "https://hmbvlwwmwmkvfjpkfgye.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_nnesDNdLlyiS1-ekCZqXyQ_aYF1cOXY";
 const supabaseClient = (SUPABASE_URL.startsWith('http') && SUPABASE_ANON_KEY.length > 10)
   ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   : null;
+/* =========================================================================== */
 
-let isAdmin = false;
-
-/* ===== 2. FONCTIONS UTILITAIRES ===== */
-
-function escapeHtml(s){
-  return String(s || '').replace(/[&<>"']/g, c => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;'
-  })[c]);
-}
-
-function formatPrice(price, currency){
-  return currency === 'HTG' 
-    ? `${Number(price).toLocaleString('en-US')} HTG` 
-    : `$${Number(price).toLocaleString('en-US')}`;
-}
-
-function getStatusBadge(status, available){
-  let badge = '';
-  
-  if(status === 'en_attente_verification'){
-    badge = `<span class="status-badge pending">En attente</span>`;
-  } else if(status === 'valide'){
-    badge = `<span class="status-badge validated">✅ Validée</span>`;
-  } else if(status === 'refuse'){
-    badge = `<span class="status-badge refused">❌ Refusée</span>`;
+/* ===== TRADUCTIONS PWA ===== */
+const pwaTranslations = {
+  fr: {
+    install_banner: "Installez KayPam sur votre téléphone !",
+    install_manual: "Pour installer KayPam :\n\n• Android : Menu Chrome → \"Ajouter à l'écran d'accueil\"\n• iPhone : Bouton Partager → \"Sur l'écran d'accueil\""
+  },
+  en: {
+    install_banner: "Install KayPam on your phone!",
+    install_manual: "To install KayPam:\n\n• Android: Chrome menu → \"Add to Home screen\"\n• iPhone: Share button → \"Add to Home Screen\""
+  },
+  ht: {
+    install_banner: "Enstale KayPam sou telefòn ou!",
+    install_manual: "Pou enstale KayPam:\n\n• Android : Menu Chrome → \"Ajouter à l'écran d'accueil\"\n• iPhone : Bouton Partager → \"Sur l'écran d'accueil\""
   }
-  
-  // Si anons lan retire (available = false)
-  if(available === false){
-    badge += ` <span class="status-badge supprime">🗑️ Siprime</span>`;
+};
+
+function getPwaText(key){
+  const lang = localStorage.getItem('kaypam_lang') || 'fr';
+  return (pwaTranslations[lang] && pwaTranslations[lang][key]) 
+    || (pwaTranslations.fr && pwaTranslations.fr[key]) 
+    || key;
+}
+
+/* ===== Système multilingue ===== */
+const translations = {
+  fr: {
+    nav_buy:"Acheter", nav_rent:"Louer", nav_boost:"Booster mes annonces", nav_how:"Comment ça marche",
+    nav_login:"Se connecter", nav_publish:"Publier",
+    hero_eyebrow:"Annonces immobilières · Haïti",
+    hero_title:"Chaque quartier<br>a sa maison<br><em>Trouvez la vôtre</em>",
+    hero_sub:"KayPam rassemble des centaines de maisons, appartements et terrains à vendre ou à louer partout en Haïti — et vous met en contact direct avec le propriétaire ou l'agent, sans détour.",
+    stat_active:"Annonces actives", stat_cities:"Villes couvertes", stat_commission:"Commission cachée",
+    search_label:"Recherche rapide", search_city:"Ville", search_city_all:"Toutes les villes",
+    search_want:"Je veux", search_want_placeholder:"Acheter ou louer",
+    search_type:"Type de bien", search_type_all:"Tous les types",
+    type_house:"Maison", type_apartment:"Appartement", type_land:"Terrain", type_commercial:"Local commercial",
+    search_budget:"Budget max (USD)", search_btn:"Rechercher des biens →",
+    listings_eyebrow:"Annonces", listings_title:"Biens en vedette",
+    listings_sub:"Filtrez par transaction, puis explorez par département, arrondissement, commune ou quartier.",
+    chip_all:"Toutes", chip_sale:"À vendre", chip_rent:"À louer",
+    loc_all_zones:"Toutes les zones", loc_back:"← Retour", loc_empty_note:"Aucun quartier détaillé pour {commune} pour le moment — toutes les annonces de la commune sont affichées ci-dessous.",
+    badge_sale:"À vendre", badge_rent:"À louer", badge_vedette:"⭐ Vedette",
+    boost_active:"⭐ Boost actif jusqu'au {date}",
+    spec_beds:"ch.", spec_baths:"sdb", spec_beds_full:"Chambres", spec_baths_full:"Salles de bain", spec_area_full:"m²",
+    btn_view_details:"Voir les détails",
+    empty_none_title:"Aucune annonce publiée pour le moment", empty_none_sub:"Les premières annonces vérifiées apparaîtront ici très bientôt.",
+    empty_match_title:"Aucune annonce ne correspond", empty_match_sub:"Essayez d'élargir votre recherche ou de modifier vos filtres.",
+    modal_specs_fallback:"Détails supplémentaires à confirmer avec le propriétaire.",
+    modal_whatsapp:"Contacter via WhatsApp", modal_close:"Fermer",
+    modal_video_not_supported:"Votre navigateur ne supporte pas la lecture de vidéos.",
+    whatsapp_interest_msg:"Bonjour, je suis intéressé(e) par : {title} à {city}",
+    how_eyebrow:"Le parcours", how_sub:"Trois étapes, aucun intermédiaire obligatoire.",
+    step1_num:"01 — Cherchez", step1_title:"Filtrez selon vos besoins", step1_desc:"Ville, budget, type de bien : trouvez en quelques clics les annonces qui correspondent à votre recherche, partout en Haïti.",
+    step2_num:"02 — Contactez", step2_title:"Parlez directement au propriétaire", step2_desc:"Chaque annonce vous met en relation directe avec le propriétaire ou l'agent, par WhatsApp ou téléphone.",
+    step3_num:"03 — Emménagez", step3_title:"Visitez, négociez, signez", step3_desc:"Organisez votre visite et finalisez l'accord en toute transparence, sans commission cachée.",
+    footer_desc:"La plateforme qui connecte directement les Haïtiens aux maisons, appartements et terrains disponibles, partout au pays.",
+    footer_coverage:"Couverture", footer_contact:"Contact", footer_publish_link:"Publier une annonce",
+    footer_copyright:"© 2026 KayPam. Tous droits réservés.", footer_tagline:"Conçu pour faciliter la recherche immobilière en Haïti.",
+  },
+  en: {
+    nav_buy:"Buy", nav_rent:"Rent", nav_boost:"Boost my listings", nav_how:"How it works",
+    nav_login:"Log in", nav_publish:"Publish",
+    hero_eyebrow:"Real estate listings · Haiti",
+    hero_title:"Every neighborhood<br>has its home<br><em>Find yours</em>",
+    hero_sub:"KayPam brings together hundreds of houses, apartments, and land for sale or rent across Haiti — connecting you directly with the owner or agent, no middleman.",
+    stat_active:"Active listings", stat_cities:"Cities covered", stat_commission:"Hidden commission",
+    search_label:"Quick search", search_city:"City", search_city_all:"All cities",
+    search_want:"I want to", search_want_placeholder:"Buy or rent",
+    search_type:"Property type", search_type_all:"All types",
+    type_house:"House", type_apartment:"Apartment", type_land:"Land", type_commercial:"Commercial space",
+    search_budget:"Max budget (USD)", search_btn:"Search properties →",
+    listings_eyebrow:"Listings", listings_title:"Featured properties",
+    listings_sub:"Filter by transaction, then browse by department, district, commune, or neighborhood.",
+    chip_all:"All", chip_sale:"For sale", chip_rent:"For rent",
+    loc_all_zones:"All zones", loc_back:"← Back", loc_empty_note:"No detailed neighborhoods for {commune} yet — all listings in this commune are shown below.",
+    badge_sale:"For sale", badge_rent:"For rent", badge_vedette:"⭐ Featured",
+    boost_active:"⭐ Active boost until {date}",
+    spec_beds:"bed", spec_baths:"bath", spec_beds_full:"Bedrooms", spec_baths_full:"Bathrooms", spec_area_full:"m²",
+    btn_view_details:"View details",
+    empty_none_title:"No listings published yet", empty_none_sub:"The first verified listings will appear here very soon.",
+    empty_match_title:"No listings match", empty_match_sub:"Try widening your search or adjusting your filters.",
+    modal_specs_fallback:"Additional details to confirm with the owner.",
+    modal_whatsapp:"Contact via WhatsApp", modal_close:"Close",
+    modal_video_not_supported:"Your browser does not support video playback.",
+    whatsapp_interest_msg:"Hello, I'm interested in: {title} in {city}",
+    how_eyebrow:"The process", how_sub:"Three steps, no mandatory middleman.",
+    step1_num:"01 — Search", step1_title:"Filter by your needs", step1_desc:"City, budget, property type: find listings matching your search in a few clicks, anywhere in Haiti.",
+    step2_num:"02 — Contact", step2_title:"Talk directly to the owner", step2_desc:"Every listing connects you directly with the owner or agent, via WhatsApp or phone.",
+    step3_num:"03 — Move in", step3_title:"Visit, negotiate, sign", step3_desc:"Arrange your visit and finalize the deal with full transparency, no hidden commission.",
+    footer_desc:"The platform that directly connects Haitians to available houses, apartments, and land, all across the country.",
+    footer_coverage:"Coverage", footer_contact:"Contact", footer_publish_link:"Publish a listing",
+    footer_copyright:"© 2026 KayPam. All rights reserved.", footer_tagline:"Built to make real estate search easier in Haiti.",
+  },
+  ht: {
+    nav_buy:"Achte", nav_rent:"Lwe", nav_boost:"Booste anons mwen yo", nav_how:"Kijan sa mache",
+    nav_login:"Konekte", nav_publish:"Pibliye",
+    hero_eyebrow:"Anons imobilye · Ayiti",
+    hero_title:"Chak katye<br>gen kay pal<br><em>Jwenn paw la</em>",
+    hero_sub:"KayPam ranmase dè santèn kay, apatman ak teren ki pou vann oswa pou lwe toupatou an Ayiti — epi li mete w an kontak dirèk ak pwopriyetè a oswa ajan an, san detou.",
+    stat_active:"Anons aktif", stat_cities:"Vil kouvri", stat_commission:"Komisyon kache",
+    search_label:"Rechèch rapid", search_city:"Vil", search_city_all:"Tout vil yo",
+    search_want:"Mwen vle", search_want_placeholder:"Achte oswa lwe",
+    search_type:"Kalite byen", search_type_all:"Tout kalite yo",
+    type_house:"Kay", type_apartment:"Apatman", type_land:"Teren", type_commercial:"Lokal komèsyal",
+    search_budget:"Bidjè maksimòm (USD)", search_btn:"Chèche byen →",
+    listings_eyebrow:"Anons", listings_title:"Byen an vedèt",
+    listings_sub:"Filtre pa tranzaksyon, epi eksplore pa depatman, awondisman, komin oswa katye.",
+    chip_all:"Tout", chip_sale:"Pou vann", chip_rent:"Pou lwe",
+    loc_all_zones:"Tout zòn yo", loc_back:"← Retounen", loc_empty_note:"Pa gen katye detaye pou {commune} kounye a — tout anons komin nan afiche anba a.",
+    badge_sale:"Pou vann", badge_rent:"Pou lwe", badge_vedette:"⭐ Vedèt",
+    boost_active:"⭐ Boost aktif jiskaske {date}",
+    spec_beds:"ch.", spec_baths:"sdb", spec_beds_full:"Chanm", spec_baths_full:"Twalèt", spec_area_full:"m²",
+    btn_view_details:"Wè detay yo",
+    empty_none_title:"Pa gen anons pibliye kounye a", empty_none_sub:"Premye anons verifye yo ap parèt isit la byento.",
+    empty_match_title:"Pa gen anons ki matche", empty_match_sub:"Eseye elaji rechèch ou oswa chanje filtè yo.",
+    modal_specs_fallback:"Lòt detay pou konfime dirèkteman ak pwopriyetè a.",
+    modal_whatsapp:"Kontakte sou WhatsApp", modal_close:"Fèmen",
+    modal_video_not_supported:"Navigatè w pa sipòte lekti videyo.",
+    whatsapp_interest_msg:"Bonjou, mwen enterese nan : {title} nan {city}",
+    how_eyebrow:"Pwosesis la", how_sub:"Twa etap, pa gen entèmedyè obligatwa.",
+    step1_num:"01 — Chèche", step1_title:"Filtre selon bezwen ou", step1_desc:"Vil, bidjè, kalite byen : jwenn nan kèk klik anons ki matche ak rechèch ou, toupatou an Ayiti.",
+    step2_num:"02 — Kontakte", step2_title:"Pale dirèkteman ak pwopriyetè a", step2_desc:"Chak anons mete w an relasyon dirèk ak pwopriyetè a oswa ajan an, pa WhatsApp oswa telefòn.",
+    step3_num:"03 — Enstale w", step3_title:"Vizite, negosye, siyen", step3_desc:"Òganize vizit ou epi finalize akò a an tout transparans, san komisyon kache.",
+    footer_desc:"Platfòm ki konekte Ayisyen yo dirèkteman ak kay, apatman ak teren ki disponib, toupatou nan peyi a.",
+    footer_coverage:"Kouvèti", footer_contact:"Kontak", footer_publish_link:"Pibliye yon anons",
+    footer_copyright:"© 2026 KayPam. Tout dwa rezève.", footer_tagline:"Fèt pou fasilite rechèch imobilye an Ayiti.",
   }
-  
-  return badge;
+};
+
+let currentLang = localStorage.getItem('kaypam_lang') || 'fr';
+
+function t(key){
+  return (translations[currentLang] && translations[currentLang][key]) || translations.fr[key] || key;
 }
 
-function getBoostStatusBadge(status){
-  const map = {
-    'en_attente_paiement': 'waiting',
-    'actif': 'active',
-    'expire': 'expired',
-    'refuse': 'refused'
-  };
-  const labels = {
-    'en_attente_paiement': 'En attente',
-    'actif': 'Actif',
-    'expire': 'Expiré',
-    'refuse': 'Refusé'
-  };
-  return `<span class="status-badge ${map[status] || ''}">${labels[status] || status}</span>`;
-}
-
-/* ===== 3. GESTION DES TABS ===== */
-document.querySelectorAll('.tab-nav button').forEach(btn => {
-  btn.addEventListener('click', function(){
-    document.querySelectorAll('.tab-nav button').forEach(b => b.classList.remove('active'));
-    this.classList.add('active');
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    document.getElementById(this.dataset.tab).classList.add('active');
+function applyStaticTranslations(){
+  document.documentElement.lang = currentLang;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.getAttribute('data-i18n'));
   });
-});
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    el.innerHTML = t(el.getAttribute('data-i18n-html'));
+  });
+}
 
-/* ===== 4. CONNEXION ADMIN ===== */
-document.getElementById('admin-login-form').addEventListener('submit', async function(e){
-  e.preventDefault();
-  const email = document.getElementById('admin-email').value.trim();
-  const password = document.getElementById('admin-password').value;
-  const errorEl = document.getElementById('login-error');
-  const btn = document.getElementById('login-submit');
+const LANG_LABELS = {
+  fr: { code:"FR", name:"Français" },
+  en: { code:"EN", name:"English" },
+  ht: { code:"HT", name:"Kreyòl" }
+};
 
-  errorEl.classList.remove('show');
-  btn.disabled = true;
-  btn.textContent = 'Connexion...';
+function renderLangMenu(){
+  document.getElementById('lang-current-label').textContent = LANG_LABELS[currentLang].code;
+  const menu = document.getElementById('lang-dropdown-menu');
+  menu.innerHTML = Object.keys(LANG_LABELS).map(code => `
+    <button class="lang-option ${code === currentLang ? 'active' : ''}" onclick="setLang('${code}')">
+      <span class="lang-code">${LANG_LABELS[code].code}</span><span>${LANG_LABELS[code].name}</span>
+    </button>`).join('');
+}
 
-  try{
-    if(!supabaseClient) throw new Error("Configuration Supabase manquante");
-    
-    const { data, error } = await supabaseClient.auth.signInWithPassword({
-      email: email,
-      password: password
-    });
-    if(error) throw error;
-    
-    const { data: adminData, error: adminError } = await supabaseClient
-      .from('admins')
-      .select('user_id')
-      .eq('user_id', data.user.id)
-      .maybeSingle();
-      
-    if(adminError || !adminData){
-      await supabaseClient.auth.signOut();
-      throw new Error("Vous n'êtes pas autorisé à accéder à cette zone.");
-    }
-    
-    isAdmin = true;
-    document.getElementById('admin-login-box').style.display = 'none';
-    document.getElementById('admin-dashboard').classList.add('show');
-    loadDashboard();
-    
-  }catch(err){
-    errorEl.textContent = err.message || "Email ou mot de passe incorrect.";
-    errorEl.classList.add('show');
-  }finally{
-    btn.disabled = false;
-    btn.textContent = 'Se connecter';
+function toggleLangMenu(){
+  document.getElementById('lang-dropdown').classList.toggle('open');
+}
+
+document.addEventListener('click', (e) => {
+  const dropdown = document.getElementById('lang-dropdown');
+  if(dropdown && !dropdown.contains(e.target)){
+    dropdown.classList.remove('open');
   }
 });
 
-/* ===== 5. DECONNEXION ===== */
-async function logout(){
-  if(supabaseClient) await supabaseClient.auth.signOut();
-  location.reload();
+function setLang(lang){
+  currentLang = lang;
+  localStorage.setItem('kaypam_lang', lang);
+  applyStaticTranslations();
+  renderLangMenu();
+  document.getElementById('lang-dropdown').classList.remove('open');
+  // Mete ajou mesaj bannière a si li vizib
+  const banner = document.getElementById('install-banner');
+  if(banner && banner.classList.contains('show')){
+    document.getElementById('install-banner-text').textContent = getPwaText('install_banner');
+  }
+  renderChips();
+  renderLocationNav();
+  renderListings();
+  renderBoosted();
 }
 
-/* ===== 6. CHARGEMENT DU DASHBOARD ===== */
-async function loadDashboard(){
-  if(!supabaseClient || !isAdmin) return;
+/* ===== DONNÉES GÉOGRAPHIQUES ===== */
+const geoData = {
+  "Artibonite": {
+    "Dessalines": ["Dessalines","Desdunes","Grande-Saline","Petite-Rivière-de-l'Artibonite"],
+    "Gonaïves": ["Les Gonaïves","Ennery","L'Estère"],
+    "Gros-Morne": ["Gros-Morne","Anse-Rouge","Terre-Neuve"],
+    "Marmelade": ["Marmelade","Saint-Michel-de-l'Attalaye"],
+    "Saint-Marc": ["Saint-Marc","La Chapelle","Liancourt","Montrouis","Verrettes"]
+  },
+  "Centre": {
+    "Cerca-la-Source": ["Cerca-la-Source","Thomassique"],
+    "Hinche": ["Hinche","Cerca-Carvajal","Maïssade","Thomonde"],
+    "Lascahobas": ["Lascahobas","Baptiste","Belladère","Savanette"],
+    "Mirebalais": ["Mirebalais","Boucan-Carré","Saut-d'Eau"]
+  },
+  "Grand'Anse": {
+    "Anse-d'Hainault": ["Anse-d'Hainault","Dame-Marie","Les Irois"],
+    "Corail": ["Corail","Beaumont","Pestel","Roseaux"],
+    "Jérémie": ["Jérémie","Abricots","Bonbon","Chambellan","Marfranc","Moron"]
+  },
+  "Nippes": {
+    "Anse-à-Veau": ["Anse-à-Veau","Arnaud","L'Asile","Petit-Trou-de-Nippes","Plaisance-du-Sud"],
+    "Baradères": ["Baradères","Grand-Boucan"],
+    "Miragoâne": ["Miragoâne","Fonds-des-Nègres","Paillant","Petite-Rivière-de-Nippes"]
+  },
+  "Nord": {
+    "Acul-du-Nord": ["Acul-du-Nord","Milot","Plaine-du-Nord"],
+    "Borgne": ["Borgne","Port-Margot"],
+    "Cap-Haïtien": ["Cap-Haïtien","Limonade","Quartier-Morin"],
+    "Grande-Rivière-du-Nord": ["Grande-Rivière-du-Nord","Bahon"],
+    "Limbé": ["Limbé","Bas-Limbé"],
+    "Plaisance": ["Plaisance","Pilate"],
+    "Saint-Raphaël": ["Saint-Raphaël","Dondon","La Victoire","Pignon","Ranquitte"]
+  },
+  "Nord-Est": {
+    "Fort-Liberté": ["Fort-Liberté","Ferrier","Perches"],
+    "Ouanaminthe": ["Ouanaminthe","Capotille","Mont-Organisé"],
+    "Trou-du-Nord": ["Trou-du-Nord","Caracol","Grand-Bassin","Sainte-Suzanne","Terrier-Rouge"],
+    "Vallières": ["Vallières","Carice","Mombin-Crochu"]
+  },
+  "Nord-Ouest": {
+    "Môle-Saint-Nicolas": ["Môle-Saint-Nicolas","Baie-de-Henne","Bombardopolis","Jean-Rabel"],
+    "Port-de-Paix": ["Port-de-Paix","Bassin-Bleu","Chansolme","La Tortue","La Pointe-des-Palmistes"],
+    "Saint-Louis-du-Nord": ["Saint-Louis-du-Nord","Anse-à-Foleur"]
+  },
+  "Ouest": {
+    "Arcahaie": ["Arcahaie","Cabaret"],
+    "Croix-des-Bouquets": ["Croix-des-Bouquets","Cornillon","Fonds-Verrettes","Ganthier","Thomazeau"],
+    "La Gonâve": ["Anse-à-Galets","Pointe-à-Raquette"],
+    "Léogâne": ["Léogâne","Grand-Goâve","Petit-Goâve"],
+    "Port-au-Prince": ["Port-au-Prince","Carrefour","Cité Soleil","Delmas","Gresscoff","Kenscoff","Pétion-Ville","Tabarre"]
+  },
+  "Sud": {
+    "Aquin": ["Aquin","Cavaillon","Fond-des-Blancs","Saint-Louis-du-Sud"],
+    "Cayes": ["Les Cayes","Camp-Perrin","Chantal","Île-à-Vache","Maniche","Torbeck"],
+    "Chardonnières": ["Chardonnières","Les Anglais","Tiburon"],
+    "Côteaux": ["Côteaux","Port-à-Piment","Roche-à-Bateaux"],
+    "Port-Salut": ["Port-Salut","Arniquet","Saint-Jean-du-Sud"]
+  },
+  "Sud-Est": {
+    "Bainet": ["Bainet","Côtes-de-Fer"],
+    "Belle-Anse": ["Belle-Anse","Anse-à-Pitres","Grand-Gosier","Thiotte"],
+    "Jacmel": ["Jacmel","Cayes-Jacmel","La Vallée-de-Jacmel","Marigot"]
+  }
+};
+
+/* ===== QUARTIERS (ZONES) ===== */
+const quartiersData = {
+  "Pétion-Ville": ["Jalousie","Pétion-Ville","Laboule","Thomassin","Meyotte","Belvil","Vivy Michel","Diègue","Duplan","Girardo","Doco","Cargo","Fermathe","Puits-Blain","Frères","Peggyvil","Morne Hercule","Nerrette","Morne Calvaire","Juvénat","Berthé","Bois Monquette","Pelerin 1","Pelerin 2","Pelerin 3","Pelerin 4","Pelerin 5"],
+  "Delmas": ["Delmas","Jacket","Siloé","Gérald Bataille","Mais Gâté","Clercine","Saint-Martin","Aéroport","Catalpa"],
+  "Port-au-Prince": ["Pacot","Turgeau","Christ-Roi","Bois-Verna","Lalue","Canapé-Vert","Debussy","Martissant","Carrefour-Feuilles","Fontamara","Bolosse","Fort-National","Solino","Bel-Air","La Saline"],
+  "Carrefour": ["Thor","Mon repos","Carrefour","Diquini","Waney","Cote Plage","Mahotière","Bizoton","Arcachon","Brochette","Mariani","Fontamara","Rivière Froide","Lamentin"],
+  "Léogâne": ["Grand-Rue","Dampus","Léogâne","Dufort","Trouin","Ca-Ira","Petite-Rivière","Gressier","Cormier","Chatuley","Orangers","Dessources"],
+  "Cap-Haïtien": ["Carénage","Bande du Nord","Vertières","Lory","Madeline","Petite-Anse","Haut-du-Cap","Fort Saint-Michel","Champion"],
+  "Les Cayes": ["La Savane","Gelée","Bourdet","Gabarre","Liautaud","Charpentier","Vernat","Derrière-Fort","Fonfrède"],
+  "Jacmel": ["Bel-Air","Bréman","Couchant","L'Acul","Raymond-les-Bains","Meyer","Maniègue","Mapou"],
+  "Saint-Marc": ["Portail Guêpe","Pivert","Nissage Saget","Nan Poés","Freycineau","Deperos","Bois-Marchand","Gobinet","Robinet"],
+  "Gonaïves": ["Raboteau","Descahos","Jubilée","K-Soleil","Bigot","Bienac","Assifa","Pont-Gaudin","Mangnan","Passe-Reine"],
+  "Hinche": ["Marmont","Cherival","Juanaria","Mapou","La Hoye","Siloe","Pandiassou","Los Palis"],
+  "Lascahobas": ["Petit-Fond","Juampas","Do-Rival","Lalomas","Savanette","Bois-Bleu"],
+  "Belladère": ["Renthe-Mathe","Croix-Fer","Roy-Sec","Los Pozo","Rospandre"],
+  "Fort-Liberté": ["Bayaha","Derac","Drière","Marion","Dumas"],
+  "Ouanaminthe": ["Dajabon","Gens-de-Nantes","Haut-Maribahoux","Acul-des-Pins","Carisse","Gayot","Capotille"],
+  "Jérémie": ["Bordes","Sainte-Hélène","Caracolie","Rochasse","Nan Lundi","Makandal","La Pointe","Desormeaux"],
+  "Miragoâne": ["Port-Sainte-Hélène","Chalon","Saint-Michel-du-Sud","Berquin","Chardonnères","Belle-Rivière","Carrefour Moussignac"],
+  "Port-de-Paix": ["La Corne","Haut-de-Saint-Louis","Carenage","Nan Paul","Fond-de-Poussière","Baudin","Trois-Rivières","Chansolme"]
+};
+
+const palette = [
+  {roof:"#E25C3B", facade:"#F2B134"},
+  {roof:"#1E8F6F", facade:"#F2F5F1"},
+  {roof:"#16243B", facade:"#E25C3B"},
+  {roof:"#F2B134", facade:"#1E8F6F"},
+  {roof:"#C2473A", facade:"#2F8F6E"},
+  {roof:"#2C3E63", facade:"#F2B134"}
+];
+
+function houseSVG(i, size){
+  const p = palette[i % palette.length];
+  return `<svg width="${size}" height="${size}" viewBox="0 0 100 100" aria-hidden="true">
+    <rect x="20" y="45" width="60" height="42" fill="${p.facade}"/>
+    <path d="M14 48 L50 16 L86 48 Z" fill="${p.roof}"/>
+    <rect x="30" y="58" width="14" height="14" fill="#16243B" opacity="0.85"/>
+    <rect x="56" y="58" width="14" height="14" fill="#16243B" opacity="0.85"/>
+    <rect x="44" y="72" width="12" height="15" fill="#16243B" opacity="0.85"/>
+    <rect x="46" y="22" width="6" height="10" fill="${p.facade}"/>
+  </svg>`;
+}
+
+/* ===== STATE OBJEK KOREK ===== */
+let state = { 
+  transaction: "", 
+  departement: "", 
+  city: "", 
+  commune: "", 
+  quartier: "", 
+  type: "", 
+  budget: ""                   
+};
+
+let locState = { departement:null, arrondissement:null, commune:null, quartier:null };
+let listings = [];
+let boostedPool = [];
+let boostIndex = 0;
+const BOOST_BATCH_SIZE = 6;
+const BOOST_ROTATION_MS = 8000;
+let boostTimer = null;
+let modalMediaIndex = 0;
+
+function fmtPrice(l){
+  if(l.isReal){
+    let base = l.currency === 'HTG' ? `${Number(l.price).toLocaleString('en-US')} HTG` : `$${Number(l.price).toLocaleString('en-US')}`;
+    if(l.period === 'mois') base += '/mois';
+    else if(l.period === 'an') base += '/an';
+    return base;
+  }
+  return l.currency === "$" ? `$${l.price.toLocaleString('en-US')}` : `$${l.price.toLocaleString('en-US')}${l.currency.replace('$','')}`;
+}
+
+function locationLabel(l){
+  let parts = [];
+  if (l.zone) parts.push(l.zone);
+  if (l.commune && l.commune !== l.city) parts.push(l.commune);
+  if (l.city) parts.push(l.city);
+  return parts.join(', ') || l.city || 'Haïti';
+}
+
+function mapRealListing(raw){
+  const media = raw.listing_media || [];
+  const photos = media.filter(m => m.media_type === 'photo').map(m => m.url);
+  const videos = media.filter(m => m.media_type === 'video');
   
+  const boosts = raw.boosts || [];
+  const now = new Date();
+  
+  const activeBoost = boosts.find(b => 
+    b.status === 'actif' && new Date(b.ends_at) > now
+  );
+  
+  const expiredBoost = boosts.find(b => 
+    (b.status === 'actif' && new Date(b.ends_at) <= now) || b.status === 'expire'
+  );
+  
+  return {
+    id: raw.id,
+    title: raw.title || `${raw.type} à ${raw.transaction === 'Vente' ? 'vendre' : 'louer'}`,
+    departement: raw.departement || '',
+    city: raw.city || 'Haïti',
+    commune: raw.commune || '',
+    zone: raw.zone || '',
+    neighborhood: [raw.zone, raw.commune, raw.city].filter(Boolean).join(', ') || raw.city || 'Haïti',
+    type: raw.type,
+    transaction: raw.transaction,
+    price: raw.price,
+    currency: raw.currency,
+    period: raw.period || '',
+    beds: null,
+    baths: null,
+    area: null,
+    desc: raw.description || '',
+    phone: raw.owners ? (raw.owners.whatsapp || raw.owners.phone) : '',
+    photoUrl: photos[0] || null,
+    media: media,
+    photos: photos,
+    videos: videos,
+    isReal: true,
+    hasActiveBoost: !!activeBoost,
+    hasExpiredBoost: !!expiredBoost,
+    boostEndsAt: activeBoost ? activeBoost.ends_at : (expiredBoost ? expiredBoost.ends_at : null),
+    boostStatus: activeBoost ? 'actif' : (expiredBoost ? 'expire' : 'aucun')
+  };
+}
+
+async function loadRealListings(){
+  if(!supabaseClient) return [];
   try{
-    // 6a. Charger toutes les annonces AVEC les médias
-    const { data: listings, error: listingsError } = await supabaseClient
+    const { data, error } = await supabaseClient
       .from('listings')
       .select(`
-        id, title, city, price, currency, status, available, created_at, description,
-        owners(name, phone, whatsapp),
-        listing_media(media_type, url)
+        id,title,departement,city,commune,zone,transaction,type,price,currency,period,description,status,available,
+        owners(name,phone,whatsapp),
+        listing_media(media_type,url,thumbnail,mime_type),
+        boosts(status,ends_at)
       `)
-      .order('created_at', { ascending: false });
-      
-    if(listingsError) throw listingsError;
-    
-    // 6b. Charger les boosts
-    const { data: boosts, error: boostsError } = await supabaseClient
-      .from('boosts')
-      .select(`
-        id, listing_id, plan_name, price_usd, payment_reference, status, requested_at,
-        listings(title, owners(name))
-      `)
-      .order('requested_at', { ascending: false });
-      
-    if(boostsError) throw boostsError;
-    
-    // 6c. Charger tous les utilisateurs
-    const { data: users, error: usersError } = await supabaseClient
-      .from('owners')
-      .select('id, username, name, phone, whatsapp, created_at')
-      .order('created_at', { ascending: false });
-      
-    if(usersError) throw usersError;
-    
-    // 6d. Charger statistiques visites
-    await loadVisitsStats();
-    await loadMonthlyYearlyStats();
-    
-    // 6e. Calculer statistiques
-    const pending = (listings || []).filter(l => l.status === 'en_attente_verification').length;
-    const validated = (listings || []).filter(l => l.status === 'valide').length;
-    const refused = (listings || []).filter(l => l.status === 'refuse').length;
-    const activeBoosts = (boosts || []).filter(b => b.status === 'actif').length;
-    const total = (listings || []).length;
-    const totalUsers = (users || []).length;
-    
-    const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    const newUsers = (users || []).filter(u => new Date(u.created_at) > weekAgo).length;
-    
-    // 6f. Mettre à jour l'interface
-    document.getElementById('stat-users').textContent = totalUsers;
-    document.getElementById('stat-users-change').textContent = `+${newUsers} cette semaine`;
-    document.getElementById('stat-pending').textContent = pending;
-    document.getElementById('stat-validated').textContent = validated;
-    document.getElementById('stat-refused').textContent = refused;
-    document.getElementById('stat-boosts').textContent = activeBoosts;
-    document.getElementById('stat-total').textContent = total;
-    
-    // 6g. Remplir tableaux
-    renderListings(listings || []);
-    renderBoosts(boosts || []);
-    renderUsers(users || []);
-    
+      .eq('status', 'valide')
+      .eq('available', true)
+      .order('created_at', { ascending:false });
+    if(error) throw error;
+    console.log('📊 Anons chaje:', data?.length || 0);
+    return (data || []).map(mapRealListing);
   }catch(err){
-    console.error('Erreur chargement dashboard:', err);
-    document.getElementById('listings-body').innerHTML = 
-      `<tr><td colspan="6" class="empty-state"><strong>Erreur</strong>${escapeHtml(err.message)}</td></tr>`;
+    console.error('Erreur de chargement des annonces réelles', err);
+    return [];
   }
 }
 
-/* ===== 7. STATISTIQUES VISITES ===== */
+async function loadBoostedListings(){
+  if(!supabaseClient) return [];
+  try{
+    const { data, error } = await supabaseClient
+      .from('listings')
+      .select(`
+        id,title,departement,city,commune,zone,transaction,type,price,currency,period,description,status,available,
+        owners(name,phone,whatsapp),
+        listing_media(media_type,url,thumbnail,mime_type),
+        boosts(status,ends_at)
+      `)
+      .eq('status', 'valide')
+      .eq('available', true)
+      .order('created_at', { ascending:false });
+    if(error) throw error;
+    
+    const boosted = (data || []).filter(item => {
+      const boosts = item.boosts || [];
+      return boosts.some(b => 
+        b.status === 'actif' && new Date(b.ends_at) > new Date()
+      );
+    });
+    
+    return boosted.map(mapRealListing);
+  }catch(err){
+    console.error('Erreur de chargement des annonces boostées', err);
+    return [];
+  }
+}
+
+function populateCitySelect(){
+  const allCities = new Set();
+  Object.keys(geoData).forEach(dept => {
+    Object.keys(geoData[dept]).forEach(city => {
+      allCities.add(city);
+    });
+  });
+  const cities = [...allCities].sort();
+  const sel = document.getElementById('f-city');
+  sel.innerHTML = '<option value="" data-i18n="search_city_all">Toutes les villes</option>';
+  cities.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c;
+    opt.textContent = c;
+    sel.appendChild(opt);
+  });
+}
+
+function renderChips(){
+  const row = document.getElementById('chip-row');
+  let html = `<button class="chip ${state.transaction==='' ? 'active':''}" onclick="setTransactionFilter('')">${t('chip_all')}</button>`;
+  html += `<button class="chip ${state.transaction==='Vente' ? 'active':''}" onclick="setTransactionFilter('Vente')">${t('chip_sale')}</button>`;
+  html += `<button class="chip ${state.transaction==='Location' ? 'active':''}" onclick="setTransactionFilter('Location')">${t('chip_rent')}</button>`;
+  row.innerHTML = html;
+}
+
+function setTransactionFilter(txn){
+  state.transaction = (state.transaction === txn) ? "" : txn;
+  document.getElementById('f-transaction').value = state.transaction;
+  renderChips();
+  renderListings();
+  renderBoosted();
+}
+
+function renderLocationNav(){
+  const crumb = document.getElementById('loc-breadcrumb');
+  const row = document.getElementById('loc-chip-row');
+
+  let crumbHtml = `<button class="loc-crumb ${!locState.departement ? 'active':''}" onclick="resetLocation()">${t('loc_all_zones')}</button>`;
+  if(locState.departement){
+    crumbHtml += `<span class="loc-sep">›</span><button class="loc-crumb ${!locState.arrondissement ? 'active':''}" onclick="backToDepartement()">${locState.departement}</button>`;
+  }
+  if(locState.arrondissement){
+    crumbHtml += `<span class="loc-sep">›</span><button class="loc-crumb ${!locState.commune ? 'active':''}" onclick="backToArrondissement()">${locState.arrondissement}</button>`;
+  }
+  if(locState.commune){
+    crumbHtml += `<span class="loc-sep">›</span><button class="loc-crumb ${!locState.quartier ? 'active':''}" onclick="backToCommune()">${locState.commune}</button>`;
+  }
+  if(locState.quartier){
+    crumbHtml += `<span class="loc-sep">›</span><span class="loc-crumb active">${locState.quartier}</span>`;
+  }
+  crumb.innerHTML = crumbHtml;
+
+  let chips = '';
+  if(!locState.departement){
+    chips = Object.keys(geoData).map((d,i) => `<button class="chip" onclick="selectDepartement(${i})">${d}</button>`).join('');
+  } else if(!locState.arrondissement){
+    const arrs = Object.keys(geoData[locState.departement]);
+    chips = arrs.map((a,i) => `<button class="chip" onclick="selectArrondissement(${i})">${a}</button>`).join('');
+  } else if(!locState.commune){
+    const communes = geoData[locState.departement][locState.arrondissement];
+    chips = communes.map((c,i) => `<button class="chip" onclick="selectCommune(${i})">${c}</button>`).join('');
+  } else if(!locState.quartier){
+    const quartiers = quartiersData[locState.commune];
+    if(quartiers && quartiers.length){
+      chips = quartiers.map((q,i) => `<button class="chip" onclick="selectQuartier(${i})">${q}</button>`).join('');
+    } else {
+      chips = `<span class="loc-empty-note">${t('loc_empty_note').replace('{commune}', locState.commune)}</span>`;
+    }
+  }
+
+  const backBtn = locState.departement
+    ? `<button class="chip chip-back" onclick="goBackOneLevel()">${t('loc_back')}</button>`
+    : '';
+  row.innerHTML = backBtn + chips;
+}
+
+function goBackOneLevel(){
+  if(locState.quartier){ 
+    backToCommune(); 
+  } else if(locState.commune){ 
+    backToArrondissement(); 
+  } else if(locState.arrondissement){ 
+    backToDepartement(); 
+  } else if(locState.departement){ 
+    resetLocation(); 
+  }
+  renderListings();
+  renderBoosted();
+}
+
+function selectDepartement(i){
+  const dept = Object.keys(geoData)[i];
+  locState = { departement: dept, arrondissement:null, commune:null, quartier:null };
+  state.departement = dept;
+  state.city = "";
+  state.commune = "";
+  state.quartier = "";
+  renderLocationNav();
+  renderListings();
+  renderBoosted();
+}
+
+function selectArrondissement(i){
+  const arr = Object.keys(geoData[locState.departement])[i];
+  locState.arrondissement = arr;
+  locState.commune = null;
+  locState.quartier = null;
+  state.city = arr;
+  state.commune = "";
+  state.quartier = "";
+  renderLocationNav();
+  renderListings();
+  renderBoosted();
+}
+
+function selectCommune(i){
+  const commune = geoData[locState.departement][locState.arrondissement][i];
+  locState.commune = commune;
+  locState.quartier = null;
+  state.commune = commune;
+  state.quartier = "";
+  renderLocationNav();
+  renderListings();
+  renderBoosted();
+}
+
+function selectQuartier(i){
+  const quartier = quartiersData[locState.commune][i];
+  locState.quartier = quartier;
+  state.quartier = quartier;
+  renderLocationNav();
+  renderListings();
+  renderBoosted();
+}
+
+function backToDepartement(){
+  locState.arrondissement = null; 
+  locState.commune = null; 
+  locState.quartier = null;
+  state.city = ""; 
+  state.commune = ""; 
+  state.quartier = "";
+  renderLocationNav();
+  renderListings();
+  renderBoosted();
+}
+
+function backToArrondissement(){
+  locState.commune = null; 
+  locState.quartier = null;
+  state.commune = ""; 
+  state.quartier = "";
+  renderLocationNav();
+  renderListings();
+  renderBoosted();
+}
+
+function backToCommune(){
+  locState.quartier = null;
+  state.quartier = "";
+  renderLocationNav();
+  renderListings();
+  renderBoosted();
+}
+
+function resetLocation(){
+  locState = { departement:null, arrondissement:null, commune:null, quartier:null };
+  state.departement = "";
+  state.city = ""; 
+  state.commune = ""; 
+  state.quartier = "";
+  const citySelect = document.getElementById('f-city');
+  if(citySelect) citySelect.value = "";
+  renderLocationNav();
+  renderListings();
+  renderBoosted();
+}
+
+function applySearchPanel(){
+  state.transaction = document.getElementById('f-transaction').value;
+  state.city = document.getElementById('f-city').value;
+  state.commune = "";
+  state.quartier = "";
+  state.type = document.getElementById('f-type').value;
+  state.budget = document.getElementById('f-budget').value;
+  syncLocStateToCity(state.city);
+  renderChips();
+  renderLocationNav();
+  renderListings();
+  renderBoosted();
+  document.getElementById('listings').scrollIntoView({behavior:'smooth'});
+}
+
+function syncLocStateToCity(city){
+  if(!city){
+    locState = { departement:null, arrondissement:null, commune:null, quartier:null };
+    return;
+  }
+  for(const dept in geoData){
+    if(geoData[dept][city]){
+      locState = { departement:dept, arrondissement:city, commune:null, quartier:null };
+      return;
+    }
+  }
+  locState = { departement:null, arrondissement:null, commune:null, quartier:null };
+}
+
+function buildCardHtml(l, i, isBoosted){
+  const specs = [];
+  if(l.beds !== null && l.beds !== undefined) specs.push(`${l.beds} ${t('spec_beds')}`);
+  if(l.baths !== null && l.baths !== undefined) specs.push(`${l.baths} ${t('spec_baths')}`);
+  if(l.area !== null && l.area !== undefined) specs.push(`${l.area} m²`);
+  
+  const p = palette[i % palette.length];
+  const artInner = (l.isReal && l.photoUrl)
+    ? `<img src="${l.photoUrl}" alt="${l.title}" loading="lazy">`
+    : houseSVG(i, 88);
+  
+  let boostBadge = '';
+  if (l.hasActiveBoost) {
+    boostBadge = `<span class="card-badge badge-boost">${t('badge_vedette')}</span>`;
+  }
+  
+  let boostIndicator = '';
+  if (l.hasActiveBoost && l.boostEndsAt) {
+    const endDate = new Date(l.boostEndsAt).toLocaleDateString(
+      currentLang === 'en' ? 'en-US' : currentLang === 'ht' ? 'ht' : 'fr-FR'
+    );
+    boostIndicator = `<span class="boost-indicator active">${t('boost_active').replace('{date}', endDate)}</span>`;
+  }
+  
+  const transactionBadge = `<span class="card-badge ${l.transaction==='Vente'?'badge-vente':'badge-location'}">${l.transaction === 'Vente' ? t('badge_sale') : t('badge_rent')}</span>`;
+  
+  return `
+    <div class="card">
+      <div class="card-art" style="background:${p.facade}1A;">
+        ${transactionBadge}
+        ${boostBadge}
+        ${artInner}
+      </div>
+      <div class="card-body">
+        <div class="card-city">${locationLabel(l)}</div>
+        <div class="card-title">${l.title}</div>
+        <div class="card-specs">${specs.join(' · ')}</div>
+        <div class="card-price">${fmtPrice(l)}</div>
+        ${boostIndicator}
+        <button class="card-cta" onclick="openModal('${l.id}')">${t('btn_view_details')}</button>
+      </div>
+    </div>`;
+}
+
+function circularSlice(arr, start, size) {
+  if (arr.length === 0) return [];
+  const result = [];
+  for (let i = 0; i < size && i < arr.length; i++) {
+    result.push(arr[(start + i) % arr.length]);
+  }
+  return result;
+}
+
+function renderListings(){
+  const grid = document.getElementById('listings-grid');
+  let filtered = listings.filter(l => {
+    if(state.transaction && l.transaction !== state.transaction) return false;
+    if(state.departement && l.departement !== state.departement) return false;
+    if(state.city && l.city !== state.city) {
+      if(!state.commune || l.commune !== state.commune) {
+        return false;
+      }
+    }
+    if(state.commune && l.commune !== state.commune) return false;
+    if(state.quartier && l.zone !== state.quartier && l.neighborhood !== state.quartier) return false;
+    if(state.type && l.type !== state.type) return false;
+    if(state.budget && l.price > Number(state.budget)) return false;
+    return true;
+  });
+
+  document.getElementById('stat-count').textContent = filtered.length;
+
+  if(filtered.length === 0){
+    grid.innerHTML = listings.length === 0
+      ? `<div class="empty-state"><span class="icon-big">🏠</span><strong>${t('empty_none_title')}</strong>${t('empty_none_sub')}</div>`
+      : `<div class="empty-state"><span class="icon-big">🔍</span><strong>${t('empty_match_title')}</strong>${t('empty_match_sub')}</div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map((l) => buildCardHtml(l, listings.indexOf(l), false)).join('');
+}
+
+function renderBoosted(){
+  const section = document.getElementById('boosted-section');
+  const grid = document.getElementById('boosted-grid');
+  
+  let activeBoosted = boostedPool.filter(l => l.hasActiveBoost === true);
+  
+  let filteredBoosted = activeBoosted.filter(l => {
+    if(state.transaction && l.transaction !== state.transaction) return false;
+    if(state.departement && l.departement !== state.departement) return false;
+    if(state.city && l.city !== state.city) {
+      if(!state.commune || l.commune !== state.commune) {
+        return false;
+      }
+    }
+    if(state.commune && l.commune !== state.commune) return false;
+    if(state.quartier && l.zone !== state.quartier && l.neighborhood !== state.quartier) return false;
+    if(state.type && l.type !== state.type) return false;
+    if(state.budget && l.price > Number(state.budget)) return false;
+    return true;
+  });
+  
+  if(filteredBoosted.length === 0){
+    section.classList.remove('show');
+    return;
+  }
+  
+  section.classList.add('show');
+  const batch = circularSlice(filteredBoosted, boostIndex, BOOST_BATCH_SIZE);
+  grid.innerHTML = batch.map((l, k) => buildCardHtml(l, k, true)).join('');
+}
+
+function startBoostRotation(){
+  if(boostTimer) clearInterval(boostTimer);
+  
+  let activeBoosted = boostedPool.filter(l => l.hasActiveBoost === true);
+  let filtered = activeBoosted.filter(l => {
+    if(state.transaction && l.transaction !== state.transaction) return false;
+    if(state.city && l.city !== state.city) {
+      if(!state.commune || l.commune !== state.commune) {
+        return false;
+      }
+    }
+    if(state.commune && l.commune !== state.commune) return false;
+    if(state.quartier && l.zone !== state.quartier && l.neighborhood !== state.quartier) return false;
+    if(state.type && l.type !== state.type) return false;
+    if(state.budget && l.price > Number(state.budget)) return false;
+    return true;
+  });
+  
+  if(filtered.length <= BOOST_BATCH_SIZE) return;
+  
+  boostTimer = setInterval(() => {
+    let currentFiltered = activeBoosted.filter(l => {
+      if(state.transaction && l.transaction !== state.transaction) return false;
+      if(state.city && l.city !== state.city) {
+        if(!state.commune || l.commune !== state.commune) {
+          return false;
+        }
+      }
+      if(state.commune && l.commune !== state.commune) return false;
+      if(state.quartier && l.zone !== state.quartier && l.neighborhood !== state.quartier) return false;
+      if(state.type && l.type !== state.type) return false;
+      if(state.budget && l.price > Number(state.budget)) return false;
+      return true;
+    });
+    
+    if(currentFiltered.length > 0){
+      boostIndex = (boostIndex + BOOST_BATCH_SIZE) % currentFiltered.length;
+      renderBoosted();
+    }
+  }, BOOST_ROTATION_MS);
+}
+
+function openModal(id){
+  const l = listings.find(x => String(x.id) === String(id));
+  if(!l) return;
+  const i = listings.indexOf(l);
+  const p = palette[i % palette.length];
+  
+  const allMedia = l.media || [];
+  const photos = allMedia.filter(m => m.media_type === 'photo');
+  const videos = allMedia.filter(m => m.media_type === 'video');
+  
+  let mediaHtml = '';
+  
+  if(photos.length > 0 || videos.length > 0){
+    let items = [];
+    
+    photos.forEach((p, idx) => {
+      items.push(`<div class="modal-media-item ${idx === 0 ? 'active' : ''}">
+        <img src="${p.url}" alt="Photo ${idx + 1}" loading="lazy">
+      </div>`);
+    });
+    
+    videos.forEach((v, idx) => {
+      const isFirst = (photos.length === 0 && idx === 0);
+      items.push(`<div class="modal-media-item ${isFirst ? 'active' : ''}">
+        <video controls preload="metadata" poster="${v.thumbnail || ''}">
+          <source src="${v.url}" type="${v.mime_type || 'video/mp4'}">
+          ${t('modal_video_not_supported')}
+        </video>
+      </div>`);
+    });
+    
+    let controlsHtml = '';
+    if(items.length > 1){
+      controlsHtml = `
+        <div class="modal-media-controls">
+          <button class="modal-media-prev" onclick="changeModalMedia(-1)" aria-label="Précédent">‹</button>
+          <span class="modal-media-counter">1 / ${items.length}</span>
+          <button class="modal-media-next" onclick="changeModalMedia(1)" aria-label="Suivant">›</button>
+        </div>
+      `;
+    }
+    
+    mediaHtml = `
+      <div class="modal-media-wrapper" data-total="${items.length}">
+        <div class="modal-media-slider" id="modal-media-slider">
+          ${items.join('')}
+        </div>
+        ${controlsHtml}
+      </div>
+    `;
+  } else {
+    mediaHtml = houseSVG(i, 110);
+  }
+  
+  document.getElementById('modal-art').style.background = p.facade + '1A';
+  document.getElementById('modal-art').innerHTML = `
+    <button class="modal-close" onclick="closeModal()" aria-label="${t('modal_close')}">✕</button>
+    ${mediaHtml}
+  `;
+  
+  modalMediaIndex = 0;
+  updateModalCounter();
+  
+  document.getElementById('modal-city').textContent = locationLabel(l);
+  document.getElementById('modal-title').textContent = l.title;
+  document.getElementById('modal-price').textContent = fmtPrice(l);
+  
+  const specs = [];
+  if(l.beds !== null && l.beds !== undefined) specs.push(`<div><b>${l.beds}</b>${t('spec_beds_full')}</div>`);
+  if(l.baths !== null && l.baths !== undefined) specs.push(`<div><b>${l.baths}</b>${t('spec_baths_full')}</div>`);
+  if(l.area !== null && l.area !== undefined) specs.push(`<div><b>${l.area}</b>${t('spec_area_full')}</div>`);
+  document.getElementById('modal-specs').innerHTML = specs.join('') || `<div style="color:var(--ink-soft);">${t('modal_specs_fallback')}</div>`;
+  document.getElementById('modal-desc').textContent = l.desc;
+  
+  const phoneDigits = l.phone ? l.phone.replace(/\D/g,'') : '50900000000';
+  const waMsg = t('whatsapp_interest_msg').replace('{title}', l.title).replace('{city}', l.city);
+  document.getElementById('modal-whatsapp').href = `https://wa.me/${phoneDigits}?text=${encodeURIComponent(waMsg)}`;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function changeModalMedia(direction){
+  const slider = document.getElementById('modal-media-slider');
+  if(!slider) return;
+  
+  const items = slider.querySelectorAll('.modal-media-item');
+  const total = items.length;
+  if(total < 1) return;
+  
+  items.forEach(el => el.classList.remove('active'));
+  
+  modalMediaIndex = (modalMediaIndex + direction + total) % total;
+  
+  items[modalMediaIndex].classList.add('active');
+  
+  updateModalCounter();
+}
+
+function updateModalCounter(){
+  const counter = document.querySelector('.modal-media-counter');
+  if(!counter) return;
+  
+  const slider = document.getElementById('modal-media-slider');
+  if(!slider) return;
+  
+  const total = slider.querySelectorAll('.modal-media-item').length;
+  counter.textContent = `${modalMediaIndex + 1} / ${total}`;
+}
+
+function closeModal(){
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+document.getElementById('modal-overlay').addEventListener('click', (e) => {
+  if(e.target.id === 'modal-overlay') closeModal();
+});
+
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape') closeModal();
+  if(e.key === 'ArrowLeft' && document.getElementById('modal-overlay').classList.contains('open')) {
+    changeModalMedia(-1);
+  }
+  if(e.key === 'ArrowRight' && document.getElementById('modal-overlay').classList.contains('open')) {
+    changeModalMedia(1);
+  }
+});
+
+async function init(){
+  applyStaticTranslations();
+  renderLangMenu();
+  
+  const real = await loadRealListings();
+  console.log('✅ Anons reyèl:', real);
+  real.forEach(r => listings.push(r));
+  console.log('✅ Total anons:', listings.length);
+  
+  boostedPool = await loadBoostedListings();
+  boostIndex = 0;
+  
+  populateCitySelect();
+  renderChips();
+  renderLocationNav();
+  renderListings();
+  renderBoosted();
+  startBoostRotation();
+}
+init();
+
+/* ===== CHARGER STATISTIQUES VISITES ===== */
 async function loadVisitsStats(){
   try{
     const now = new Date();
@@ -605,471 +1756,128 @@ async function loadVisitsStats(){
     
     const uniqueVisitors = new Set(uniqueData.map(v => v.visitor_id)).size;
     
-    document.getElementById('visits-today').textContent = todayCount || 0;
-    document.getElementById('visits-week').textContent = weekCount || 0;
-    document.getElementById('visits-month').textContent = monthCount || 0;
-    document.getElementById('visitors-today').textContent = uniqueVisitors || 0;
+    const elToday = document.getElementById('visits-today');
+    const elWeek = document.getElementById('visits-week');
+    const elMonth = document.getElementById('visits-month');
+    const elUnique = document.getElementById('visitors-today');
+    
+    if(elToday) elToday.textContent = todayCount || 0;
+    if(elWeek) elWeek.textContent = weekCount || 0;
+    if(elMonth) elMonth.textContent = monthCount || 0;
+    if(elUnique) elUnique.textContent = uniqueVisitors || 0;
     
   }catch(err){
     console.error('Erreur chargement stats visites:', err);
-    document.getElementById('visits-today').textContent = '—';
-    document.getElementById('visits-week').textContent = '—';
-    document.getElementById('visits-month').textContent = '—';
-    document.getElementById('visitors-today').textContent = '—';
   }
 }
 
-/* ===== 8. STATISTIQUES MENSUELLES ET ANNUELLES ===== */
-async function loadMonthlyYearlyStats(){
-  try{
-    // Mwa aktyèl la
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    
-    const { count: monthTotal, error: monthError } = await supabaseClient
-      .from('visits')
-      .select('*', { count: 'exact', head: true })
-      .gte('visited_at', startOfMonth.toISOString())
-      .lte('visited_at', endOfMonth.toISOString());
-      
-    if(monthError) throw monthError;
-    
-    const { data: monthUniqueData, error: uniqueError } = await supabaseClient
-      .from('visits')
-      .select('visitor_id')
-      .gte('visited_at', startOfMonth.toISOString())
-      .lte('visited_at', endOfMonth.toISOString());
-      
-    if(uniqueError) throw uniqueError;
-    
-    const monthUnique = new Set(monthUniqueData.map(v => v.visitor_id)).size;
-    
-    // Ane aktyèl la
-    const startOfYear = new Date(now.getFullYear(), 0, 1);
-    const endOfYear = new Date(now.getFullYear(), 11, 31);
-    
-    const { count: yearTotal, error: yearError } = await supabaseClient
-      .from('visits')
-      .select('*', { count: 'exact', head: true })
-      .gte('visited_at', startOfYear.toISOString())
-      .lte('visited_at', endOfYear.toISOString());
-      
-    if(yearError) throw yearError;
-    
-    const { data: yearUniqueData, error: yearUniqueError } = await supabaseClient
-      .from('visits')
-      .select('visitor_id')
-      .gte('visited_at', startOfYear.toISOString())
-      .lte('visited_at', endOfYear.toISOString());
-      
-    if(yearUniqueError) throw yearUniqueError;
-    
-    const yearUnique = new Set(yearUniqueData.map(v => v.visitor_id)).size;
-    
-    document.getElementById('month-visits').textContent = monthTotal || 0;
-    document.getElementById('month-unique').textContent = monthUnique || 0;
-    document.getElementById('year-visits').textContent = yearTotal || 0;
-    document.getElementById('year-unique').textContent = yearUnique || 0;
-    
-  }catch(err){
-    console.error('Erreur chargement stats mensuelles/annuelles:', err);
-    document.getElementById('month-visits').textContent = '—';
-    document.getElementById('month-unique').textContent = '—';
-    document.getElementById('year-visits').textContent = '—';
-    document.getElementById('year-unique').textContent = '—';
-  }
-}
-
-/* ===== 9. RENDU DES ANNONCES AVEC PREVIEW FOTO ET BADGE SUPPRIME ===== */
-function renderListings(listings){
-  const tbody = document.getElementById('listings-body');
-  
-  if(listings.length === 0){
-    tbody.innerHTML = `<tr><td colspan="6" class="empty-state"><strong>Aucune annonce</strong></td></tr>`;
-    return;
-  }
-  
-  tbody.innerHTML = listings.map(l => {
-    const media = l.listing_media || [];
-    const photos = media.filter(m => m.media_type === 'photo');
-    const videos = media.filter(m => m.media_type === 'video');
-    
-    // Detekte si anons lan retire (available = false)
-    const isRemoved = l.available === false;
-    const rowClass = isRemoved ? 'style="opacity:0.6;background:var(--bg-soft);"' : '';
-    
-    // Preview premye foto
-    let previewHtml = '';
-    if(photos.length > 0){
-      previewHtml = `<img src="${photos[0].url}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;border:1px solid var(--border);">`;
+/* ===== TRACKING DES VISITES ===== */
+function getVisitorId() {
+  let id = localStorage.getItem('kaypam_visitor_id');
+  if (!id) {
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substr(2, 6);
+    id = 'v_' + timestamp + '_' + random;
+    try {
+      localStorage.setItem('kaypam_visitor_id', id);
+    } catch(e) {
+      id = 'tmp_' + Date.now().toString(36);
     }
-    
-    const mediaCount = `📷 ${photos.length} | 🎬 ${videos.length}`;
-    
-    return `
-    <tr ${rowClass}>
-      <td>
-        <div style="display:flex;align-items:center;gap:10px;">
-          ${previewHtml}
-          <div>
-            <strong>${escapeHtml(l.title)}</strong>
-            <br><span style="font-size:11px;color:var(--ink-soft);">${escapeHtml(l.owners?.name || 'Inconnu')}</span>
-          </div>
-        </div>
-      </td>
-      <td>${escapeHtml(l.city)}</td>
-      <td>${formatPrice(l.price, l.currency)}</td>
-      <td>${getStatusBadge(l.status, l.available)}</td>
-      <td style="font-size:12px;text-align:center;">
-        ${mediaCount}
-        ${(photos.length > 0 || videos.length > 0) ? `<br><button class="admin-btn admin-btn-view admin-btn-sm" onclick="viewMedia('${l.id}')">👁️ Voir</button>` : ''}
-      </td>
-      <td>
-        <div class="admin-btn-group">
-          ${l.status === 'en_attente_verification' ? `
-            <button class="admin-btn admin-btn-validate" onclick="validateListing('${l.id}')">✅ Valider</button>
-            <button class="admin-btn admin-btn-refuse" onclick="refuseListing('${l.id}')">❌ Refuser</button>
-          ` : `
-            <span style="font-size:10px;color:var(--ink-soft);display:block;text-align:center;">
-              ${l.status === 'valide' ? '✅ Validée' : '❌ Refusée'}
-              ${isRemoved ? '🗑️ Siprime' : ''}
-            </span>
-          `}
-          <button class="admin-btn ${isRemoved ? 'admin-btn-supprime' : 'admin-btn-danger'} admin-btn-sm" onclick="removeListingAdmin('${l.id}')" ${isRemoved ? 'disabled' : ''}>
-            ${isRemoved ? '🔒 Siprime' : '🗑️ Retirer'}
-          </button>
-        </div>
-      </td>
-    </tr>
-  `}).join('');
-}
-
-/* ===== 10. RENDU DES BOOSTS ===== */
-function renderBoosts(boosts){
-  const tbody = document.getElementById('boosts-body');
-  const pending = boosts.filter(b => b.status === 'en_attente_paiement');
-  
-  if(pending.length === 0){
-    tbody.innerHTML = `<tr><td colspan="5" class="empty-state"><strong>Aucune demande en attente</strong></td></tr>`;
-    return;
   }
-  
-  tbody.innerHTML = pending.map(b => `
-    <tr>
-      <td>
-        <strong>${escapeHtml(b.listings?.title || 'Annonce supprimée')}</strong>
-        <br><span style="font-size:11px;color:var(--ink-soft);">${escapeHtml(b.listings?.owners?.name || 'Inconnu')}</span>
-      </td>
-      <td>${escapeHtml(b.plan_name)} ($${b.price_usd})</td>
-      <td><code style="font-size:12px;">${escapeHtml(b.payment_reference || '—')}</code></td>
-      <td>${getBoostStatusBadge(b.status)}</td>
-      <td>
-        <div class="admin-btn-group">
-          <button class="admin-btn admin-btn-activate" onclick="activateBoost('${b.id}')">⭐ Activer</button>
-          <button class="admin-btn admin-btn-refuse" onclick="refuseBoost('${b.id}')">❌ Refuser</button>
-        </div>
-      </td>
-    </tr>
-  `).join('');
+  return id;
 }
 
-/* ===== 11. RENDU DES UTILISATEURS ===== */
-function renderUsers(users){
-  const tbody = document.getElementById('users-body');
-  
-  if(users.length === 0){
-    tbody.innerHTML = `<tr><td colspan="6" class="empty-state"><strong>Aucun utilisateur</strong></td></tr>`;
-    return;
-  }
-  
-  tbody.innerHTML = users.map(u => `
-    <tr>
-      <td><strong>${escapeHtml(u.name)}</strong></td>
-      <td>${escapeHtml(u.username || '—')}</td>
-      <td>${escapeHtml(u.phone)}</td>
-      <td>${escapeHtml(u.whatsapp || '—')}</td>
-      <td style="text-align:center;">—</td>
-      <td style="font-size:12px;">${new Date(u.created_at).toLocaleDateString('fr-FR')}</td>
-    </tr>
-  `).join('');
-}
-
-/* ===== 12. ACTIONS ADMIN ===== */
-
-async function validateListing(listingId){
-  if(!confirm("Confirmer la validation de cette annonce ?")) return;
-  try{
+async function trackVisit() {
+  if (!supabaseClient) return;
+  try {
+    const visitorId = getVisitorId();
+    const page = window.location.pathname.split('/').pop() || 'index.html';
+    
     const { error } = await supabaseClient
-      .from('listings')
-      .update({ 
-        status: 'valide', 
-        available: true,
-        reviewed_at: new Date().toISOString() 
+      .from('visits')
+      .insert({
+        visitor_id: visitorId,
+        page: page,
+        referrer: document.referrer || null,
+        user_agent: navigator.userAgent,
+        visited_at: new Date().toISOString()
+      });
+    
+    if (error) {
+      console.error('❌ Erreur tracking:', error);
+    } else {
+      console.log('✅ Visite enregistrée:', page, '| ID:', visitorId);
+    }
+  } catch(err) {
+    console.error('❌ Erreur tracking:', err);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(trackVisit, 500);
+});
+
+/* ===== PWA — SERVICE WORKER ===== */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(registration => {
+        console.log('✅ Service Worker KayPam anrejistre (index)');
       })
-      .eq('id', listingId);
-    if(error) throw error;
-    loadDashboard();
-  }catch(err){
-    alert("Erreur : " + err.message);
-  }
+      .catch(error => {
+        console.log('❌ Service Worker erè:', error);
+      });
+  });
 }
 
-async function refuseListing(listingId){
-  if(!confirm("Confirmer le refus de cette annonce ?")) return;
-  try{
-    const { error } = await supabaseClient
-      .from('listings')
-      .update({ status: 'refuse', reviewed_at: new Date().toISOString() })
-      .eq('id', listingId);
-    if(error) throw error;
-    loadDashboard();
-  }catch(err){
-    alert("Erreur : " + err.message);
-  }
-}
+/* ===== PWA — BOUTON INSTALLATION (BANNIÈRE SÈLMAN) ===== */
+let deferredPrompt = null;
 
-/* ===== RETIRER UNE ANNONCE (ADMIN) - KOREK ===== */
-async function removeListingAdmin(listingId){
-  console.log('🔍 Tentative retrait ID:', listingId);
-  if(!listingId){
-    alert("❌ ID annonce manquant !");
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('install-banner-text').textContent = getPwaText('install_banner');
+  document.getElementById('install-banner').classList.add('show');
+});
+
+function triggerInstall() {
+  if (!deferredPrompt) {
+    alert(getPwaText('install_manual'));
     return;
   }
-  
-  // Pa bezwen verifye si deja retire - retire verifikasyon an
-  if(!confirm("⚠️ Confirmer le retrait définitif de cette annonce ?")) return;
-  
-  try{
-    console.log('📤 Envoi requête...');
-    const { error } = await supabaseClient
-      .from('listings')
-      .update({ 
-        available: false,
-        reviewed_at: new Date().toISOString()
-      })
-      .eq('id', listingId);
-    if(error) {
-      console.error('❌ Erreur Supabase:', error);
-      throw error;
-    }
-    console.log('✅ Retrait réussi !');
-    alert("✅ Annonce siprimée avec succès !");
-    loadDashboard(); // Rafrechi paj la
-  }catch(err){
-    console.error('❌ Erreur retrait:', err);
-    alert("❌ Erreur : " + err.message);
-  }
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then((choiceResult) => {
+    console.log('✅ Choix utilisateur:', choiceResult.outcome);
+    deferredPrompt = null;
+    document.getElementById('install-banner').classList.remove('show');
+  });
 }
- 
 
-async function activateBoost(boostId){
-  if(!confirm("Confirmer l'activation de ce boost ? Le paiement a bien été reçu ?")) return;
-  try{
-    const { error } = await supabaseClient.rpc('activate_boost', { p_boost_id: boostId });
-    if(error) throw error;
-    loadDashboard();
-  }catch(err){
-    alert("Erreur : " + err.message);
+window.addEventListener('appinstalled', () => {
+  console.log('✅ KayPam enstale!');
+  document.getElementById('install-banner').classList.remove('show');
+  localStorage.setItem('kaypam_installed', 'true');
+});
+
+/* ===== MASQUER LA BANNIÈRE SI DÉJÀ INSTALLÉ ===== */
+if (window.matchMedia('(display-mode: standalone)').matches || localStorage.getItem('kaypam_installed') === 'true') {
+  document.getElementById('install-banner').style.display = 'none';
+}
+
+/* ===== DÉTECTION EN LIGNE / HORS LIGNE ===== */
+function updateOnlineStatus() {
+  const banner = document.getElementById('offline-banner');
+  if (!banner) return;
+  if (navigator.onLine) {
+    banner.classList.remove('show');
+  } else {
+    banner.classList.add('show');
   }
 }
 
-async function refuseBoost(boostId){
-  if(!confirm("Confirmer le refus de ce boost ?")) return;
-  try{
-    const { error } = await supabaseClient
-      .from('boosts')
-      .update({ status: 'refuse' })
-      .eq('id', boostId);
-    if(error) throw error;
-    loadDashboard();
-  }catch(err){
-    alert("Erreur : " + err.message);
-  }
-}
-
-/* ===== 13. VOIR MEDIAS ===== */
-async function viewMedia(listingId){
-  try{
-    const { data, error } = await supabaseClient
-      .from('listing_media')
-      .select('*')
-      .eq('listing_id', listingId);
-    if(error) throw error;
-    
-    if(!data || data.length === 0){
-      alert("Aucun média pour cette annonce.");
-      return;
-    }
-    
-    let html = '<div style="display:flex;flex-wrap:wrap;gap:10px;padding:10px;justify-content:center;max-height:70vh;overflow-y:auto;">';
-    data.forEach(m => {
-      if(m.media_type === 'photo'){
-        html += `<img src="${m.url}" style="max-width:200px;max-height:200px;object-fit:cover;border-radius:8px;border:1px solid var(--border);">`;
-      } else {
-        html += `<video src="${m.url}" controls style="max-width:200px;max-height:200px;border-radius:8px;border:1px solid var(--border);"></video>`;
-      }
-    });
-    html += '</div>';
-    
-    const modal = document.createElement('div');
-    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;';
-    modal.innerHTML = `
-      <div style="background:#fff;border-radius:12px;max-width:95%;max-height:95%;overflow:hidden;padding:20px;width:100%;">
-        <button onclick="this.parentElement.parentElement.remove()" style="float:right;background:none;border:none;font-size:24px;cursor:pointer;padding:0 8px;">✕</button>
-        <h3 style="margin-top:0;">📷 Médias de l'annonce</h3>
-        ${html}
-      </div>
-    `;
-    document.body.appendChild(modal);
-    modal.addEventListener('click', (e) => {
-      if(e.target === modal) modal.remove();
-    });
-  }catch(err){
-    alert("Erreur : " + err.message);
-  }
-}
-
-/* ===== 14. VERIFIER SESSION EXISTANTE ===== */
-async function checkExistingSession(){
-  if(!supabaseClient) return;
-  try{
-    const { data } = await supabaseClient.auth.getSession();
-    if(data?.session){
-      const { data: adminData } = await supabaseClient
-        .from('admins')
-        .select('user_id')
-        .eq('user_id', data.session.user.id)
-        .maybeSingle();
-      if(adminData){
-        isAdmin = true;
-        document.getElementById('admin-login-box').style.display = 'none';
-        document.getElementById('admin-dashboard').classList.add('show');
-        loadDashboard();
-      }
-    }
-  }catch(err){
-    console.error('Erreur vérification session:', err);
-  }
-}
-
-checkExistingSession();
-
-/* ===== 15. MULTILINGUE ===== */
-(function(){
-  var lang = localStorage.getItem('kaypam_lang') || 'fr';
-  var maps = {
-    fr: {},
-    en: {
-      'Administration': 'Administration',
-      'Espace Admin KayPam': 'KayPam Admin Area',
-      'Connectez-vous avec votre compte administrateur pour gérer les annonces, valider ou refuser les soumissions, activer les boosts, et suivre les statistiques du site.': 'Log in with your admin account to manage listings, validate or reject submissions, activate boosts, and track site statistics.',
-      'Connexion Admin': 'Admin Login',
-      'Email': 'Email',
-      'Mot de passe': 'Password',
-      'Se connecter': 'Log in',
-      'Se déconnecter': 'Log out',
-      'Mode Admin': 'Admin Mode',
-      'Utilisateurs': 'Users',
-      'Total des comptes': 'Total accounts',
-      'cette semaine': 'this week',
-      'Annonces à vérifier': 'Listings to review',
-      'Annonces publiées': 'Published listings',
-      'Annonces rejetées': 'Rejected listings',
-      'Annonces en vedette': 'Featured listings',
-      'Toutes les annonces': 'All listings',
-      'Tous les utilisateurs': 'All users',
-      'Visites aujourd\'hui': 'Visits today',
-      'Cette semaine': 'This week',
-      'Ce mois': 'This month',
-      'Titre': 'Title',
-      'Ville': 'City',
-      'Prix': 'Price',
-      'Statut': 'Status',
-      'Médias': 'Media',
-      'Actions': 'Actions',
-      'Nom': 'Name',
-      'Téléphone': 'Phone',
-      'WhatsApp': 'WhatsApp',
-      'Annonces': 'Listings',
-      'Inscrit le': 'Registered on',
-      'Valider': 'Validate',
-      'Refuser': 'Reject',
-      'Retirer': 'Remove',
-      'Siprime': 'Removed',
-      'Voir': 'View',
-      'Activer': 'Activate'
-    },
-    ht: {
-      'Administration': 'Administrasyon',
-      'Espace Admin KayPam': 'Espas Admin KayPam',
-      'Connectez-vous avec votre compte administrateur pour gérer les annonces, valider ou refuser les soumissions, activer les boosts, et suivre les statistiques du site.': 'Konekte avèk kont administratè ou pou jere anons yo, valide oswa refize soumisyon yo, aktive boosts yo, epi swiv estatistik sit la.',
-      'Connexion Admin': 'Koneksyon Admin',
-      'Email': 'Imel',
-      'Mot de passe': 'Mo de pase',
-      'Se connecter': 'Konekte',
-      'Se déconnecter': 'Dekonekte',
-      'Mode Admin': 'Mòd Admin',
-      'Utilisateurs': 'Itilizatè',
-      'Total des comptes': 'Total kont yo',
-      'cette semaine': 'semèn sa a',
-      'Annonces à vérifier': 'Anons pou verifye',
-      'Annonces publiées': 'Anons pibliye',
-      'Annonces rejetées': 'Anons rejte',
-      'Annonces en vedette': 'Anons an vedèt',
-      'Toutes les annonces': 'Tout anons yo',
-      'Tous les utilisateurs': 'Tout itilizatè yo',
-      'Visites aujourd\'hui': 'Vizit jodi a',
-      'Cette semaine': 'Semèn sa a',
-      'Ce mois': 'Mwa sa a',
-      'Titre': 'Tit',
-      'Ville': 'Vil',
-      'Prix': 'Pri',
-      'Statut': 'Estati',
-      'Médias': 'Medya',
-      'Actions': 'Aksyon',
-      'Nom': 'Non',
-      'Téléphone': 'Telefòn',
-      'WhatsApp': 'WhatsApp',
-      'Annonces': 'Anons',
-      'Inscrit le': 'Enskri le',
-      'Valider': 'Valide',
-      'Refuser': 'Refize',
-      'Retirer': 'Retire',
-      'Siprime': 'Siprime',
-      'Voir': 'Wè',
-      'Activer': 'Aktive'
-    }
-  };
-  var map = maps[lang] || maps.fr;
-  function applyToText(value){
-    if(!value) return value;
-    var result = value;
-    Object.keys(map).forEach(function(from){
-      result = result.split(from).join(map[from]);
-    });
-    return result;
-  }
-  function updateElement(el){
-    if(!el) return;
-    var aria = el.getAttribute('aria-label');
-    if(aria) el.setAttribute('aria-label', applyToText(aria));
-    var title = el.getAttribute('title');
-    if(title) el.setAttribute('title', applyToText(title));
-    if(el.placeholder) el.placeholder = applyToText(el.placeholder);
-    if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT'){
-      var value = el.value;
-      if(value) el.value = applyToText(value);
-    }
-    var text = el.textContent;
-    if(text && text.trim()){
-      var newText = applyToText(text);
-      if(newText !== text) el.textContent = newText;
-    }
-  }
-  document.documentElement.lang = lang;
-  document.querySelectorAll('a, button, label, p, span, h1, h2, h3, h4, li, option, legend, input, textarea, select, th, td').forEach(updateElement);
-})();
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
 </script>
 </body>
 </html>

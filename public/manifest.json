@@ -1,0 +1,76 @@
+{
+  "name": "KayPam — Trouvez votre toit en Haïti",
+  "short_name": "KayPam",
+  "description": "Trouvez votre toit en Haïti — maisons, appartements, terrains à vendre ou à louer, partout au pays.",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#F2F5F1",
+  "theme_color": "#16243B",
+  "lang": "fr",
+  "dir": "ltr",
+  "categories": ["business", "lifestyle", "shopping"],
+  "icons": [
+    {
+      "src": "icons/167.png",
+      "sizes": "167x167",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/launchericon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/launchericon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/Square150x150Logo.scale-200.png",
+      "sizes": "300x300",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Publier une annonce",
+      "short_name": "Publier",
+      "description": "Publier une nouvelle annonce immobilière",
+      "url": "/publier.html",
+      "icons": [
+        {
+          "src": "icons/launchericon-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Mes annonces",
+      "short_name": "Anons mwen",
+      "description": "Voir et gérer mes annonces",
+      "url": "/mes-annonces.html",
+      "icons": [
+        {
+          "src": "icons/launchericon-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false
+}

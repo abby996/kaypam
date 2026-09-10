@@ -1,19 +1,22 @@
 -- ============================================================
 -- KayPam — Schéma de base de données (Supabase / PostgreSQL)
+-- VERSION COMPLÈTE AVEC TOUTES LES MISES À JOUR
 -- ============================================================
 -- Comment utiliser ce fichier :
 -- 1. Ouvrez votre projet sur https://supabase.com
 -- 2. Allez dans "SQL Editor" (menu de gauche)
 -- 3. Collez TOUT le contenu de ce fichier et cliquez "Run"
 -- 4. Créez ensuite un bucket de stockage nommé "listing-media"
---    dans "Storage" (voir SETUP.md pour les détails)
+--    dans "Storage" (cochez "Public bucket")
 -- 5. IMPORTANT : ajoutez votre compte admin existant dans la table
 --    "admins" — zionmaket@gmail.com deja ajoute
 -- ============================================================
 
 create extension if not exists "pgcrypto";
 
+-- ============================================================
 -- ---------- TABLES DE BASE ----------
+-- ============================================================
 
 create table if not exists owners (
   id uuid primary key default gen_random_uuid(),
@@ -25,18 +28,15 @@ create table if not exists owners (
   created_at timestamptz not null default now()
 );
 
--- Ajoute les nouvelles colonnes si la table existait déjà (ancienne version
--- basée sur le téléphone seul, sans compte).
+-- Ajoute les nouvelles colonnes si la table existait déjà
 alter table owners add column if not exists auth_user_id uuid references auth.users(id) on delete cascade;
 alter table owners add column if not exists username text;
 alter table owners add column if not exists whatsapp text;
 
--- Numéro WhatsApp non renseigné pour d'anciens comptes : on retombe sur le
--- téléphone général en attendant que le propriétaire renseigne un numéro dédié.
+-- Numéro WhatsApp non renseigné pour d'anciens comptes
 update owners set whatsapp = phone where whatsapp is null;
 
--- Le téléphone n'a plus besoin d'être unique : c'est maintenant le username
--- (donc le compte) qui identifie un propriétaire de façon unique.
+-- Le téléphone n'a plus besoin d'être unique
 alter table owners drop constraint if exists owners_phone_key;
 
 drop index if exists owners_username_unique_idx;
@@ -45,8 +45,7 @@ create unique index owners_username_unique_idx on owners (lower(username)) where
 drop index if exists owners_auth_user_id_unique_idx;
 create unique index owners_auth_user_id_unique_idx on owners (auth_user_id) where auth_user_id is not null;
 
--- ID court et lisible par compte (ex. KP-00001), généré automatiquement,
--- pour distinguer facilement deux propriétaires portant le même nom.
+-- ID court lisible (ex. KP-00001)
 create sequence if not exists owners_owner_number_seq;
 alter table owners add column if not exists owner_number bigint;
 alter table owners alter column owner_number set default nextval('owners_owner_number_seq');
@@ -54,6 +53,10 @@ update owners set owner_number = nextval('owners_owner_number_seq') where owner_
 alter sequence owners_owner_number_seq owned by owners.owner_number;
 drop index if exists owners_owner_number_unique_idx;
 create unique index owners_owner_number_unique_idx on owners(owner_number);
+
+-- ============================================================
+-- ---------- TABLE LISTINGS ----------
+-- ============================================================
 
 create table if not exists listings (
   id uuid primary key default gen_random_uuid(),
@@ -95,6 +98,10 @@ create index if not exists idx_listings_zone on listings(zone);
 create index if not exists idx_listings_departement on listings(departement);
 create index if not exists idx_listings_location on listings(departement, city, commune, zone);
 
+-- ============================================================
+-- ---------- TABLE LISTING_MEDIA ----------
+-- ============================================================
+
 create table if not exists listing_media (
   id uuid primary key default gen_random_uuid(),
   listing_id uuid not null references listings(id) on delete cascade,
@@ -110,7 +117,10 @@ alter table listing_media add column if not exists mime_type text;
 
 create index if not exists idx_listing_media_listing_id on listing_media(listing_id);
 
+-- ============================================================
 -- ---------- TABLE ADMINS ----------
+-- ============================================================
+
 create table if not exists admins (
   user_id uuid primary key references auth.users(id) on delete cascade,
   created_at timestamptz not null default now()
@@ -121,7 +131,10 @@ drop policy if exists "admins_self_select" on admins;
 create policy "admins_self_select" on admins
   for select to authenticated using (user_id = auth.uid());
 
+-- ============================================================
 -- ---------- TABLE VISITS ----------
+-- ============================================================
+
 create table if not exists visits (
   id uuid primary key default gen_random_uuid(),
   visitor_id text,
@@ -135,7 +148,10 @@ create index if not exists idx_visits_visited_at on visits(visited_at);
 create index if not exists idx_visits_visitor_id on visits(visitor_id);
 create index if not exists idx_visits_page on visits(page);
 
+-- ============================================================
 -- ---------- TABLE VISITS_SUMMARY ----------
+-- ============================================================
+
 create table if not exists visits_summary (
   id uuid primary key default gen_random_uuid(),
   date date not null unique,
@@ -146,7 +162,10 @@ create table if not exists visits_summary (
 
 create index if not exists idx_visits_summary_date on visits_summary(date);
 
--- ---------- SÉCURITÉ ----------
+-- ============================================================
+-- ---------- SÉCURITÉ (RLS) ----------
+-- ============================================================
+
 alter table owners enable row level security;
 alter table listings enable row level security;
 alter table listing_media enable row level security;
@@ -219,7 +238,9 @@ create policy "visits_summary_admin_select" on visits_summary
   for select to authenticated
   using (exists (select 1 from admins a where a.user_id = auth.uid()));
 
--- ---------- FONCTIONS ----------
+-- ============================================================
+-- ---------- FONCTIONS DE BASE ----------
+-- ============================================================
 
 -- link_owner_account
 drop function if exists public.link_owner_account(uuid, text, text, text);
@@ -318,7 +339,55 @@ $$;
 
 grant execute on function public.kaypam_stats to anon, authenticated;
 
+-- ============================================================
+-- ---------- FONCTIONS MEDIA ----------
+-- ============================================================
+
+-- add_listing_media (RPC pou pase sou RLS)
+drop function if exists public.add_listing_media(uuid, text, text, text);
+create or replace function public.add_listing_media(
+  p_listing_id uuid,
+  p_media_type text,
+  p_url text,
+  p_mime_type text
+) returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into listing_media (listing_id, media_type, url, mime_type)
+  values (p_listing_id, p_media_type, p_url, p_mime_type);
+end;
+$$;
+
+grant execute on function public.add_listing_media to authenticated;
+
+-- get_listing_media
+create or replace function public.get_listing_media(p_listing_id uuid)
+returns table(
+  id uuid,
+  media_type text,
+  url text,
+  thumbnail text,
+  mime_type text,
+  created_at timestamptz
+)
+language sql
+security definer
+set search_path = public
+as $$
+  select id, media_type, url, thumbnail, mime_type, created_at
+  from listing_media
+  where listing_id = p_listing_id
+  order by created_at asc;
+$$;
+
+grant execute on function public.get_listing_media to anon, authenticated;
+
+-- ============================================================
 -- ---------- SYSTÈME BOOST ----------
+-- ============================================================
 
 create table if not exists boost_plans (
   id uuid primary key default gen_random_uuid(),
@@ -531,6 +600,10 @@ $$;
 
 grant execute on function public.set_listing_availability to authenticated;
 
+-- ============================================================
+-- ---------- FONCTIONS ADMIN ----------
+-- ============================================================
+
 -- delete_listing_admin
 drop function if exists public.delete_listing_admin(uuid);
 create or replace function public.delete_listing_admin(
@@ -556,7 +629,320 @@ $$;
 
 grant execute on function public.delete_listing_admin(uuid) to authenticated;
 
+-- is_admin
+create or replace function public.is_admin()
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  select exists (select 1 from admins where user_id = auth.uid());
+$$;
+
+grant execute on function public.is_admin to authenticated;
+
+-- admin_get_all_listings
+create or replace function public.admin_get_all_listings()
+returns table(
+  id uuid,
+  title text,
+  city text,
+  commune text,
+  zone text,
+  departement text,
+  transaction text,
+  type text,
+  price numeric,
+  currency text,
+  period text,
+  description text,
+  status text,
+  available boolean,
+  created_at timestamptz,
+  reviewed_at timestamptz,
+  owner_id uuid,
+  owner_name text,
+  owner_phone text,
+  owner_whatsapp text,
+  photo_count bigint,
+  video_count bigint,
+  has_active_boost boolean
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not exists (select 1 from admins where user_id = auth.uid()) then
+    raise exception 'Accès administrateur requis';
+  end if;
+
+  return query
+  select
+    l.id, l.title, l.city, l.commune, l.zone, l.departement,
+    l.transaction, l.type, l.price, l.currency, l.period, l.description,
+    l.status, l.available, l.created_at, l.reviewed_at,
+    o.id as owner_id, o.name as owner_name, o.phone as owner_phone, o.whatsapp as owner_whatsapp,
+    (select count(*) from listing_media where listing_id = l.id and media_type = 'photo') as photo_count,
+    (select count(*) from listing_media where listing_id = l.id and media_type = 'video') as video_count,
+    exists (
+      select 1 from boosts b 
+      where b.listing_id = l.id and b.status = 'actif' and b.ends_at > now()
+    ) as has_active_boost
+  from listings l
+  join owners o on o.id = l.owner_id
+  order by l.created_at desc;
+end;
+$$;
+
+grant execute on function public.admin_get_all_listings to authenticated;
+
+-- admin_get_pending_listings
+create or replace function public.admin_get_pending_listings()
+returns table(
+  id uuid,
+  title text,
+  city text,
+  commune text,
+  zone text,
+  departement text,
+  transaction text,
+  type text,
+  price numeric,
+  currency text,
+  description text,
+  created_at timestamptz,
+  owner_name text,
+  owner_phone text,
+  owner_whatsapp text,
+  photo_count bigint,
+  video_count bigint
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not exists (select 1 from admins where user_id = auth.uid()) then
+    raise exception 'Accès administrateur requis';
+  end if;
+
+  return query
+  select
+    l.id, l.title, l.city, l.commune, l.zone, l.departement,
+    l.transaction, l.type, l.price, l.currency, l.description, l.created_at,
+    o.name as owner_name, o.phone as owner_phone, o.whatsapp as owner_whatsapp,
+    (select count(*) from listing_media where listing_id = l.id and media_type = 'photo') as photo_count,
+    (select count(*) from listing_media where listing_id = l.id and media_type = 'video') as video_count
+  from listings l
+  join owners o on o.id = l.owner_id
+  where l.status = 'en_attente_verification'
+  order by l.created_at asc;
+end;
+$$;
+
+grant execute on function public.admin_get_pending_listings to authenticated;
+
+-- admin_validate_listing
+create or replace function public.admin_validate_listing(p_listing_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not exists (select 1 from admins where user_id = auth.uid()) then
+    raise exception 'Accès administrateur requis';
+  end if;
+
+  update listings
+  set status = 'valide', available = true, reviewed_at = now()
+  where id = p_listing_id;
+
+  if not found then
+    raise exception 'Annonce introuvable';
+  end if;
+end;
+$$;
+
+grant execute on function public.admin_validate_listing to authenticated;
+
+-- admin_refuse_listing
+create or replace function public.admin_refuse_listing(p_listing_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not exists (select 1 from admins where user_id = auth.uid()) then
+    raise exception 'Accès administrateur requis';
+  end if;
+
+  update listings
+  set status = 'refuse', reviewed_at = now()
+  where id = p_listing_id;
+
+  if not found then
+    raise exception 'Annonce introuvable';
+  end if;
+end;
+$$;
+
+grant execute on function public.admin_refuse_listing to authenticated;
+
+-- admin_get_all_owners
+create or replace function public.admin_get_all_owners()
+returns table(
+  id uuid,
+  username text,
+  name text,
+  phone text,
+  whatsapp text,
+  account_code text,
+  created_at timestamptz,
+  listing_count bigint,
+  validated_count bigint,
+  pending_count bigint
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not exists (select 1 from admins where user_id = auth.uid()) then
+    raise exception 'Accès administrateur requis';
+  end if;
+
+  return query
+  select
+    o.id, o.username, o.name, o.phone, o.whatsapp,
+    'KP-' || lpad(o.owner_number::text, 5, '0') as account_code,
+    o.created_at,
+    (select count(*) from listings where owner_id = o.id) as listing_count,
+    (select count(*) from listings where owner_id = o.id and status = 'valide') as validated_count,
+    (select count(*) from listings where owner_id = o.id and status = 'en_attente_verification') as pending_count
+  from owners o
+  order by o.created_at desc;
+end;
+$$;
+
+grant execute on function public.admin_get_all_owners to authenticated;
+
+-- admin_get_pending_boosts
+create or replace function public.admin_get_pending_boosts()
+returns table(
+  boost_id uuid,
+  listing_id uuid,
+  listing_title text,
+  listing_city text,
+  owner_name text,
+  owner_phone text,
+  plan_name text,
+  duration_days int,
+  price_usd numeric,
+  payment_reference text,
+  status text,
+  requested_at timestamptz
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not exists (select 1 from admins where user_id = auth.uid()) then
+    raise exception 'Accès administrateur requis';
+  end if;
+
+  return query
+  select
+    b.id as boost_id, b.listing_id, l.title as listing_title, l.city as listing_city,
+    o.name as owner_name, o.phone as owner_phone,
+    b.plan_name, b.duration_days, b.price_usd, b.payment_reference, b.status, b.requested_at
+  from boosts b
+  join listings l on l.id = b.listing_id
+  join owners o on o.id = l.owner_id
+  where b.status = 'en_attente_paiement'
+  order by b.requested_at asc;
+end;
+$$;
+
+grant execute on function public.admin_get_pending_boosts to authenticated;
+
+-- admin_refuse_boost
+create or replace function public.admin_refuse_boost(p_boost_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not exists (select 1 from admins where user_id = auth.uid()) then
+    raise exception 'Accès administrateur requis';
+  end if;
+
+  update boosts set status = 'refuse' where id = p_boost_id;
+
+  if not found then
+    raise exception 'Boost introuvable';
+  end if;
+end;
+$$;
+
+grant execute on function public.admin_refuse_boost to authenticated;
+
+-- admin_get_stats
+create or replace function public.admin_get_stats()
+returns json
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_result json;
+begin
+  if not exists (select 1 from admins where user_id = auth.uid()) then
+    raise exception 'Accès administrateur requis';
+  end if;
+
+  select json_build_object(
+    'total_owners', (select count(*) from owners),
+    'total_listings', (select count(*) from listings),
+    'pending_listings', (select count(*) from listings where status = 'en_attente_verification'),
+    'validated_listings', (select count(*) from listings where status = 'valide'),
+    'refused_listings', (select count(*) from listings where status = 'refuse'),
+    'active_boosts', (select count(*) from boosts where status = 'actif' and ends_at > now()),
+    'pending_boosts', (select count(*) from boosts where status = 'en_attente_paiement'),
+    'new_owners_week', (select count(*) from owners where created_at > now() - interval '7 days')
+  ) into v_result;
+
+  return v_result;
+end;
+$$;
+
+grant execute on function public.admin_get_stats to authenticated;
+
+-- get_my_owner_stats
+create or replace function public.get_my_owner_stats()
+returns json
+language sql
+security definer
+set search_path = public
+as $$
+  select json_build_object(
+    'total_listings', (select count(*) from listings l join owners o on o.id = l.owner_id where o.auth_user_id = auth.uid()),
+    'validated_listings', (select count(*) from listings l join owners o on o.id = l.owner_id where o.auth_user_id = auth.uid() and l.status = 'valide'),
+    'pending_listings', (select count(*) from listings l join owners o on o.id = l.owner_id where o.auth_user_id = auth.uid() and l.status = 'en_attente_verification'),
+    'refused_listings', (select count(*) from listings l join owners o on o.id = l.owner_id where o.auth_user_id = auth.uid() and l.status = 'refuse'),
+    'active_boosts', (select count(*) from boosts b join listings l on l.id = b.listing_id join owners o on o.id = l.owner_id where o.auth_user_id = auth.uid() and b.status = 'actif' and b.ends_at > now())
+  );
+$$;
+
+grant execute on function public.get_my_owner_stats to authenticated;
+
+-- ============================================================
 -- ---------- FONCTIONS VISITES ----------
+-- ============================================================
 
 create or replace function public.get_visits_count(
   p_start_date timestamptz,
@@ -619,7 +1005,9 @@ $$;
 
 grant execute on function public.get_visits_stats to authenticated;
 
+-- ============================================================
 -- ---------- FONCTIONS RECHERCHE ----------
+-- ============================================================
 
 create or replace function public.get_cities_by_departement(p_departement text)
 returns table(city text)
@@ -627,11 +1015,8 @@ language sql
 security definer
 set search_path = public
 as $$
-  select distinct city 
-  from listings 
-  where departement = p_departement 
-    and status = 'valide' 
-    and available = true
+  select distinct city from listings 
+  where departement = p_departement and status = 'valide' and available = true
   order by city;
 $$;
 
@@ -643,11 +1028,8 @@ language sql
 security definer
 set search_path = public
 as $$
-  select distinct commune 
-  from listings 
-  where city = p_city 
-    and status = 'valide' 
-    and available = true
+  select distinct commune from listings 
+  where city = p_city and status = 'valide' and available = true
   order by commune;
 $$;
 
@@ -659,18 +1041,14 @@ language sql
 security definer
 set search_path = public
 as $$
-  select distinct zone 
-  from listings 
-  where commune = p_commune 
-    and status = 'valide' 
-    and available = true
+  select distinct zone from listings 
+  where commune = p_commune and status = 'valide' and available = true
   order by zone;
 $$;
 
 grant execute on function public.get_zones_by_commune to anon, authenticated;
 
--- ---------- FONCTION RECHERCHE AVANCÉE ----------
-
+-- search_listings
 create or replace function public.search_listings(
   p_departement text default null,
   p_city text default null,
@@ -684,59 +1062,25 @@ create or replace function public.search_listings(
   p_offset int default 0
 )
 returns table(
-  id uuid,
-  title text,
-  city text,
-  commune text,
-  zone text,
-  departement text,
-  transaction text,
-  type text,
-  price numeric,
-  currency text,
-  period text,
-  description text,
-  photo_url text,
-  owner_phone text,
-  owner_whatsapp text,
-  has_boost boolean,
-  boost_ends_at timestamptz
+  id uuid, title text, city text, commune text, zone text, departement text,
+  transaction text, type text, price numeric, currency text, period text, description text,
+  photo_url text, owner_phone text, owner_whatsapp text,
+  has_boost boolean, boost_ends_at timestamptz
 )
 language sql
 security definer
 set search_path = public
 as $$
   select
-    l.id,
-    l.title,
-    l.city,
-    l.commune,
-    l.zone,
-    l.departement,
-    l.transaction,
-    l.type,
-    l.price,
-    l.currency,
-    l.period,
-    l.description,
+    l.id, l.title, l.city, l.commune, l.zone, l.departement,
+    l.transaction, l.type, l.price, l.currency, l.period, l.description,
     (select url from listing_media where listing_id = l.id and media_type = 'photo' limit 1) as photo_url,
-    o.phone as owner_phone,
-    o.whatsapp as owner_whatsapp,
-    exists (
-      select 1 from boosts b 
-      where b.listing_id = l.id 
-        and b.status = 'actif' 
-        and b.ends_at > now()
-    ) as has_boost,
-    (select ends_at from boosts b 
-     where b.listing_id = l.id 
-       and b.status = 'actif' 
-       and b.ends_at > now() 
-     limit 1) as boost_ends_at
+    o.phone as owner_phone, o.whatsapp as owner_whatsapp,
+    exists (select 1 from boosts b where b.listing_id = l.id and b.status = 'actif' and b.ends_at > now()) as has_boost,
+    (select ends_at from boosts b where b.listing_id = l.id and b.status = 'actif' and b.ends_at > now() limit 1) as boost_ends_at
   from listings l
   join owners o on o.id = l.owner_id
-  where l.status = 'valide'
-    and l.available = true
+  where l.status = 'valide' and l.available = true
     and (p_departement is null or l.departement = p_departement)
     and (p_city is null or l.city = p_city)
     and (p_commune is null or l.commune = p_commune)
@@ -745,16 +1089,15 @@ as $$
     and (p_type is null or l.type = p_type)
     and (p_min_price is null or l.price >= p_min_price)
     and (p_max_price is null or l.price <= p_max_price)
-  order by 
-    has_boost desc,
-    l.created_at desc
-  limit p_limit
-  offset p_offset;
+  order by has_boost desc, l.created_at desc
+  limit p_limit offset p_offset;
 $$;
 
 grant execute on function public.search_listings to anon, authenticated;
 
+-- ============================================================
 -- ---------- FONCTIONS VISITS_SUMMARY ----------
+-- ============================================================
 
 create or replace function public.add_daily_visits_summary()
 returns void
@@ -776,20 +1119,14 @@ begin
   end if;
   
   while v_date <= date_trunc('day', now())::date loop
-    select count(*) into v_total
-    from visits
-    where date_trunc('day', visited_at) = v_date;
-    
-    select count(distinct visitor_id) into v_unique
-    from visits
-    where date_trunc('day', visited_at) = v_date;
+    select count(*) into v_total from visits where date_trunc('day', visited_at) = v_date;
+    select count(distinct visitor_id) into v_unique from visits where date_trunc('day', visited_at) = v_date;
     
     insert into visits_summary (date, total_visits, unique_visitors)
     values (v_date, v_total, v_unique)
     on conflict (date) do update
-    set 
-      total_visits = excluded.total_visits,
-      unique_visitors = excluded.unique_visitors;
+    set total_visits = excluded.total_visits,
+        unique_visitors = excluded.unique_visitors;
     
     v_date := v_date + interval '1 day';
   end loop;
@@ -798,23 +1135,12 @@ $$;
 
 grant execute on function public.add_daily_visits_summary to authenticated;
 
-create or replace function public.get_visits_summary(
-  p_start_date date,
-  p_end_date date
-)
-returns table(
-  period text,
-  total_visits bigint,
-  unique_visitors bigint
-)
-language sql
-security definer
-set search_path = public
+create or replace function public.get_visits_summary(p_start_date date, p_end_date date)
+returns table(period text, total_visits bigint, unique_visitors bigint)
+language sql security definer set search_path = public
 as $$
-  select 
-    to_char(date, 'YYYY-MM') as period,
-    sum(total_visits) as total_visits,
-    sum(unique_visitors) as unique_visitors
+  select to_char(date, 'YYYY-MM') as period,
+    sum(total_visits) as total_visits, sum(unique_visitors) as unique_visitors
   from visits_summary
   where date between p_start_date and p_end_date
   group by to_char(date, 'YYYY-MM')
@@ -823,23 +1149,11 @@ $$;
 
 grant execute on function public.get_visits_summary to authenticated;
 
-create or replace function public.get_visits_daily(
-  p_start_date date,
-  p_end_date date
-)
-returns table(
-  jour date,
-  total_visits bigint,
-  unique_visitors bigint
-)
-language sql
-security definer
-set search_path = public
+create or replace function public.get_visits_daily(p_start_date date, p_end_date date)
+returns table(jour date, total_visits bigint, unique_visitors bigint)
+language sql security definer set search_path = public
 as $$
-  select 
-    date,
-    total_visits,
-    unique_visitors
+  select date, total_visits, unique_visitors
   from visits_summary
   where date between p_start_date and p_end_date
   order by date;
@@ -848,48 +1162,32 @@ $$;
 grant execute on function public.get_visits_daily to authenticated;
 
 create or replace function public.get_current_month_summary()
-returns table(
-  month text,
-  total_visits bigint,
-  unique_visitors bigint
-)
-language sql
-security definer
-set search_path = public
+returns table(month text, total_visits bigint, unique_visitors bigint)
+language sql security definer set search_path = public
 as $$
-  select 
-    to_char(date_trunc('month', now()), 'YYYY-MM') as month,
-    sum(total_visits) as total_visits,
-    sum(unique_visitors) as unique_visitors
+  select to_char(date_trunc('month', now()), 'YYYY-MM') as month,
+    sum(total_visits) as total_visits, sum(unique_visitors) as unique_visitors
   from visits_summary
-  where date >= date_trunc('month', now())
-    and date <= now()::date;
+  where date >= date_trunc('month', now()) and date <= now()::date;
 $$;
 
 grant execute on function public.get_current_month_summary to authenticated;
 
 create or replace function public.get_current_year_summary()
-returns table(
-  year text,
-  total_visits bigint,
-  unique_visitors bigint
-)
-language sql
-security definer
-set search_path = public
+returns table(year text, total_visits bigint, unique_visitors bigint)
+language sql security definer set search_path = public
 as $$
-  select 
-    to_char(date_trunc('year', now()), 'YYYY') as year,
-    sum(total_visits) as total_visits,
-    sum(unique_visitors) as unique_visitors
+  select to_char(date_trunc('year', now()), 'YYYY') as year,
+    sum(total_visits) as total_visits, sum(unique_visitors) as unique_visitors
   from visits_summary
-  where date >= date_trunc('year', now())
-    and date <= now()::date;
+  where date >= date_trunc('year', now()) and date <= now()::date;
 $$;
 
 grant execute on function public.get_current_year_summary to authenticated;
 
+-- ============================================================
 -- ---------- STORAGE POLICIES ----------
+-- ============================================================
 
 drop policy if exists "media_bucket_public_read" on storage.objects;
 drop policy if exists "media_bucket_public_upload" on storage.objects;
@@ -902,7 +1200,9 @@ create policy "media_bucket_public_upload" on storage.objects
   for insert to authenticated 
   with check (bucket_id = 'listing-media');
 
+-- ============================================================
 -- ---------- TRIGGER ----------
+-- ============================================================
 
 create or replace function set_available_on_validate()
 returns trigger as $$
@@ -920,7 +1220,9 @@ before update on listings
 for each row
 execute function set_available_on_validate();
 
+-- ============================================================
 -- ---------- PRIVILÈGES ----------
+-- ============================================================
 
 grant usage on schema public to anon, authenticated;
 grant all on all tables in schema public to anon, authenticated;
@@ -930,33 +1232,47 @@ grant select on visits to authenticated;
 alter default privileges in schema public grant all on tables to anon, authenticated;
 alter default privileges in schema public grant all on sequences to anon, authenticated;
 
+-- ============================================================
 -- ---------- ADMIN ----------
+-- ============================================================
+
 insert into admins (user_id)
 select id from auth.users where email = 'zionmaket@gmail.com'
 on conflict (user_id) do nothing;
 
+-- ============================================================
 -- ---------- VERIFICATION ----------
-update listings 
-set available = true 
-where status = 'valide';
+-- ============================================================
+
+-- Mete tout anons valide yo disponib
+update listings set available = true where status = 'valide';
 
 -- Verifye policies
-select 
-  schemaname, 
-  tablename, 
-  policyname, 
-  permissive, 
-  roles, 
-  cmd, 
-  qual, 
-  with_check
+select schemaname, tablename, policyname, permissive, roles, cmd
 from pg_policies 
-where tablename in ('listings', 'listing_media', 'boosts');
+where tablename in ('listings', 'listing_media', 'boosts', 'owners', 'visits')
+order by tablename, policyname;
 
 -- Verifye fonksyon yo
 select 
   proname as function_name,
   pg_get_function_identity_arguments(oid) as arguments
 from pg_proc 
-where proname in ('link_owner_account', 'create_listing', 'search_listings')
-  and pronamespace = 'public'::regnamespace;
+where pronamespace = 'public'::regnamespace
+  and proname in (
+    'link_owner_account', 'get_my_owner_profile', 'create_listing', 'kaypam_stats',
+    'add_listing_media', 'get_listing_media',
+    'request_boost', 'activate_boost', 'get_owner_boosts', 'set_listing_availability',
+    'delete_listing_admin', 'is_admin',
+    'admin_get_all_listings', 'admin_get_pending_listings',
+    'admin_validate_listing', 'admin_refuse_listing',
+    'admin_get_all_owners', 'admin_get_pending_boosts',
+    'admin_refuse_boost', 'admin_get_stats', 'get_my_owner_stats',
+    'get_visits_count', 'get_unique_visitors', 'get_visits_stats',
+    'get_visits_summary', 'get_visits_daily',
+    'get_current_month_summary', 'get_current_year_summary',
+    'add_daily_visits_summary',
+    'get_cities_by_departement', 'get_communes_by_city', 'get_zones_by_commune',
+    'search_listings'
+  )
+order by proname;

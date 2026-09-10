@@ -2,8 +2,24 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Publier une annonce — KayPam</title>
+
+<!-- PWA Meta -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#16243B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="KayPam">
+
+<!-- Icons -->
+<link rel="apple-touch-icon" sizes="167x167" href="icons/167.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/launchericon-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/launchericon-512x512.png">
+<meta name="msapplication-TileColor" content="#16243B">
+<meta name="msapplication-TileImage" content="icons/Square150x150Logo.scale-200.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -14,11 +30,15 @@
     --green: #1E8F6F; --gold: #F2B134; --card-bg: #FFFFFF; --border: rgba(22,36,59,0.12);
     --font-display: 'Space Grotesk', sans-serif; --font-body: 'Inter', sans-serif; --font-mono: 'Space Mono', monospace;
     --radius: 14px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
   *{box-sizing:border-box;}
   body{
     margin:0;background:var(--bg);color:var(--ink);
     font-family:var(--font-body);line-height:1.55;-webkit-font-smoothing:antialiased;
+    -webkit-tap-highlight-color:transparent;
+    padding-bottom:var(--safe-bottom);
   }
   img,svg{display:block;max-width:100%;}
   a{color:inherit;}
@@ -38,6 +58,7 @@
     -webkit-backdrop-filter:blur(8px);
     backdrop-filter:blur(8px);
     padding:18px 0;
+    padding-top:calc(18px + var(--safe-top));
     position:sticky;
     top:0;
     z-index:40;
@@ -205,7 +226,7 @@
   #form-card{display:none;}
   #form-card.show{display:block;}
 
-  footer{padding:26px 0 40px;text-align:center;font-size:12.5px;color:var(--ink-soft);}
+  footer{padding:26px 0 calc(40px + var(--safe-bottom));text-align:center;font-size:12.5px;color:var(--ink-soft);}
 
   @media (max-width:640px){
     .pform-row,.pform-row-3,.auth-form-row{grid-template-columns:1fr;}
@@ -472,7 +493,7 @@ const supabaseClient = (SUPABASE_URL.startsWith('http') && SUPABASE_ANON_KEY.len
   : null;
 const EMAIL_DOMAIN = '@kaypam.local';
 
-/* ===== DONNÉES GÉOGRAPHIQUES (menm ak index.html) ===== */
+/* ===== DONNÉES GÉOGRAPHIQUES ===== */
 const geoData = {
   "Artibonite": {
     "Dessalines": ["Dessalines","Desdunes","Grande-Saline","Petite-Rivière-de-l'Artibonite"],
@@ -538,7 +559,6 @@ const geoData = {
   }
 };
 
-/* ===== QUARTIERS / ZONES (menm ak index.html) ===== */
 const quartiersData = {
   "Pétion-Ville": ["Jalousie","Pétion-Ville","Laboule","Thomassin","Meyotte","Belvil","Vivy Michel","Diègue","Duplan","Girardo","Doco","Cargo","Fermathe","Puits-Blain","Frères","Peggyvil","Morne Hercule","Nerrette","Morne Calvaire","Juvénat","Berthé","Bois Monquette","Pelerin 1","Pelerin 2","Pelerin 3","Pelerin 4","Pelerin 5"],
   "Delmas": ["Delmas","Jacket","Siloé","Gérald Bataille","Mais Gâté","Clercine","Saint-Martin","Aéroport","Catalpa"],
@@ -560,7 +580,6 @@ const quartiersData = {
   "Port-de-Paix": ["La Corne","Haut-de-Saint-Louis","Carenage","Nan Paul","Fond-de-Poussière","Baudin","Trois-Rivières","Chansolme"]
 };
 
-/* ===== Fonctions de mise à jour des selects ===== */
 function populateDepartements() {
   const select = document.getElementById('p-departement');
   select.innerHTML = '<option value="">Choisir un département</option>';
@@ -584,7 +603,6 @@ function updateVilles() {
   
   if (!dept || !geoData[dept]) return;
   
-  // Les "villes" = arrondissements dans geoData (menm ak index.html)
   const arrondissements = Object.keys(geoData[dept]);
   arrondissements.forEach(arr => {
     const opt = document.createElement('option');
@@ -631,32 +649,18 @@ function updateZones() {
   });
 }
 
-// Écouteurs d'événements pour les selects cascadants
-document.getElementById('p-departement').addEventListener('change', function() {
-  updateVilles();
-});
+document.getElementById('p-departement').addEventListener('change', updateVilles);
+document.getElementById('p-ville').addEventListener('change', updateCommunes);
+document.getElementById('p-commune').addEventListener('change', updateZones);
 
-document.getElementById('p-ville').addEventListener('change', function() {
-  updateCommunes();
-});
-
-document.getElementById('p-commune').addEventListener('change', function() {
-  updateZones();
-});
-
-// Interaction entre select zone et custom zone
 document.getElementById('p-zone-custom').addEventListener('input', function() {
   const zoneSelect = document.getElementById('p-zone');
-  if (this.value.trim() !== '') {
-    zoneSelect.value = '';
-  }
+  if (this.value.trim() !== '') zoneSelect.value = '';
 });
 
 document.getElementById('p-zone').addEventListener('change', function() {
   const customInput = document.getElementById('p-zone-custom');
-  if (this.value !== '') {
-    customInput.value = '';
-  }
+  if (this.value !== '') customInput.value = '';
 });
 
 /* ===== AUTHENTIFICATION ===== */
@@ -817,7 +821,6 @@ async function checkExistingSession(){
   }
 }
 
-/* ===== STATISTIQUES ===== */
 async function loadStats(){
   if(!supabaseClient) return;
   try{
@@ -1044,11 +1047,13 @@ document.getElementById('publish-form').addEventListener('submit', async functio
       const { error: upErr } = await supabaseClient.storage.from('listing-media').upload(path, file);
       if(upErr) throw upErr;
       const { data: urlData } = supabaseClient.storage.from('listing-media').getPublicUrl(path);
-      const { error: mediaErr } = await supabaseClient.from('listing_media').insert({ 
-        listing_id: listingId, 
-        media_type: 'photo', 
-        url: urlData.publicUrl,
-        mime_type: file.type || 'image/jpeg'
+      
+      // ✅ Sèvi ak RPC pou pase sou RLS
+      const { error: mediaErr } = await supabaseClient.rpc('add_listing_media', {
+        p_listing_id: listingId,
+        p_media_type: 'photo',
+        p_url: urlData.publicUrl,
+        p_mime_type: file.type || 'image/jpeg'
       });
       if(mediaErr) throw mediaErr;
     }
@@ -1061,11 +1066,13 @@ document.getElementById('publish-form').addEventListener('submit', async functio
         const { error: upErr } = await supabaseClient.storage.from('listing-media').upload(path, file);
         if(upErr) throw upErr;
         const { data: urlData } = supabaseClient.storage.from('listing-media').getPublicUrl(path);
-        const { error: mediaErr } = await supabaseClient.from('listing_media').insert({ 
-          listing_id: listingId, 
-          media_type: 'video', 
-          url: urlData.publicUrl,
-          mime_type: file.type || 'video/mp4'
+        
+        // ✅ Sèvi ak RPC pou pase sou RLS
+        const { error: mediaErr } = await supabaseClient.rpc('add_listing_media', {
+          p_listing_id: listingId,
+          p_media_type: 'video',
+          p_url: urlData.publicUrl,
+          p_mime_type: file.type || 'video/mp4'
         });
         if(mediaErr) throw mediaErr;
       }
@@ -1141,10 +1148,8 @@ async function trackVisit() {
 document.addEventListener('DOMContentLoaded', function() {
   setTimeout(trackVisit, 500);
 });
-</script>
 
-<!-- ===== TRADUCTION ===== -->
-<script>
+/* ===== TRADUCTION DYNAMIQUE ===== */
 (function(){
   var lang = localStorage.getItem('kaypam_lang') || 'fr';
   var maps = {
@@ -1203,8 +1208,6 @@ document.addEventListener('DOMContentLoaded', function() {
       'Aucune vidéo sélectionnée': 'No videos selected',
       'Soumettre l\'annonce pour vérification': 'Submit listing for verification',
       '✅ Annonce envoyée avec succès !': '✅ Listing sent successfully!',
-      'Merci ! Votre annonce a bien été reçue avec ses photos et vidéos. Notre équipe la vérifiera et la publiera sous 24h.': 'Thank you! Your listing has been received with its photos and videos. Our team will review it and publish it within 24h.',
-      'Mèsi ! Annons ou a anrejistre. Ekip KayPam nan ap verifye enfòmasyon yo ak foto yo pou sekirite platfòm lan. L ap parèt an liy nan mwens pase 24 èdtan.': 'Thank you! Your listing is registered. The KayPam team will verify the information and photos for platform security. It will appear online in less than 24 hours.',
       '© 2026 KayPam. Toutes les annonces sont vérifiées avant publication.': '© 2026 KayPam. All listings are verified before publication.',
       'Choisir un département': 'Choose a department',
       'Choisir une ville': 'Choose a city',
@@ -1267,8 +1270,6 @@ document.addEventListener('DOMContentLoaded', function() {
       'Aucune vidéo sélectionnée': 'Pa gen videyo chwazi',
       'Soumettre l\'annonce pour vérification': 'Soumèt anons pou verifikasyon',
       '✅ Annonce envoyée avec succès !': '✅ Anons voye avèk siksè!',
-      'Merci ! Votre annonce a bien été reçue avec ses photos et vidéos. Notre équipe la vérifiera et la publiera sous 24h.': 'Mèsi! Anons ou te resevwa byen ak foto ak videyo li yo. Ekip nou an ap verifye l epi pibliye l nan mwens pase 24è.',
-      'Mèsi ! Annons ou a anrejistre. Ekip KayPam nan ap verifye enfòmasyon yo ak foto yo pou sekirite platfòm lan. L ap parèt an liy nan mwens pase 24 èdtan.': 'Mèsi! Anons ou anrejistre. Ekip KayPam nan ap verifye enfòmasyon yo ak foto yo pou sekirite platfòm lan. L ap parèt an liy nan mwens pase 24 èdtan.',
       '© 2026 KayPam. Toutes les annonces sont vérifiées avant publication.': '© 2026 KayPam. Tout anons yo verifye anvan piblikasyon.',
       'Choisir un département': 'Chwazi yon depatman',
       'Choisir une ville': 'Chwazi yon vil',
@@ -1308,6 +1309,9 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('a, button, label, p, span, h1, h2, h3, h4, li, option, legend, input, textarea, select').forEach(updateElement);
 })();
 </script>
+
+<!-- App Shell (PWA : Service Worker + Bannière) -->
+<script src="app-shell.js"></script>
 
 </body>
 </html>

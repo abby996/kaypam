@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Hors ligne — KayPam</title>
+<meta name="theme-color" content="#16243B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="KayPam">
+<style>
+  :root{
+    --bg: #F2F5F1;
+    --ink: #16243B;
+    --ink-soft: #4A5872;
+    --coral: #E25C3B;
+    --coral-dark: #C2473A;
+    --green: #1E8F6F;
+    --gold: #F2B134;
+    --card-bg: #FFFFFF;
+    --border: rgba(22,36,59,0.12);
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+    background:var(--bg);
+    font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+    text-align:center;
+    padding:20px;
+    padding-top:calc(20px + var(--safe-top));
+    padding-bottom:calc(20px + var(--safe-bottom));
+    -webkit-font-smoothing:antialiased;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .offline-box{
+    background:var(--card-bg);
+    padding:44px 32px;
+    border-radius:20px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.1);
+    max-width:440px;
+    width:100%;
+    border:1px solid var(--border);
+    animation:fadeIn .5s ease;
+  }
+  @keyframes fadeIn{
+    from{opacity:0; transform:translateY(10px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  .logo{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:28px;
+    text-decoration:none;
+  }
+  .logo-mark{
+    width:36px;
+    height:36px;
+    flex-shrink:0;
+  }
+  .logo-text{
+    font-weight:700;
+    font-size:20px;
+    color:var(--ink);
+    letter-spacing:-0.01em;
+  }
+  .logo-text span{color:var(--coral);}
+  .offline-icon{
+    font-size:72px;
+    margin-bottom:12px;
+    line-height:1;
+    display:block;
+    animation:pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%, 100%{opacity:1; transform:scale(1);}
+    50%{opacity:0.6; transform:scale(0.95);}
+  }
+  h1{
+    color:var(--ink);
+    margin:0 0 12px;
+    font-size:26px;
+    font-weight:700;
+    letter-spacing:-0.01em;
+  }
+  p{
+    color:var(--ink-soft);
+    margin:0 0 28px;
+    font-size:15px;
+    line-height:1.55;
+    max-width:36ch;
+    margin-left:auto;
+    margin-right:auto;
+  }
+  .btn{
+    background:var(--coral);
+    color:#fff;
+    border:none;
+    padding:14px 36px;
+    border-radius:999px;
+    font-weight:700;
+    font-size:15px;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    transition:background .15s, transform .1s;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    min-width:180px;
+  }
+  .btn:hover{
+    background:var(--coral-dark);
+  }
+  .btn:active{
+    transform:scale(0.97);
+  }
+  .btn-icon{
+    font-size:16px;
+  }
+  .status-indicator{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    margin-top:24px;
+    padding:8px 16px;
+    border-radius:999px;
+    background:rgba(226,92,59,0.1);
+    color:var(--coral-dark);
+    font-size:12.5px;
+    font-weight:600;
+  }
+  .status-dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:var(--coral);
+    animation:pulse 1.5s ease-in-out infinite;
+  }
+  .status-indicator.online{
+    background:rgba(30,143,111,0.12);
+    color:#0f5c47;
+  }
+  .status-indicator.online .status-dot{
+    background:var(--green);
+    animation:none;
+  }
+  @media (max-width:480px){
+    .offline-box{padding:32px 24px;}
+    h1{font-size:22px;}
+    .offline-icon{font-size:60px;}
+    .btn{width:100%;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+</style>
+</head>
+<body>
+  <div class="offline-box">
+    <div class="logo">
+      <svg class="logo-mark" viewBox="0 0 40 40" aria-hidden="true">
+        <rect width="40" height="40" rx="9" fill="#16243B"/>
+        <path d="M20 8 L31 17 V32 H9 V17 Z" fill="#F2F5F1"/>
+        <rect x="17" y="22" width="6" height="10" fill="#E25C3B"/>
+        <rect x="13" y="11" width="14" height="3" fill="#F2B134"/>
+      </svg>
+      <span class="logo-text">Kay<span>Pam</span></span>
+    </div>
+
+    <span class="offline-icon" id="offline-icon">📶</span>
+    <h1 id="offline-title">Pa gen koneksyon</h1>
+    <p id="offline-msg">Ou pa konekte ak entènèt kounye a. Rekonekte w epi eseye ankò.</p>
+    <a href="/" class="btn" id="offline-btn">
+      <span class="btn-icon">🔄</span>
+      <span id="offline-btn-text">Eseye ankò</span>
+    </a>
+
+    <div class="status-indicator" id="status-indicator">
+      <span class="status-dot"></span>
+      <span id="status-text">Pa konekte</span>
+    </div>
+  </div>
+
+  <script>
+    /* ===== TRADUCTIONS ===== */
+    var translations = {
+      fr: {
+        title: "Pas de connexion",
+        msg: "Vous n'êtes pas connecté à Internet. Reconnectez-vous et réessayez.",
+        btn: "Réessayer",
+        offline: "Hors ligne",
+        online: "En ligne — Reconnexion..."
+      },
+      en: {
+        title: "No connection",
+        msg: "You are not connected to the Internet. Reconnect and try again.",
+        btn: "Retry",
+        offline: "Offline",
+        online: "Online — Reconnecting..."
+      },
+      ht: {
+        title: "Pa gen koneksyon",
+        msg: "Ou pa konekte ak entènèt kounye a. Rekonekte w epi eseye ankò.",
+        btn: "Eseye ankò",
+        offline: "Pa konekte",
+        online: "Konekte — Rekoneksyon..."
+      }
+    };
+
+    var lang = localStorage.getItem('kaypam_lang') || 'fr';
+    var t = translations[lang] || translations.fr;
+
+    document.documentElement.lang = lang;
+    document.getElementById('offline-title').textContent = t.title;
+    document.getElementById('offline-msg').textContent = t.msg;
+    document.getElementById('offline-btn-text').textContent = t.btn;
+    document.getElementById('status-text').textContent = t.offline;
+
+    /* ===== DETECTION KONEKSYON ===== */
+    var statusIndicator = document.getElementById('status-indicator');
+    var statusText = document.getElementById('status-text');
+
+    function updateStatus() {
+      if (navigator.onLine) {
+        statusIndicator.classList.add('online');
+        statusText.textContent = t.online;
+        setTimeout(function(){
+          window.location.reload();
+        }, 1500);
+      } else {
+        statusIndicator.classList.remove('online');
+        statusText.textContent = t.offline;
+      }
+    }
+
+    /* Verifye estati a kounye a */
+    updateStatus();
+
+    /* Koute chanjman koneksyon */
+    window.addEventListener('online', updateStatus);
+    window.addEventListener('offline', updateStatus);
+
+    /* ===== BOUTON REESEYE ===== */
+    document.getElementById('offline-btn').addEventListener('click', function(e){
+      e.preventDefault();
+      window.location.reload();
+    });
+
+    /* ===== DETECTION OTOMATIK CHAK 5 SEGONN ===== */
+    setInterval(function(){
+      if (navigator.onLine) {
+        window.location.reload();
+      }
+    }, 5000);
+  </script>
+</body>
+</html>

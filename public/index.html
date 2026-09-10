@@ -2,8 +2,24 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>KayPam — Trouvez votre toit en Haïti</title>
+
+<!-- PWA Meta -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#16243B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="KayPam">
+
+<!-- Icons -->
+<link rel="apple-touch-icon" sizes="167x167" href="icons/167.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/launchericon-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/launchericon-512x512.png">
+<meta name="msapplication-TileColor" content="#16243B">
+<meta name="msapplication-TileImage" content="icons/Square150x150Logo.scale-200.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -24,6 +40,8 @@
     --font-body: 'Inter', sans-serif;
     --font-mono: 'Space Mono', monospace;
     --radius: 14px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -34,6 +52,9 @@
     font-family:var(--font-body);
     line-height:1.55;
     -webkit-font-smoothing:antialiased;
+    -webkit-tap-highlight-color:transparent;
+    overscroll-behavior-y:contain;
+    padding-bottom:var(--safe-bottom);
   }
   img,svg{display:block;max-width:100%;}
   a{color:inherit;}
@@ -59,6 +80,7 @@
     -webkit-backdrop-filter:blur(8px);
     backdrop-filter:blur(8px);
     border-bottom:1px solid var(--border);
+    padding-top:var(--safe-top);
   }
   .nav{
     display:flex;align-items:center;justify-content:space-between;
@@ -325,7 +347,7 @@
   .step h3{color:#fff;font-size:18px;}
   .step p{color:rgba(255,255,255,0.65);font-size:14.5px;margin:0;}
 
-  footer{background:var(--navy);color:rgba(255,255,255,0.7);padding:48px 0 28px;}
+  footer{background:var(--navy);color:rgba(255,255,255,0.7);padding:48px 0 calc(28px + var(--safe-bottom));}
   .footer-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:32px;margin-bottom:36px;}
   .footer-logo{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
   .footer-logo .logo-text{color:#fff;}
@@ -448,6 +470,21 @@
   #boosted-section.show{display:block;}
   #boosted-section .grid{margin-top:0;}
 
+  /* ---------- OFFLINE INDICATOR ---------- */
+  #offline-banner{
+    display:none;
+    background:var(--coral-dark);
+    color:#fff;
+    padding:8px 16px;
+    text-align:center;
+    font-size:13px;
+    font-weight:600;
+    position:sticky;
+    top:0;
+    z-index:50;
+  }
+  #offline-banner.show{display:block;}
+
   @media (max-width:1100px){
     .nav-links{gap:16px;font-size:13.5px;}
     .nav-links a{font-size:13.5px;}
@@ -459,23 +496,32 @@
     .steps{grid-template-columns:1fr;}
     .footer-grid{grid-template-columns:1fr 1fr;}
     .nav-links{display:none;}
+    .grid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));}
   }
   @media (max-width:480px){
+    .wrap{padding:0 18px;}
+    .nav{padding:12px 18px;}
     .logo-text{font-size:17px;}
     .nav-cta,.nav-cta-secondary{padding:7px 11px;font-size:11.5px;}
     .nav-ctas{gap:6px;}
     .lang-dropdown-trigger{padding:6px 9px;font-size:11px;}
+    .hero{padding:48px 0 0;}
+    section{padding:48px 0;}
+    .card-art{height:170px;}
   }
   @media (max-width:520px){
     .field-row{grid-template-columns:1fr;}
     .footer-grid{grid-template-columns:1fr;}
   }
   @media (prefers-reduced-motion:reduce){
-    *{transition:none !important; scroll-behavior:auto !important;}
+    *{transition:none !important; scroll-behavior:auto !important; animation:none !important;}
   }
 </style>
 </head>
 <body>
+
+<!-- Offline banner -->
+<div id="offline-banner">📶 Ou pa konekte — kèk fonksyonalite ka pa disponib</div>
 
 <header>
   <div class="nav">
@@ -491,7 +537,7 @@
     <nav class="nav-links">
       <a href="#listings" onclick="setTransactionFilter('Vente')" data-i18n="nav_buy">Acheter</a>
       <a href="#listings" onclick="setTransactionFilter('Location')" data-i18n="nav_rent">Louer</a>
-      <a href="mes-annonces.html" target="_blank" rel="noopener" data-i18n="nav_boost">Booster mes annonces</a>
+      <a href="mes-annonces.html" data-i18n="nav_boost">Booster mes annonces</a>
       <a href="#comment" data-i18n="nav_how">Comment ça marche</a>
     </nav>
     <div class="nav-ctas">
@@ -501,8 +547,8 @@
         </button>
         <div class="lang-dropdown-menu" id="lang-dropdown-menu"></div>
       </div>
-      <a href="mes-annonces.html" target="_blank" rel="noopener" class="nav-cta-secondary" data-i18n="nav_login">Se connecter</a>
-      <a href="publier.html" target="_blank" rel="noopener" class="nav-cta" data-i18n="nav_publish">Publier</a>
+      <a href="mes-annonces.html" class="nav-cta-secondary" data-i18n="nav_login">Se connecter</a>
+      <a href="publier.html" class="nav-cta" data-i18n="nav_publish">Publier</a>
     </div>
   </div>
 </header>
@@ -650,8 +696,8 @@
         <ul>
           <li>contact@kaypam.ht</li>
           <li>WhatsApp : +509 4792 1790</li>
-          <li><a href="publier.html" target="_blank" rel="noopener" data-i18n="footer_publish_link">Publier une annonce</a></li>
-          <li><a href="mes-annonces.html" target="_blank" rel="noopener" data-i18n="nav_boost">Booster mes annonces</a></li>
+          <li><a href="publier.html" data-i18n="footer_publish_link">Publier une annonce</a></li>
+          <li><a href="mes-annonces.html" data-i18n="nav_boost">Booster mes annonces</a></li>
         </ul>
       </div>
     </div>
@@ -1017,7 +1063,7 @@ function mapRealListing(raw){
   return {
     id: raw.id,
     title: raw.title || `${raw.type} à ${raw.transaction === 'Vente' ? 'vendre' : 'louer'}`,
-    departement: raw.departement,
+    departement: raw.departement || '',
     city: raw.city || 'Haïti',
     commune: raw.commune || '',
     zone: raw.zone || '',
@@ -1174,8 +1220,6 @@ function renderLocationNav(){
   row.innerHTML = backBtn + chips;
 }
 
-/* ===== FONKSYON NAVIGASYON KOREK AK RENDER ===== */
-
 function goBackOneLevel(){
   if(locState.quartier){ 
     backToCommune(); 
@@ -1186,7 +1230,6 @@ function goBackOneLevel(){
   } else if(locState.departement){ 
     resetLocation(); 
   }
-  // FORCE re-render apre chak retou
   renderListings();
   renderBoosted();
 }
@@ -1195,19 +1238,20 @@ function selectDepartement(i){
   const dept = Object.keys(geoData)[i];
   locState = { departement: dept, arrondissement:null, commune:null, quartier:null };
   state.departement = dept;
-  state.city = "";        // <-- REMETE SA
+  state.city = "";
   state.commune = "";
   state.quartier = "";
   renderLocationNav();
   renderListings();
   renderBoosted();
 }
+
 function selectArrondissement(i){
   const arr = Object.keys(geoData[locState.departement])[i];
   locState.arrondissement = arr;
   locState.commune = null;
   locState.quartier = null;
-  state.city = arr;   // <-- "Ville" = Arrondissement
+  state.city = arr;
   state.commune = "";
   state.quartier = "";
   renderLocationNav();
@@ -1221,7 +1265,6 @@ function selectCommune(i){
   locState.quartier = null;
   state.commune = commune;
   state.quartier = "";
-  // PA modifye state.city — kenbe Arrondissement
   renderLocationNav();
   renderListings();
   renderBoosted();
@@ -1308,7 +1351,6 @@ function syncLocStateToCity(city){
   locState = { departement:null, arrondissement:null, commune:null, quartier:null };
 }
 
-/* ===== buildCardHtml ===== */
 function buildCardHtml(l, i, isBoosted){
   const specs = [];
   if(l.beds !== null && l.beds !== undefined) specs.push(`${l.beds} ${t('spec_beds')}`);
@@ -1317,7 +1359,7 @@ function buildCardHtml(l, i, isBoosted){
   
   const p = palette[i % palette.length];
   const artInner = (l.isReal && l.photoUrl)
-    ? `<img src="${l.photoUrl}" alt="${l.title}">`
+    ? `<img src="${l.photoUrl}" alt="${l.title}" loading="lazy">`
     : houseSVG(i, 88);
   
   let boostBadge = '';
@@ -1362,37 +1404,20 @@ function circularSlice(arr, start, size) {
   return result;
 }
 
-/* ===== RENDER LISTINGS KOREK ===== */
 function renderListings(){
   const grid = document.getElementById('listings-grid');
   let filtered = listings.filter(l => {
-    // Filtre pa transaction
     if(state.transaction && l.transaction !== state.transaction) return false;
-    
-    // Filtre pa département
     if(state.departement && l.departement !== state.departement) return false;
-    
-    // Filtre pa ville (city) — Si city a yon valè
     if(state.city && l.city !== state.city) {
-      // Si commune a matche, on accepte (cas où on est dans la commune)
-      // Sinon on filtre
       if(!state.commune || l.commune !== state.commune) {
         return false;
       }
     }
-    
-    // Filtre pa commune
     if(state.commune && l.commune !== state.commune) return false;
-    
-    // Filtre pa zone/quartier
     if(state.quartier && l.zone !== state.quartier && l.neighborhood !== state.quartier) return false;
-    
-    // Filtre pa type
     if(state.type && l.type !== state.type) return false;
-    
-    // Filtre pa budget
     if(state.budget && l.price > Number(state.budget)) return false;
-    
     return true;
   });
 
@@ -1408,7 +1433,6 @@ function renderListings(){
   grid.innerHTML = filtered.map((l) => buildCardHtml(l, listings.indexOf(l), false)).join('');
 }
 
-/* ===== RENDER BOOSTED KOREK ===== */
 function renderBoosted(){
   const section = document.getElementById('boosted-section');
   const grid = document.getElementById('boosted-grid');
@@ -1418,13 +1442,11 @@ function renderBoosted(){
   let filteredBoosted = activeBoosted.filter(l => {
     if(state.transaction && l.transaction !== state.transaction) return false;
     if(state.departement && l.departement !== state.departement) return false;
-    
     if(state.city && l.city !== state.city) {
       if(!state.commune || l.commune !== state.commune) {
         return false;
       }
     }
-    
     if(state.commune && l.commune !== state.commune) return false;
     if(state.quartier && l.zone !== state.quartier && l.neighborhood !== state.quartier) return false;
     if(state.type && l.type !== state.type) return false;
@@ -1484,7 +1506,6 @@ function startBoostRotation(){
   }, BOOST_ROTATION_MS);
 }
 
-/* ===== MODAL ===== */
 function openModal(id){
   const l = listings.find(x => String(x.id) === String(id));
   if(!l) return;
@@ -1571,7 +1592,7 @@ function changeModalMedia(direction){
   
   const items = slider.querySelectorAll('.modal-media-item');
   const total = items.length;
-  if(total <= 1) return;
+  if(total < 1) return;
   
   items.forEach(el => el.classList.remove('active'));
   
@@ -1611,7 +1632,6 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-/* ===== INIT ===== */
 async function init(){
   applyStaticTranslations();
   renderLangMenu();
@@ -1632,60 +1652,6 @@ async function init(){
   startBoostRotation();
 }
 init();
-
-/* ===== CHARGER STATISTIQUES VISITES ===== */
-async function loadVisitsStats(){
-  try{
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const weekAgo = new Date(today);
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    const monthAgo = new Date(today);
-    monthAgo.setDate(monthAgo.getDate() - 30);
-    
-    const { count: todayCount, error: todayError } = await supabaseClient
-      .from('visits')
-      .select('*', { count: 'exact', head: true })
-      .gte('visited_at', today.toISOString());
-      
-    if(todayError) throw todayError;
-    
-    const { count: weekCount, error: weekError } = await supabaseClient
-      .from('visits')
-      .select('*', { count: 'exact', head: true })
-      .gte('visited_at', weekAgo.toISOString());
-      
-    if(weekError) throw weekError;
-    
-    const { count: monthCount, error: monthError } = await supabaseClient
-      .from('visits')
-      .select('*', { count: 'exact', head: true })
-      .gte('visited_at', monthAgo.toISOString());
-      
-    if(monthError) throw monthError;
-    
-    const { data: uniqueData, error: uniqueError } = await supabaseClient
-      .from('visits')
-      .select('visitor_id')
-      .gte('visited_at', today.toISOString());
-      
-    if(uniqueError) throw uniqueError;
-    
-    const uniqueVisitors = new Set(uniqueData.map(v => v.visitor_id)).size;
-    
-    document.getElementById('visits-today').textContent = todayCount || 0;
-    document.getElementById('visits-week').textContent = weekCount || 0;
-    document.getElementById('visits-month').textContent = monthCount || 0;
-    document.getElementById('visitors-today').textContent = uniqueVisitors || 0;
-    
-  }catch(err){
-    console.error('Erreur chargement stats visites:', err);
-    document.getElementById('visits-today').textContent = '—';
-    document.getElementById('visits-week').textContent = '—';
-    document.getElementById('visits-month').textContent = '—';
-    document.getElementById('visitors-today').textContent = '—';
-  }
-}
 
 /* ===== TRACKING DES VISITES ===== */
 function getVisitorId() {
@@ -1733,6 +1699,24 @@ document.addEventListener('DOMContentLoaded', function() {
   setTimeout(trackVisit, 500);
 });
 
+/* ===== DÉTECTION EN LIGNE / HORS LIGNE ===== */
+function updateOnlineStatus() {
+  const banner = document.getElementById('offline-banner');
+  if (!banner) return;
+  if (navigator.onLine) {
+    banner.classList.remove('show');
+  } else {
+    banner.classList.add('show');
+  }
+}
+
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
 </script>
+
+<!-- App Shell (PWA : Service Worker + Bannière) -->
+<script src="app-shell.js"></script>
+
 </body>
 </html>
